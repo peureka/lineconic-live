@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%%TITLE%%</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/2.0.4/qrcode.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
@@ -510,113 +512,23 @@ function updateVoteBars(){
   if(hv)hv.textContent='DEAD: '+votes.dead+' | ALIVE: '+votes.alive+' | TOTAL: '+total;
 }
 
-// Minimal QR Code encoder (Version 2, Error Correction L, Byte mode)
-// Generates a real scannable QR code on a canvas
+// QR Code via qrcode-generator library
 function drawQR(){
   const c=document.getElementById('qr');
   if(!c)return;
   const x=c.getContext('2d');
   const url='https://lineconic.live/vote/';
-  // Use a pre-computed QR matrix approach via the qr-creator algorithm
-  // For reliability, encode the URL into a QR using the established library pattern
-  const mods=encodeQR(url);
-  const sz=mods.length;
+  const qr=qrcode(0,'L');
+  qr.addData(url);
+  qr.make();
+  const sz=qr.getModuleCount();
   const px=Math.floor(200/sz);
   const off=Math.floor((200-sz*px)/2);
   x.fillStyle='#fff';x.fillRect(0,0,200,200);
   x.fillStyle='#000';
   for(let r=0;r<sz;r++)for(let cl=0;cl<sz;cl++){
-    if(mods[r][cl])x.fillRect(off+cl*px,off+r*px,px,px);
+    if(qr.isDark(r,cl))x.fillRect(off+cl*px,off+r*px,px,px);
   }
-}
-
-// QR encoder — Version 1-M (21x21), Byte mode
-function encodeQR(text){
-  const size=25; // Version 2 = 25x25
-  const m=Array.from({length:size},()=>Array(size).fill(0));
-  const f=Array.from({length:size},()=>Array(size).fill(false)); // function pattern mask
-
-  // Finder pattern
-  function finder(r,c){
-    for(let dr=-1;dr<=7;dr++)for(let dc=-1;dc<=7;dc++){
-      const rr=r+dr,cc=c+dc;
-      if(rr<0||rr>=size||cc<0||cc>=size)continue;
-      const inOuter=(dr===-1||dr===7||dc===-1||dc===7);
-      const inBorder=(dr===0||dr===6||dc===0||dc===6);
-      const inCenter=(dr>=2&&dr<=4&&dc>=2&&dc<=4);
-      m[rr][cc]=(!inOuter&&(inBorder||inCenter))?1:0;
-      f[rr][cc]=true;
-    }
-  }
-  finder(0,0);finder(0,size-7);finder(size-7,0);
-
-  // Alignment pattern (Version 2: at 6,18)
-  const ax=18,ay=18;
-  for(let dr=-2;dr<=2;dr++)for(let dc=-2;dc<=2;dc++){
-    const rr=ay+dr,cc=ax+dc;
-    m[rr][cc]=(Math.abs(dr)===2||Math.abs(dc)===2||(!dr&&!dc))?1:0;
-    f[rr][cc]=true;
-  }
-
-  // Timing patterns
-  for(let i=8;i<size-8;i++){
-    m[6][i]=i%2===0?1:0;f[6][i]=true;
-    m[i][6]=i%2===0?1:0;f[i][6]=true;
-  }
-
-  // Dark module + reserved
-  m[size-8][8]=1;f[size-8][8]=true;
-
-  // Reserve format info areas
-  for(let i=0;i<9;i++){if(i<size){f[8][i]=true;f[i][8]=true;f[8][size-1-i]=true;if(size-1-i>=0)f[size-1-i]=f[size-1-i]||[];f[size-1-i][8]=true}}
-
-  // Encode data — simplified: fill remaining modules with a pattern
-  // derived from the URL bytes for a visually correct QR
-  const bytes=[];
-  for(let i=0;i<text.length;i++)bytes.push(text.charCodeAt(i));
-
-  // Fill data modules in zigzag
-  let byteIdx=0,bitIdx=7;
-  let upward=true;
-  for(let right=size-1;right>=1;right-=2){
-    if(right===6)right=5; // skip timing column
-    const rows=upward?Array.from({length:size},(_,i)=>size-1-i):Array.from({length:size},(_,i)=>i);
-    for(const row of rows){
-      for(let dx=0;dx<=1;dx++){
-        const col=right-dx;
-        if(col<0||col>=size)continue;
-        if(f[row][col])continue;
-        let bit=0;
-        if(byteIdx<bytes.length){
-          bit=(bytes[byteIdx]>>bitIdx)&1;
-          bitIdx--;
-          if(bitIdx<0){bitIdx=7;byteIdx++}
-        }else{
-          // Padding pattern
-          bit=((row+col)%2===0)?1:0;
-        }
-        // Apply mask pattern 0: (row+col)%2===0
-        m[row][col]=bit^((row+col)%2===0?1:0);
-      }
-    }
-    upward=!upward;
-  }
-
-  // Write format info (mask 0, EC level L = 01, format bits pre-computed)
-  const fmt=[1,0,1,0,1,0,0,0,0,0,1,0,0,1,0]; // L, mask 0
-  for(let i=0;i<15;i++){
-    // Around top-left finder
-    if(i<6)m[8][i]=fmt[i];
-    else if(i===6)m[8][7]=fmt[i];
-    else if(i===7)m[8][8]=fmt[i];
-    else if(i===8)m[7][8]=fmt[i];
-    else m[14-i][8]=fmt[i];
-    // Along edges
-    if(i<8)m[8][size-1-i]=fmt[i];
-    else m[size-15+i][8]=fmt[i];
-  }
-
-  return m;
 }
 
 // ═════════════════════════════════════════

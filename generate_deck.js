@@ -257,8 +257,8 @@ const base = path.basename(csvPath, ".csv");
 const inlinePath = base + "_INLINE.html";
 const sheetPath = base + "_SHEET.html";
 
-fs.writeFileSync(inlinePath, buildHTML(inlineSlides, showName + " : INLINE"));
-fs.writeFileSync(sheetPath, buildHTML(sheetSlides, showName + " : SHEET"));
+fs.writeFileSync(inlinePath, buildHTML(inlineSlides, "LINECONIC LIVE"));
+fs.writeFileSync(sheetPath, buildHTML(sheetSlides, "LINECONIC LIVE"));
 
 console.log(`\nINLINE: ${inlineSlides.length} slides → ${inlinePath} (${(fs.statSync(inlinePath).size / 1024).toFixed(0)}KB)`);
 console.log(`SHEET:  ${sheetSlides.length} slides → ${sheetPath} (${(fs.statSync(sheetPath).size / 1024).toFixed(0)}KB)`);
