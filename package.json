@@ -1,0 +1,17 @@
+{
+  "name": "lineconic-live",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "npx playwright test",
+    "seed": "node seed-firebase.js"
+  },
+  "devDependencies": {
+    "vitest": "latest",
+    "playwright": "latest",
+    "@playwright/test": "latest",
+    "serve": "latest"
+  }
+}
