@@ -143,7 +143,7 @@ function buildSlides(mode) {
   let qnum = 0;
 
   function flushAnswerSheet() {
-    if (sectionAnswers.length > 0) {
+    if (mode === "sheet" && sectionAnswers.length > 0) {
       const ansText = sectionAnswers.map(a => {
         const src = a.source ? " : " + a.source : "";
         const tag = a.bonusTag || "";
