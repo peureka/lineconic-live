@@ -4,11 +4,13 @@
 
 **Goal:** Build a dress-rehearsal-ready React app at `app.html` with Operator View, Audience View (The Monolith), scoring, and full keyboard control — ported from the proven TEMPLATE.html renderer.
 
-**Architecture:** Single HTML file (`app.html`) using React 18 via CDN with inline CSS. No build tools. Data loaded from localStorage (offline-first) with Firebase fallback. Run of Show seeded from CSV via a Node.js script. Service worker for PWA offline support.
+**Architecture:** Single HTML file (`app.html`) using React 18 via CDN with inline CSS. No build tools for the app itself. Node.js test harness for unit tests on data logic. Playwright for browser integration tests. Data loaded from localStorage (offline-first) with Firebase fallback. Run of Show seeded from CSV via a Node.js script. Service worker for PWA offline support.
 
-**Tech Stack:** React 18 (CDN), Firebase Realtime Database (europe-west1), Web Audio API, Canvas 2D, Service Worker
+**Tech Stack:** React 18 (CDN), Firebase Realtime Database (europe-west1), Web Audio API, Canvas 2D, Service Worker, Vitest (unit tests), Playwright (integration tests)
 
 **Branch:** `sprint-1-core-engine` (main is untouched, live site stays up)
+
+**TDD approach:** Tests are written BEFORE implementation for every testable unit. The app is a single HTML file with no module system, so we extract testable logic into a shared `.js` module that both the tests and app.html consume. Browser-level behavior is tested with Playwright after implementation.
 
 **Reference files you MUST read before each task:**
 - `TEMPLATE.html` — the proven renderer. Port logic verbatim, don't reinvent.
@@ -18,160 +20,810 @@
 
 ---
 
-## Task 1: Seed Script — CSV to Firebase + JSON
+## Task 0: Test Infrastructure Setup
 
 **Files:**
-- Create: `seed-firebase.js`
+- Create: `package.json`
+- Create: `vitest.config.js`
+- Create: `playwright.config.js`
+- Create: `tests/unit/.gitkeep`
+- Create: `tests/e2e/.gitkeep`
+
+**Step 1: Initialize package.json**
+
+```bash
+npm init -y
+```
+
+Then edit to add test dependencies and scripts:
+
+```json
+{
+  "name": "lineconic-live",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "npx playwright test",
+    "seed": "node seed-firebase.js"
+  },
+  "devDependencies": {
+    "vitest": "latest",
+    "playwright": "latest",
+    "@playwright/test": "latest"
+  }
+}
+```
+
+**Step 2: Install dependencies**
+
+```bash
+npm install
+```
+
+**Step 3: Create vitest.config.js**
+
+```javascript
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    include: ['tests/unit/**/*.test.js'],
+  },
+});
+```
+
+**Step 4: Create playwright.config.js**
+
+```javascript
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+  testDir: './tests/e2e',
+  use: {
+    baseURL: 'http://localhost:8080',
+    headless: true,
+  },
+  webServer: {
+    command: 'npx serve . -l 8080 -s',
+    port: 8080,
+    reuseExistingServer: true,
+  },
+});
+```
+
+Also install serve for local dev server:
+```bash
+npm install -D serve
+```
+
+**Step 5: Add .gitignore entries**
+
+Append to `.gitignore` (create if doesn't exist):
+```
+node_modules/
+test-results/
+playwright-report/
+```
+
+**Step 6: Verify test runner works**
+
+Create a smoke test `tests/unit/smoke.test.js`:
+```javascript
+import { describe, it, expect } from 'vitest';
+
+describe('smoke', () => {
+  it('test runner works', () => {
+    expect(1 + 1).toBe(2);
+  });
+});
+```
+
+```bash
+npm test
+```
+
+Expected: 1 test passes.
+
+**Step 7: Commit**
+
+```bash
+git add package.json vitest.config.js playwright.config.js tests/ .gitignore
+git commit -m "chore: test infrastructure — Vitest + Playwright
+
+Unit tests with Vitest, browser integration with Playwright.
+Serve-based local dev server for e2e."
+```
+
+---
+
+## Task 1: Seed Script — Tests First, Then Implementation
+
+**Files:**
+- Create: `tests/unit/seed.test.js`
+- Create: `lib/csv-parser.js` (extracted, testable CSV parsing)
+- Create: `lib/ros-builder.js` (extracted, testable schema mapping)
+- Create: `seed-firebase.js` (orchestrator: parse + build + write)
 - Create: `ros-v1.json` (generated output)
 - Read: `SHOW_MASTER_V2.csv` (input)
 - Reference: `generate_deck.js` (CSV parsing logic to reuse)
 
-**Step 1: Write the seed script**
+### Step 1: Write failing tests for CSV parser
 
-Create `seed-firebase.js`. This Node.js script:
+Create `tests/unit/seed.test.js`:
+
+```javascript
+import { describe, it, expect } from 'vitest';
+import { parseCSV } from '../../lib/csv-parser.js';
+import { buildRunOfShow, mapSlide, groupIntoSections } from '../../lib/ros-builder.js';
+import fs from 'fs';
+
+describe('CSV Parser', () => {
+  it('strips UTF-8 BOM', () => {
+    const input = '\uFEFFa,b,c\n1,2,3';
+    const rows = parseCSV(input);
+    expect(rows[0][0]).toBe('a');
+  });
+
+  it('normalizes CRLF to LF', () => {
+    const input = 'a,b\r\n1,2\r\n';
+    const rows = parseCSV(input);
+    expect(rows.length).toBe(2); // header + 1 data row
+  });
+
+  it('handles quoted fields with commas', () => {
+    const input = 'a,b\n"hello, world",2';
+    const rows = parseCSV(input);
+    expect(rows[1][0]).toBe('hello, world');
+  });
+
+  it('handles escaped quotes inside quoted fields', () => {
+    const input = 'a,b\n"he said ""hello""",2';
+    const rows = parseCSV(input);
+    expect(rows[1][0]).toBe('he said "hello"');
+  });
+
+  it('skips blank rows', () => {
+    const input = 'a,b\n1,2\n\n3,4';
+    const rows = parseCSV(input);
+    expect(rows.length).toBe(3); // header + 2 data rows
+  });
+
+  it('parses the actual SHOW_MASTER_V2.csv', () => {
+    const csv = fs.readFileSync('SHOW_MASTER_V2.csv', 'utf8');
+    const rows = parseCSV(csv);
+    // Header + 161 data rows
+    expect(rows.length).toBeGreaterThan(100);
+    // First data row is slide 1, attract
+    expect(rows[1][1]).toBe('PRE-SHOW');
+    expect(rows[1][2]).toBe('attract');
+  });
+});
+
+describe('ROS Builder — mapSlide', () => {
+  it('maps a source_q row correctly', () => {
+    const row = {
+      slide_number: '5',
+      section: 'ROUND 1: GUESS THE SOURCE',
+      slide_type: 'source_q',
+      primary_text: 'DID I STUTTER?',
+      secondary_text: '',
+      answer: 'The Office',
+      answer_source: '',
+      notes: '',
+    };
+    const slide = mapSlide(row, 4);
+    expect(slide.type).toBe('source_q');
+    expect(slide.content.primary).toBe('DID I STUTTER?');
+    expect(slide.content.answer).toBe('The Office');
+    expect(slide.reveal_state).toBe('hidden');
+    expect(slide.timer_seconds).toBe(30);
+    expect(slide.id).toBe('s005');
+  });
+
+  it('maps an acronym_q row correctly', () => {
+    const row = {
+      slide_number: '27',
+      section: 'ROUND 2: SCREEN',
+      slide_type: 'acronym_q',
+      primary_text: 'I.A.K.',
+      secondary_text: '',
+      answer: 'I AM KENOUGH',
+      answer_source: 'Barbie',
+      notes: '',
+    };
+    const slide = mapSlide(row, 26);
+    expect(slide.type).toBe('acronym_q');
+    expect(slide.content.primary).toBe('I.A.K.');
+    expect(slide.content.answer).toBe('I AM KENOUGH');
+    expect(slide.content.source).toBe('Barbie');
+    expect(slide.timer_seconds).toBe(30);
+  });
+
+  it('extracts bonus points from notes', () => {
+    const row = {
+      slide_number: '10',
+      section: 'ROUND 1',
+      slide_type: 'source_q',
+      primary_text: 'TEST',
+      secondary_text: '',
+      answer: 'Answer',
+      answer_source: '',
+      notes: 'bonus 3pts',
+    };
+    const slide = mapSlide(row, 9);
+    expect(slide.points).toBe(3);
+  });
+
+  it('maps an attract slide', () => {
+    const row = {
+      slide_number: '1',
+      section: 'PRE-SHOW',
+      slide_type: 'attract',
+      primary_text: 'L',
+      secondary_text: '',
+      answer: '',
+      answer_source: '',
+      notes: '',
+    };
+    const slide = mapSlide(row, 0);
+    expect(slide.type).toBe('attract');
+    expect(slide.content.primary).toBe('L');
+    expect(slide.team).toBe('neutral');
+  });
+
+  it('maps hotseat_prompt with 30s timer', () => {
+    const row = {
+      slide_number: '154',
+      section: 'BONUS: HOT SEAT',
+      slide_type: 'hotseat_prompt',
+      primary_text: 'BABY SHARK',
+      secondary_text: '',
+      answer: '',
+      answer_source: 'Pinkfong',
+      notes: '',
+    };
+    const slide = mapSlide(row, 153);
+    expect(slide.type).toBe('hotseat_prompt');
+    expect(slide.timer_seconds).toBe(30);
+  });
+
+  it('maps operational slides (fishbowl, round_title, etc.)', () => {
+    const row = {
+      slide_number: '2',
+      section: 'WARM-UP',
+      slide_type: 'fishbowl',
+      primary_text: 'WRITE YOUR RED FLAG.',
+      secondary_text: 'DROP IT IN THE BOWL.',
+      answer: '',
+      answer_source: '',
+      notes: '',
+    };
+    const slide = mapSlide(row, 1);
+    expect(slide.type).toBe('fishbowl');
+    expect(slide.content.primary).toBe('WRITE YOUR RED FLAG.');
+    expect(slide.content.secondary).toBe('DROP IT IN THE BOWL.');
+  });
+});
+
+describe('ROS Builder — groupIntoSections', () => {
+  it('groups rows by section column', () => {
+    const rows = [
+      { section: 'A', slide_type: 'attract', primary_text: 'L', secondary_text: '', answer: '', answer_source: '', notes: '', slide_number: '1' },
+      { section: 'A', slide_type: 'fishbowl', primary_text: 'X', secondary_text: '', answer: '', answer_source: '', notes: '', slide_number: '2' },
+      { section: 'B', slide_type: 'round_title', primary_text: 'R1', secondary_text: '', answer: '', answer_source: '', notes: '', slide_number: '3' },
+    ];
+    const sections = groupIntoSections(rows);
+    expect(sections.length).toBe(2);
+    expect(sections[0].name).toBe('A');
+    expect(sections[0].slides.length).toBe(2);
+    expect(sections[1].name).toBe('B');
+    expect(sections[1].slides.length).toBe(1);
+  });
+
+  it('generates section IDs from names', () => {
+    const rows = [
+      { section: 'ROUND 1: GUESS THE SOURCE', slide_type: 'round_title', primary_text: 'R1', secondary_text: '', answer: '', answer_source: '', notes: '', slide_number: '1' },
+    ];
+    const sections = groupIntoSections(rows);
+    expect(sections[0].id).toBe('round-1-guess-the-source');
+  });
+});
+
+describe('ROS Builder — buildRunOfShow (full integration)', () => {
+  it('builds the complete Run of Show from the real CSV', () => {
+    const csv = fs.readFileSync('SHOW_MASTER_V2.csv', 'utf8');
+    const ros = buildRunOfShow(csv, 'THE SPLIT — TABLE FORMAT V2');
+
+    expect(ros.id).toBe('split-table-v2');
+    expect(ros.name).toBe('THE SPLIT — TABLE FORMAT V2');
+    expect(ros.sections.length).toBeGreaterThan(8);
+    expect(typeof ros.created).toBe('number');
+
+    // Count total slides
+    const totalSlides = ros.sections.reduce((a, s) => a + s.slides.length, 0);
+    expect(totalSlides).toBe(161);
+
+    // First slide is attract
+    expect(ros.sections[0].slides[0].type).toBe('attract');
+    expect(ros.sections[0].slides[0].content.primary).toBe('L');
+
+    // Last slide is endcard
+    const lastSection = ros.sections[ros.sections.length - 1];
+    const lastSlide = lastSection.slides[lastSection.slides.length - 1];
+    expect(lastSlide.type).toBe('endcard');
+
+    // Check a known acronym_q
+    const round2 = ros.sections.find(s => s.name.includes('ROUND 2'));
+    expect(round2).toBeDefined();
+    const iak = round2.slides.find(s => s.content.primary === 'I.A.K.');
+    expect(iak).toBeDefined();
+    expect(iak.content.answer).toBe('I AM KENOUGH');
+    expect(iak.content.source).toBe('Barbie');
+
+    // Every slide has an id
+    ros.sections.forEach(section => {
+      section.slides.forEach(slide => {
+        expect(slide.id).toBeTruthy();
+        expect(slide.type).toBeTruthy();
+        expect(slide.team).toBe('neutral');
+        expect(slide.reveal_state).toBe('hidden');
+      });
+    });
+  });
+});
+```
+
+### Step 2: Run tests — verify they fail
+
+```bash
+npm test
+```
+
+Expected: ALL tests fail (modules don't exist yet).
+
+### Step 3: Implement lib/csv-parser.js
+
+Create `lib/csv-parser.js`. Export a single function `parseCSV(csvString)` that:
+
+1. Strips UTF-8 BOM (`\uFEFF`)
+2. Normalizes `\r\n` to `\n`
+3. Splits into rows, handling quoted fields (commas inside quotes, escaped `""`)
+4. Skips blank rows
+5. Returns array of arrays (first row is headers)
+
+Port the parsing logic from `generate_deck.js` lines 1-60 but make it a clean ES module export.
+
+### Step 4: Run CSV parser tests
+
+```bash
+npm test -- --reporter verbose tests/unit/seed.test.js
+```
+
+Expected: CSV Parser tests pass. ROS Builder tests still fail.
+
+### Step 5: Implement lib/ros-builder.js
+
+Create `lib/ros-builder.js`. Export:
+
+- `mapSlide(rowObject, index)` — maps a CSV row (as object with named fields) to the slide schema
+- `groupIntoSections(rowObjects)` — groups an array of row objects into sections
+- `buildRunOfShow(csvString, showName)` — full pipeline: parse CSV → map rows → group sections → return ROS object
+
+Uses `parseCSV` from `lib/csv-parser.js`.
+
+Content mapping rules:
+- `primary_text` → `content.primary`
+- `secondary_text` → `content.secondary`
+- `answer` → `content.answer`
+- `answer_source` → `content.source`
+- `notes` → check for `/(\d+)\s*p/` → `points` field
+- `source_q`, `acronym_q`, `hotseat_prompt` → `timer_seconds: 30`
+- All slides: `team: "neutral"`, `reveal_state: "hidden"`
+- Slide ID: `s` + zero-padded slide_number (e.g., `s001`, `s042`, `s161`)
+- Section ID: lowercase name, spaces/colons/special chars → hyphens
+
+### Step 6: Run all tests
+
+```bash
+npm test
+```
+
+Expected: ALL tests pass.
+
+### Step 7: Create seed-firebase.js
+
+The orchestrator script that:
 
 1. Reads `SHOW_MASTER_V2.csv`
-2. Parses it (copy the CSV parsing approach from `generate_deck.js` lines 1-60: BOM stripping, CRLF normalization, quoted field handling)
-3. Groups rows into sections by the `section` column (when `section` value changes, new section starts)
-4. Maps each CSV row to the schema:
+2. Calls `buildRunOfShow()` to get the full ROS
+3. Writes `ros-v1.json` to disk
+4. PUTs to Firebase REST API:
+   ```
+   PUT https://lineconic-live-default-rtdb.europe-west1.firebasedatabase.app/shows/split-table-v2.json
+   ```
+   Uses native `fetch()` (Node 18+). No auth needed.
+5. Logs section summary to console
 
-```
-CSV slide_type    -> Schema type
-─────────────────────────────────
-source_q          -> "source_q"       (keep original types for renderer compatibility)
-acronym_q         -> "acronym_q"
-source_a          -> "source_a"
-acronym_a         -> "acronym_a"
-attract           -> "attract"
-fishbowl          -> "fishbowl"
-round_title       -> "round_title"
-tier_title        -> "tier_title"
-bonus_marker      -> "bonus_marker"
-score             -> "score"
-intermission      -> "intermission"
-warning           -> "warning"
-blackout          -> "blackout"
-transition_beat   -> "transition_beat"
-crate_drop        -> "crate_drop"
-fluency_line      -> "fluency_line"
-fluency_source    -> "fluency_source"
-doa_ref           -> "doa_ref"
-doa_vote          -> "doa_vote"
-doa_verdict_dead  -> "doa_verdict_dead"
-doa_verdict_alive -> "doa_verdict_alive"
-hotseat_rules     -> "hotseat_rules"
-hotseat_prompt    -> "hotseat_prompt"
-verdict           -> "verdict"
-sentence          -> "sentence"
-receipt_rain      -> "receipt_rain"
-last_line         -> "last_line"
-endcard           -> "endcard"
-answer_sheet      -> "answer_sheet"
-```
-
-IMPORTANT: Keep original CSV `slide_type` values as-is in the schema. The renderer functions in TEMPLATE.html use these exact type names. Don't remap to abstract types — it would break the direct port.
-
-Each slide object:
-```json
-{
-  "id": "s001",
-  "type": "source_q",
-  "team": "neutral",
-  "content": {
-    "primary": "DID I STUTTER?",
-    "secondary": null,
-    "answer": "The Office",
-    "source": "The Office"
-  },
-  "reveal_state": "hidden",
-  "timer_seconds": null,
-  "host_notes": null,
-  "points": null,
-  "notes": ""
-}
-```
-
-Content mapping from CSV columns:
-- `primary_text` -> `content.primary`
-- `secondary_text` -> `content.secondary`
-- `answer` column -> `content.answer`
-- `answer_source` column -> `content.source`
-- For `acronym_q`: primary is the acronym, answer is the decoded line, source is the source
-- For `source_q`: primary is the line, answer is the source
-- `notes` column -> check for bonus points pattern `/(\d+)\s*p/` -> `points` field
-- `hotseat_prompt` slides -> `timer_seconds: 30`
-- `source_q` and `acronym_q` slides -> `timer_seconds: 30`
-
-Section structure:
-```json
-{
-  "id": "round-1-guess-the-source",
-  "name": "ROUND 1: GUESS THE SOURCE",
-  "slides": [...]
-}
-```
-
-The full Run of Show:
-```json
-{
-  "id": "split-table-v2",
-  "name": "THE SPLIT — TABLE FORMAT V2",
-  "created": <timestamp>,
-  "sections": [...]
-}
-```
-
-5. Writes the JSON to `ros-v1.json`
-6. Writes to Firebase `shows/split-table-v2` using the Firebase REST API (no SDK needed for a one-shot script):
-
-```
-PUT https://lineconic-live-default-rtdb.europe-west1.firebasedatabase.app/shows/split-table-v2.json
-```
-
-Use `fetch()` (available in Node 18+) with the Firebase REST API. No auth needed if database rules allow writes (they currently do based on the existing voting system).
-
-**Step 2: Run the seed script**
+### Step 8: Run the seed script
 
 ```bash
 node seed-firebase.js
 ```
 
-Expected: `ros-v1.json` created with the full Run of Show. Firebase updated.
-
-**Step 3: Verify the output**
-
-```bash
-node -e "const d=JSON.parse(require('fs').readFileSync('ros-v1.json','utf8')); console.log('Sections:', d.sections.length); d.sections.forEach(s => console.log(' ', s.name, '-', s.slides.length, 'slides')); console.log('Total slides:', d.sections.reduce((a,s) => a+s.slides.length, 0))"
+Expected output:
+```
+Parsing SHOW_MASTER_V2.csv...
+  PRE-SHOW — 1 slides
+  WARM-UP — 1 slides
+  ROUND 1: GUESS THE SOURCE — 22 slides
+  ...
+Total: 161 slides across N sections
+Writing ros-v1.json...
+Uploading to Firebase...
+Done.
 ```
 
-Expected: ~10-12 sections, ~161 total slides matching the CSV row count.
+### Step 9: Verify Firebase
 
-Also verify Firebase:
 ```bash
 curl -s "https://lineconic-live-default-rtdb.europe-west1.firebasedatabase.app/shows/split-table-v2/name.json"
 ```
 
 Expected: `"THE SPLIT — TABLE FORMAT V2"`
 
-**Step 4: Commit**
+### Step 10: Commit
 
 ```bash
-git add seed-firebase.js ros-v1.json
-git commit -m "feat: seed script — CSV to Firebase + JSON
+git add lib/ tests/unit/seed.test.js seed-firebase.js ros-v1.json
+git commit -m "feat: seed script with tests — CSV to Firebase + JSON
 
-Parses SHOW_MASTER_V2.csv into structured Run of Show.
-Writes to Firebase shows/split-table-v2 and ros-v1.json."
+TDD: 15+ unit tests for CSV parser, slide mapping, section grouping.
+Full integration test against SHOW_MASTER_V2.csv (161 slides).
+lib/csv-parser.js and lib/ros-builder.js extracted as testable modules."
 ```
 
 ---
 
-## Task 2: PWA Shell — manifest.json + sw.js
+## Task 2: App State — Tests First, Then Implementation
+
+**Files:**
+- Create: `tests/unit/state.test.js`
+- Create: `lib/state.js` (reducer + helpers, shared between tests and app.html)
+
+### Step 1: Write failing tests for the state reducer and helpers
+
+Create `tests/unit/state.test.js`:
+
+```javascript
+import { describe, it, expect } from 'vitest';
+import { reducer, initialState, flattenSlides, slideToSection, getSectionStartIndex } from '../../lib/state.js';
+
+// Minimal test show
+const testShow = {
+  id: 'test',
+  name: 'TEST SHOW',
+  sections: [
+    {
+      id: 'sec-a', name: 'SECTION A',
+      slides: [
+        { id: 's001', type: 'attract', content: { primary: 'L' }, reveal_state: 'hidden', team: 'neutral', timer_seconds: null, host_notes: null, points: null },
+        { id: 's002', type: 'fishbowl', content: { primary: 'RED FLAG' }, reveal_state: 'hidden', team: 'neutral', timer_seconds: null, host_notes: null, points: null },
+      ],
+    },
+    {
+      id: 'sec-b', name: 'SECTION B',
+      slides: [
+        { id: 's003', type: 'source_q', content: { primary: 'DID I STUTTER?', answer: 'The Office' }, reveal_state: 'hidden', team: 'neutral', timer_seconds: 30, host_notes: null, points: null },
+        { id: 's004', type: 'acronym_q', content: { primary: 'I.A.K.', answer: 'I AM KENOUGH', source: 'Barbie' }, reveal_state: 'hidden', team: 'neutral', timer_seconds: 30, host_notes: null, points: null },
+        { id: 's005', type: 'score', content: { primary: 'ROUND COMPLETE' }, reveal_state: 'hidden', team: 'neutral', timer_seconds: null, host_notes: null, points: null },
+      ],
+    },
+  ],
+};
+
+describe('flattenSlides', () => {
+  it('flattens nested sections into a single array', () => {
+    const flat = flattenSlides(testShow);
+    expect(flat.length).toBe(5);
+    expect(flat[0].id).toBe('s001');
+    expect(flat[4].id).toBe('s005');
+  });
+});
+
+describe('slideToSection', () => {
+  it('returns the section index for a given flat slide index', () => {
+    const flat = flattenSlides(testShow);
+    expect(slideToSection(testShow, 0)).toBe(0); // s001 in SECTION A
+    expect(slideToSection(testShow, 1)).toBe(0); // s002 in SECTION A
+    expect(slideToSection(testShow, 2)).toBe(1); // s003 in SECTION B
+    expect(slideToSection(testShow, 4)).toBe(1); // s005 in SECTION B
+  });
+});
+
+describe('getSectionStartIndex', () => {
+  it('returns the flat index of the first slide in a section', () => {
+    expect(getSectionStartIndex(testShow, 0)).toBe(0);
+    expect(getSectionStartIndex(testShow, 1)).toBe(2);
+  });
+});
+
+describe('reducer — navigation', () => {
+  const state = { ...initialState, show: testShow, currentSlide: 0 };
+
+  it('NEXT_SLIDE increments slide index', () => {
+    const next = reducer(state, { type: 'NEXT_SLIDE' });
+    expect(next.currentSlide).toBe(1);
+  });
+
+  it('NEXT_SLIDE does not go past last slide', () => {
+    const atEnd = { ...state, currentSlide: 4 };
+    const next = reducer(atEnd, { type: 'NEXT_SLIDE' });
+    expect(next.currentSlide).toBe(4);
+  });
+
+  it('PREV_SLIDE decrements slide index', () => {
+    const at2 = { ...state, currentSlide: 2 };
+    const prev = reducer(at2, { type: 'PREV_SLIDE' });
+    expect(prev.currentSlide).toBe(1);
+  });
+
+  it('PREV_SLIDE does not go below 0', () => {
+    const prev = reducer(state, { type: 'PREV_SLIDE' });
+    expect(prev.currentSlide).toBe(0);
+  });
+
+  it('JUMP_SECTION jumps to first slide of a section', () => {
+    const jumped = reducer(state, { type: 'JUMP_SECTION', payload: 1 });
+    expect(jumped.currentSlide).toBe(2);
+  });
+
+  it('GO_TO_SLIDE goes to exact slide index', () => {
+    const jumped = reducer(state, { type: 'GO_TO_SLIDE', payload: 3 });
+    expect(jumped.currentSlide).toBe(3);
+  });
+
+  it('GO_TO_SLIDE clamps to valid range', () => {
+    const jumped = reducer(state, { type: 'GO_TO_SLIDE', payload: 999 });
+    expect(jumped.currentSlide).toBe(4);
+  });
+});
+
+describe('reducer — scoring', () => {
+  const state = { ...initialState, show: testShow, scores: [0, 0] };
+
+  it('SCORE_CYAN +1 increments cyan score', () => {
+    const next = reducer(state, { type: 'SCORE_CYAN', payload: 1 });
+    expect(next.scores).toEqual([1, 0]);
+  });
+
+  it('SCORE_CYAN -1 decrements cyan score', () => {
+    const at5 = { ...state, scores: [5, 3] };
+    const next = reducer(at5, { type: 'SCORE_CYAN', payload: -1 });
+    expect(next.scores).toEqual([4, 3]);
+  });
+
+  it('SCORE_PINK +1 increments pink score', () => {
+    const next = reducer(state, { type: 'SCORE_PINK', payload: 1 });
+    expect(next.scores).toEqual([0, 1]);
+  });
+
+  it('scores do not go below 0', () => {
+    const next = reducer(state, { type: 'SCORE_CYAN', payload: -1 });
+    expect(next.scores).toEqual([0, 0]);
+  });
+});
+
+describe('reducer — reveal', () => {
+  const state = { ...initialState, show: testShow, currentSlide: 2, revealState: {} };
+
+  it('TOGGLE_REVEAL reveals a hidden slide', () => {
+    const next = reducer(state, { type: 'TOGGLE_REVEAL' });
+    expect(next.revealState['s003']).toBe('revealed');
+  });
+
+  it('TOGGLE_REVEAL hides a revealed slide', () => {
+    const revealed = { ...state, revealState: { s003: 'revealed' } };
+    const next = reducer(revealed, { type: 'TOGGLE_REVEAL' });
+    expect(next.revealState['s003']).toBe('hidden');
+  });
+});
+
+describe('reducer — toggles', () => {
+  const state = { ...initialState, show: testShow };
+
+  it('TOGGLE_SCOREBOARD flips showScoreboard', () => {
+    expect(reducer(state, { type: 'TOGGLE_SCOREBOARD' }).showScoreboard).toBe(true);
+    expect(reducer({ ...state, showScoreboard: true }, { type: 'TOGGLE_SCOREBOARD' }).showScoreboard).toBe(false);
+  });
+
+  it('TOGGLE_SHORTCUTS flips showShortcuts', () => {
+    expect(reducer(state, { type: 'TOGGLE_SHORTCUTS' }).showShortcuts).toBe(true);
+  });
+
+  it('TOGGLE_MUTE flips muted', () => {
+    expect(reducer(state, { type: 'TOGGLE_MUTE' }).muted).toBe(false);
+  });
+
+  it('CLOSE_OVERLAYS closes all overlays', () => {
+    const open = { ...state, showShortcuts: true, showHostPanel: true };
+    const closed = reducer(open, { type: 'CLOSE_OVERLAYS' });
+    expect(closed.showShortcuts).toBe(false);
+    expect(closed.showHostPanel).toBe(false);
+  });
+
+  it('INCREMENT_RECEIPTS increments receipt counter', () => {
+    const next = reducer(state, { type: 'INCREMENT_RECEIPTS' });
+    expect(next.receipts).toBe(1);
+  });
+});
+
+describe('reducer — SET_SHOW loads a show', () => {
+  it('sets the show and resets slide to 0', () => {
+    const next = reducer(initialState, { type: 'SET_SHOW', payload: testShow });
+    expect(next.show).toBe(testShow);
+    expect(next.currentSlide).toBe(0);
+  });
+});
+```
+
+### Step 2: Run tests — verify they fail
+
+```bash
+npm test
+```
+
+Expected: ALL fail — `lib/state.js` doesn't exist.
+
+### Step 3: Implement lib/state.js
+
+Create `lib/state.js` exporting:
+
+- `initialState` — the default state object
+- `reducer(state, action)` — pure function handling all action types
+- `flattenSlides(show)` — returns flat array of all slides across all sections
+- `slideToSection(show, flatIndex)` — returns the section index containing that flat slide index
+- `getSectionStartIndex(show, sectionIndex)` — returns the flat index of the first slide in that section
+
+All pure functions. No side effects. No DOM. No Firebase.
+
+### Step 4: Run tests — verify they pass
+
+```bash
+npm test
+```
+
+Expected: ALL tests pass.
+
+### Step 5: Commit
+
+```bash
+git add lib/state.js tests/unit/state.test.js
+git commit -m "feat: app state reducer with tests — navigation, scoring, reveal
+
+TDD: 25+ unit tests for reducer, flattenSlides, slideToSection,
+getSectionStartIndex. Pure functions, zero side effects.
+Covers NEXT/PREV, JUMP_SECTION, scoring, reveal toggle, overlays."
+```
+
+---
+
+## Task 3: Slide Renderer Helpers — Tests First
+
+**Files:**
+- Create: `tests/unit/renderers.test.js`
+- Create: `lib/renderers.js` (sizing functions + transition map)
+
+### Step 1: Write failing tests
+
+Create `tests/unit/renderers.test.js`:
+
+```javascript
+import { describe, it, expect } from 'vitest';
+import { qSz, aSz, tx } from '../../lib/renderers.js';
+
+describe('qSz — acronym question sizing', () => {
+  it('returns largest size for short acronyms (<=4 chars)', () => {
+    expect(qSz('I.A.K.')).toContain('22vw'); // 5 chars > 4, next tier
+    expect(qSz('N.S.')).toContain('22vw');    // 4 chars
+  });
+
+  it('scales down for longer acronyms', () => {
+    const short = qSz('A.B.');
+    const long = qSz('W.A.Y.T.W.T.Y.A.');
+    // Longer acronym should have smaller max size
+    expect(short).not.toBe(long);
+  });
+
+  it('handles empty string', () => {
+    const result = qSz('');
+    expect(result).toBeTruthy();
+  });
+});
+
+describe('aSz — answer sizing', () => {
+  it('returns largest size for short answers', () => {
+    expect(aSz('JAWS')).toContain('11vw');
+  });
+
+  it('scales down for long answers', () => {
+    const result = aSz('WHY ARE YOU THE WAY THAT YOU ARE');
+    expect(result).toContain('vw'); // should have a smaller vw value
+  });
+});
+
+describe('tx — transition map', () => {
+  it('maps source_q to slam', () => {
+    expect(tx('source_q')).toBe('t-slam');
+  });
+
+  it('maps acronym_q to slam', () => {
+    expect(tx('acronym_q')).toBe('t-slam');
+  });
+
+  it('maps source_a to punch', () => {
+    expect(tx('source_a')).toBe('t-punch');
+  });
+
+  it('maps round_title to breath', () => {
+    expect(tx('round_title')).toBe('t-breath');
+  });
+
+  it('maps receipt_rain to shake', () => {
+    expect(tx('receipt_rain')).toBe('t-shake');
+  });
+
+  it('maps crate_drop to fade', () => {
+    expect(tx('crate_drop')).toBe('t-fade');
+  });
+
+  it('returns fade for unknown types', () => {
+    expect(tx('unknown_type')).toBe('t-fade');
+  });
+});
+```
+
+### Step 2: Run — verify fail
+
+```bash
+npm test
+```
+
+### Step 3: Implement lib/renderers.js
+
+Port VERBATIM from TEMPLATE.html:
+- `qSz(text)` — line 327
+- `aSz(text)` — line 328
+- `tx(type)` — lines 310-319
+
+Export as ES module functions.
+
+### Step 4: Run — verify pass
+
+```bash
+npm test
+```
+
+### Step 5: Commit
+
+```bash
+git add lib/renderers.js tests/unit/renderers.test.js
+git commit -m "feat: renderer helpers with tests — sizing + transitions
+
+TDD: qSz, aSz, tx ported from TEMPLATE.html as testable modules.
+Transition map covers all slide types."
+```
+
+---
+
+## Task 4: PWA Shell — manifest.json + sw.js
 
 **Files:**
 - Create: `manifest.json`
 - Create: `sw.js`
 
-**Step 1: Create manifest.json**
+### Step 1: Create manifest.json
 
 ```json
 {
@@ -185,641 +837,433 @@ Writes to Firebase shows/split-table-v2 and ros-v1.json."
 }
 ```
 
-Minimal. No icons needed for v1. The PWA install prompt isn't the goal — offline caching is.
-
-**Step 2: Create sw.js**
+### Step 2: Create sw.js
 
 Service worker that caches:
 - `/app.html`
 - `/ros-v1.json`
 - Google Fonts CSS + font files for Space Mono
-- Firebase SDK JS files (both firebase-app-compat.js and firebase-database-compat.js)
+- Firebase SDK JS files
 
-Strategy: Cache-first for all assets. Network-first for Firebase API calls (so voting still works live).
+Strategy: Cache-first for all assets. Skip caching for Firebase Realtime Database requests (`*.firebasedatabase.app`).
 
-The service worker should:
-1. On `install`: pre-cache the asset list
-2. On `fetch`: return cached version if available, fall back to network
-3. Skip caching for Firebase Realtime Database requests (*.firebasedatabase.app)
-
-**Step 3: Verify files exist**
-
-```bash
-cat manifest.json
-cat sw.js
-```
-
-**Step 4: Commit**
+### Step 3: Commit
 
 ```bash
 git add manifest.json sw.js
 git commit -m "feat: PWA shell — manifest + service worker
 
-Offline-first caching for app.html, fonts, Firebase SDK, and
-Run of Show JSON. Firebase API calls pass through to network."
+Offline-first caching for app.html, fonts, Firebase SDK, and ROS JSON."
 ```
 
 ---
 
-## Task 3: app.html — Skeleton + Routing + CSS Foundation
+## Task 5: app.html — The Big Build
 
 **Files:**
 - Create: `app.html`
+- Reference: `TEMPLATE.html` (the entire file — port verbatim)
+- Reference: `docs/LINECONIC_LIVE_DESIGN_SYSTEM_V1.md` (all tokens)
+- Reference: `lib/state.js`, `lib/renderers.js`, `lib/csv-parser.js`, `lib/ros-builder.js` (tested logic)
 
-This is the big file. Build it in layers across Tasks 3-8.
+This is the largest task. Build the complete single-file React app.
 
-**Step 1: Create app.html with the full CSS foundation + React shell**
+**CRITICAL: The tested logic in `lib/` must be DUPLICATED into app.html** (since it's a single CDN file with no module system). Keep them identical. The `lib/` modules are the testable source of truth; `app.html` inlines the same code.
 
-The file structure:
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LINECONIC LIVE</title>
-  <link rel="manifest" href="/manifest.json">
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-  <!-- React CDN -->
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <!-- Babel for JSX (dev convenience — single file, no build) -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    /* === FULL CSS HERE === */
-  </style>
-</head>
-<body>
-  <div id="root"></div>
-  <canvas id="particles"></canvas>
-  <script type="text/babel">
-    /* === FULL REACT APP HERE === */
-  </script>
-</body>
-</html>
+### Step 1: Create app.html with the complete application
+
+The file must contain (in order):
+
+**HEAD:**
+1. Meta tags, title "LINECONIC LIVE"
+2. PWA manifest link
+3. Firebase SDK (10.12.0 compat)
+4. React 18 + ReactDOM CDN
+5. Babel standalone (for JSX in single file)
+6. Space Mono font from Google Fonts
+
+**STYLE block — ALL of the following:**
+
+1. **Design System V1 tokens** — complete `:root` from Design System appendix (lines 461-503)
+2. **Global resets** — `* { border-radius: 0 !important; box-sizing: border-box }` etc.
+3. **All CSS from TEMPLATE.html lines 9-107** — ported VERBATIM:
+   - `.S`, `.S.on` (slide base)
+   - Keyframes: slam, breath, punch, fadeIn, shakeIn
+   - `.D`, `.M` (typography)
+   - `.hw`, `.hc`, `.hp`, `.hg`, `.hs` (halation)
+   - `.nb`, `.nb-pk`, `.nb-cy`, `.nb-wh`, `.nb-gd` (neon borders)
+   - `.tb`, `.tb.pk`, `.tb.cy`, `.tb.dead` (timer border)
+   - `#sbug` (scoreboard)
+   - `.srcbar`, `.rule`, `.ans-list` (misc)
+   - Keyframes: pulse, rain, crateGlow, crateFloat, crateLidOpen, crateGlowReveal
+   - Crate, particle canvas, host panel CSS
+4. **Design System bloom-pulse** keyframe
+5. **Design System reveal** transition CSS (`.answer`, `.answer.revealed`)
+6. **Operator View CSS** — new styles for:
+   - `.operator-grid` (12-col layout: 220px sidebar, 1fr main, 280px preview)
+   - `.section-nav` (per Design System 4.4)
+   - `.slide-card`, `.slide-card-current`, `.slide-card-next` (per Design System 4.3)
+   - `.score-display` (per Design System 4.2)
+   - `.timer-bar` (per Design System 4.5)
+   - `.host-notes` (per Design System 4.6)
+   - `.shortcut-overlay` (per Design System 4.7)
+   - `.reveal-badge` (HIDDEN/REVEALED states per Design System 4.3)
+
+**BODY:**
+1. `<div id="root"></div>`
+2. `<canvas id="particles"></canvas>`
+
+**SCRIPT (type="text/babel"):**
+
+All inlined. Structure:
+
+```javascript
+// ═══════════════════════════════════════
+// FIREBASE INIT
+// ═══════════════════════════════════════
+// (same config from TEMPLATE.html lines 439-451)
+
+// ═══════════════════════════════════════
+// SOUND ENGINE (direct port from TEMPLATE.html)
+// ═══════════════════════════════════════
+// initAudio, tone, startShepard, stopShepard, sfx
+
+// ═══════════════════════════════════════
+// PARTICLE SYSTEM (direct port from TEMPLATE.html)
+// ═══════════════════════════════════════
+// Canvas setup, spawnReceipts, spawnFlutter, tickParticles, startParticles, stopParticles
+
+// ═══════════════════════════════════════
+// TIMER SYSTEM (direct port from TEMPLATE.html)
+// ═══════════════════════════════════════
+// startTimer, resumeTimer, pauseTimer, togglePause, stopTimer
+
+// ═══════════════════════════════════════
+// DOA VOTING (direct port from TEMPLATE.html)
+// ═══════════════════════════════════════
+// pushTopic, castVote, resetVotes, updateVoteBars
+
+// ═══════════════════════════════════════
+// QR CODE ENCODER (direct port from TEMPLATE.html)
+// ═══════════════════════════════════════
+// drawQR, encodeQR (update URL to lineconic.live/vote)
+
+// ═══════════════════════════════════════
+// STATE (inlined from lib/state.js — KEEP IDENTICAL)
+// ═══════════════════════════════════════
+// initialState, reducer, flattenSlides, slideToSection, getSectionStartIndex
+
+// ═══════════════════════════════════════
+// RENDERER HELPERS (inlined from lib/renderers.js — KEEP IDENTICAL)
+// ═══════════════════════════════════════
+// qSz, aSz, tx
+
+// ═══════════════════════════════════════
+// REACT COMPONENTS
+// ═══════════════════════════════════════
+
+// --- Slide Renderers (one per type, ported from TEMPLATE.html R.* functions) ---
+// AttractSlide, FishbowlSlide, RoundTitleSlide, TierTitleSlide,
+// BonusMarkerSlide, SourceQSlide, SourceASlide, AcronymQSlide, AcronymASlide,
+// FluencyLineSlide, FluencySourceSlide, ScoreSlide, IntermissionSlide,
+// DoaVoteSlide, WarningSlide, BlackoutSlide, TransitionBeatSlide,
+// DoaRefSlide, DoaVerdictDeadSlide, DoaVerdictAliveSlide,
+// HotseatRulesSlide, HotseatPromptSlide, VerdictSlide, SentenceSlide,
+// ReceiptRainSlide, CrateDropSlide, LastLineSlide, EndcardSlide, AnswerSheetSlide
+
+// --- SlideRenderer dispatcher ---
+// --- AudienceView (The Monolith) ---
+// --- Operator View components ---
+//     SectionNav, CurrentSlideCard, NextSlideCard, ScoreDisplay,
+//     TimerDisplay, ReceiptCounter, ShortcutOverlay, OperatorView
+// --- App (root component with routing + keyboard + persistence) ---
+
+// ═══════════════════════════════════════
+// MOUNT + SERVICE WORKER
+// ═══════════════════════════════════════
 ```
 
-**CSS must include ALL of the following (in order):**
-
-1. **Design System V1 tokens** — complete `:root` block from Design System appendix (lines 461-503)
-2. **Global resets** — from Design System appendix (lines 508-528), including `border-radius: 0 !important`
-3. **Audience View slide CSS** — ported VERBATIM from TEMPLATE.html lines 16-97:
-   - Slide base (`.S`, `.S.on`)
-   - Transitions (slam, breath, punch, fade, shakeIn keyframes)
-   - Typography classes (`.D` display, `.M` mono)
-   - Halation classes (`.hw`, `.hc`, `.hp`, `.hg`, `.hs`)
-   - Neon borders (`.nb`, `.nb-pk`, `.nb-cy`, `.nb-wh`, `.nb-gd`)
-   - Timer border (`.tb`, `.tb.pk`, `.tb.cy`, `.tb.dead`)
-   - Scoreboard bug (`#sbug`)
-   - Source bar (`.srcbar`)
-   - Answer list (`.ans-list`)
-   - Particle canvas (`#particles`)
-   - Crate drop animations
-   - All keyframes (pulse, rain, crateGlow, crateFloat, crateLidOpen, crateGlowReveal)
-4. **Design System bloom pulse** keyframe (the 120 BPM animation)
-5. **Design System reveal transition** CSS
-6. **Operator View CSS** — new CSS for:
-   - Operator grid layout (sidebar + main + secondary)
-   - Section nav styles (per Design System 4.4)
-   - Slide card styles (per Design System 4.3)
-   - Score display styles (per Design System 4.2)
-   - Timer bar styles (per Design System 4.5)
-   - Host notes field (per Design System 4.6)
-   - Shortcut overlay modal (per Design System 4.7)
-   - All using Design System tokens
-
-**React shell must include:**
-
-1. **Firebase init** — same config from TEMPLATE.html lines 439-451
-2. **Mode routing** — read `?mode=` param, render `<OperatorView>` or `<AudienceView>`
-3. **State management** using `React.useReducer`:
-   ```
-   state = {
-     show: null,           // the Run of Show object
-     currentSlide: 0,      // flat index across all sections
-     scores: [0, 0],       // [cyan, pink]
-     revealState: {},       // { slideId: 'revealed' | 'hidden' }
-     receipts: 0,
-     muted: true,
-     timerRunning: false,
-     timerSeconds: 30,
-     showScoreboard: false,
-     showShortcuts: false,
-     showHostPanel: false,
-   }
-   ```
-4. **Data loading** — on mount:
-   - Try localStorage `lineconic-show` first
-   - Fall back to fetch `ros-v1.json`
-   - Save to localStorage on load
-5. **Session persistence (US-004)** — save state to localStorage on every dispatch
-6. **Flat slide index helper** — function to convert `(sectionIndex, slideIndex)` to flat index and back, since the show is nested but navigation is linear
-7. **Placeholder components** — `OperatorView` and `AudienceView` as empty divs (filled in Tasks 4-7)
-
-**Step 2: Verify it loads**
-
-Open `app.html` in browser. Should see a black screen (void). No errors in console. React mounted.
-
-Open `app.html?mode=operator` — black screen.
-Open `app.html?mode=audience` — black screen, no cursor.
-
-**Step 3: Verify data loads**
-
-Open console. Check `localStorage.getItem('lineconic-show')` is populated.
-Check the React state has the show loaded with correct section/slide counts.
-
-**Step 4: Commit**
-
-```bash
-git add app.html
-git commit -m "feat: app shell — routing, CSS foundation, data loading
-
-React 18 CDN app with query-param routing (?mode=operator/audience).
-Full Design System V1 tokens. All TEMPLATE.html CSS ported.
-Data loads from localStorage -> ros-v1.json fallback.
-Session state persists to localStorage."
-```
-
----
-
-## Task 4: Audience View — The Monolith (Slide Renderers)
-
-**Files:**
-- Modify: `app.html` (add AudienceView component)
-- Reference: `TEMPLATE.html` lines 322-361 (renderer functions)
-- Reference: `TEMPLATE.html` lines 308-319 (transition map)
-
-**Step 1: Port all renderer functions to React**
-
-Inside `app.html`, create the `AudienceView` component. This needs:
-
-1. **Utility functions** — port VERBATIM from TEMPLATE.html:
-   - `qSz(text)` — acronym question sizing (line 327)
-   - `aSz(text)` — answer sizing (line 328)
-   - `nw()` — nowrap style (line 329)
-   - `sb(text)` — source bar HTML (line 330)
-   - `tx(type)` — transition map (lines 310-319)
-
-2. **Slide renderer components** — one React component per slide type, porting the HTML from each `R.*` function (TEMPLATE.html lines 332-361). Each component receives the slide's `content` object as props.
-
-   Port these exactly:
-   - `AttractSlide` (from `R.attract`)
-   - `FishbowlSlide` (from `R.fishbowl`)
-   - `RoundTitleSlide` (from `R.round_title`)
-   - `TierTitleSlide` (from `R.tier_title`)
-   - `BonusMarkerSlide` (from `R.bonus_marker`)
-   - `SourceQSlide` (from `R.source_q`)
-   - `SourceASlide` (from `R.source_a`)
-   - `AcronymQSlide` (from `R.acronym_q`)
-   - `AcronymASlide` (from `R.acronym_a`)
-   - `FluencyLineSlide` (from `R.fluency_line`)
-   - `FluencySourceSlide` (from `R.fluency_source`)
-   - `ScoreSlide` (from `R.score`)
-   - `IntermissionSlide` (from `R.intermission`)
-   - `DoaVoteSlide` (from `R.doa_vote`)
-   - `WarningSlide` (from `R.warning`)
-   - `BlackoutSlide` (from `R.blackout`)
-   - `TransitionBeatSlide` (from `R.transition_beat`)
-   - `DoaRefSlide` (from `R.doa_ref`)
-   - `DoaVerdictDeadSlide` (from `R.doa_verdict_dead`)
-   - `DoaVerdictAliveSlide` (from `R.doa_verdict_alive`)
-   - `HotseatRulesSlide` (from `R.hotseat_rules`)
-   - `HotseatPromptSlide` (from `R.hotseat_prompt`)
-   - `VerdictSlide` (from `R.verdict`)
-   - `SentenceSlide` (from `R.sentence`)
-   - `ReceiptRainSlide` (from `R.receipt_rain`)
-   - `CrateDropSlide` (from `R.crate_drop`)
-   - `LastLineSlide` (from `R.last_line`)
-   - `EndcardSlide` (from `R.endcard`)
-   - `AnswerSheetSlide` (from `R.answer_sheet`)
-
-3. **SlideRenderer** — dispatcher component that picks the right renderer by `slide.type`
-
-4. **AudienceView layout**:
-   - Full-screen container
-   - Current slide rendered with `.S.on` + transition class
-   - Previous slide has `.S` only (hidden)
-   - `cursor: none` on body when in audience mode
-
-5. **Answer reveal layer (US-016)**:
-   - Gameplay slides (`source_q`, `acronym_q`, `acronym_a`, `source_a`) show answer
-   - Answer wrapped in a div with class `answer` (blurred) or `answer revealed` (visible)
-   - Reveal state comes from the app state's `revealState[slideId]`
-
-**Step 2: Verify renderers**
-
-Open `app.html?mode=audience` in browser.
-- Should see the attract slide (big pink "L" pulsing)
-- Arrow right: should advance through slides
-- Each slide type should render with correct styling, borders, typography
-
-**Step 3: Commit**
-
-```bash
-git add app.html
-git commit -m "feat: Audience View — all slide renderers ported from TEMPLATE.html
-
-29 slide type renderers. Transition animations. Answer reveal with
-blur/glow. Full TEMPLATE.html visual parity."
-```
-
----
-
-## Task 5: Keyboard Navigation + Sound Engine + Particles
-
-**Files:**
-- Modify: `app.html`
-- Reference: `TEMPLATE.html` lines 213-268 (sound engine)
-- Reference: `TEMPLATE.html` lines 366-431 (particle system)
-- Reference: `TEMPLATE.html` lines 656-750 (navigation + input)
-
-**Step 1: Port the sound engine**
-
-Copy the sound engine VERBATIM from TEMPLATE.html:
-- `initAudio()`, `tone()` functions (lines 213-225)
-- `startShepard()`, `stopShepard()` (lines 229-247)
-- `sfx()` switch statement (lines 249-268)
-
-These are vanilla JS functions that live outside React. Put them in a `<script>` block before the React code, or at the top of the Babel script block as plain functions.
-
-**Step 2: Port the particle system**
-
-Copy VERBATIM from TEMPLATE.html:
-- Canvas setup + resize handler (lines 366-371)
-- `spawnReceipts()`, `spawnFlutter()` (lines 373-404)
-- `tickParticles()` render loop (lines 406-423)
-- `startParticles()`, `stopParticles()` (lines 425-431)
-
-These operate on the `<canvas id="particles">` element directly. Vanilla JS, outside React.
-
-**Step 3: Port keyboard navigation**
-
-Implement the `useEffect` hook for keyboard handling. Map keys per the design:
-
-```
-Right / Space    -> dispatch('NEXT_SLIDE')
-Left             -> dispatch('PREV_SLIDE')
-R                -> dispatch('TOGGLE_REVEAL')
-Q                -> dispatch('SCORE_CYAN', +1)
-A                -> dispatch('SCORE_CYAN', -1)
-P                -> dispatch('SCORE_PINK', +1)
-L                -> dispatch('SCORE_PINK', -1)
-1-9              -> dispatch('JUMP_SECTION', sectionIndex)
-T                -> dispatch('TOGGLE_TIMER')
-F                -> toggleFullscreen()
-S                -> dispatch('TOGGLE_SCOREBOARD')
-M                -> dispatch('TOGGLE_MUTE')
-H                -> dispatch('TOGGLE_HOST_PANEL')
-?                -> dispatch('TOGGLE_SHORTCUTS')
-Esc              -> dispatch('CLOSE_OVERLAYS')
-```
-
-On slide change:
-- Call `sfx(slideType)` for the new slide
-- Call `stopParticles()` then conditionally `startParticles('rain')` or `startParticles('flutter')`
-- Stop timer
-- Persist state to localStorage
-
-Also port:
-- Click to advance (from TEMPLATE.html line 747)
-- Right-click to go back (line 748)
-- Touch swipe (lines 749-750)
-
-**Step 4: Port the timer system**
-
-Copy the timer logic from TEMPLATE.html lines 274-305:
-- `startTimer()`, `resumeTimer()`, `pauseTimer()`, `togglePause()`, `stopTimer()`
-- The conic gradient border fuse (operates on `.tb` elements in the DOM)
-- Auto-timer on question slides when enabled
-- Timer death sound cue
-
-**Step 5: Verify navigation**
+### Step 2: Verify it all works
 
 Open `app.html?mode=audience`:
-- Arrow keys advance/retreat slides
-- Each slide transition animates correctly
-- Sound plays on unmute (M key)
-- Shepard tone starts on question slides, stops on answers
-- Receipt rain slide shows particles
-- Timer starts on T key, conic border counts down
-
-**Step 6: Commit**
-
-```bash
-git add app.html
-git commit -m "feat: keyboard nav, sound engine, particles, timer
-
-Full keyboard control. Web Audio sfx + Shepard tone ported.
-Canvas particle system (receipt rain + flutter). Timer border fuse.
-All logic direct-ported from TEMPLATE.html."
-```
-
----
-
-## Task 6: DOA Voting + QR Code
-
-**Files:**
-- Modify: `app.html`
-- Reference: `TEMPLATE.html` lines 434-620 (Firebase voting + QR)
-
-**Step 1: Port DOA voting**
-
-Copy from TEMPLATE.html:
-- Firebase init (already done in Task 3)
-- `pushTopic()`, `castVote()`, `resetVotes()`, `updateVoteBars()` (lines 459-511)
-- Vote bar DOM updates (the `.vbar-dead`, `.vbar-alive`, `.vpct-dead`, `.vpct-alive` elements)
-
-The voting system must:
-- Push `currentTopic` to Firebase when entering a `doa_vote` slide
-- Listen for vote counts and update bars in real-time
-- Clear topic when leaving DOA section
-- Cast votes from operator (host controls: +DEAD, +ALIVE, +5 DEAD, +5 ALIVE, RESET)
-
-**Step 2: Port QR code encoder**
-
-Copy the `drawQR()` and `encodeQR()` functions from TEMPLATE.html lines 514-620.
-Call `drawQR()` when an intermission slide mounts (via useEffect or direct DOM call).
-
-Update the QR URL to: `https://lineconic.live/vote`
-
-**Step 3: Verify voting**
-
-Open `app.html?mode=audience`, navigate to a DOA vote slide.
-- Vote bars should appear
-- Open the existing `vote/index.html` in another tab
-- Verify the topic appears on the vote page
-- Cast a vote — bar should update on the audience slide
-
-**Step 4: Commit**
-
-```bash
-git add app.html
-git commit -m "feat: DOA voting + QR code on intermission
-
-Firebase-backed voting with real-time bar updates.
-QR code renders on intermission slides (lineconic.live/vote).
-Host can cast/reset votes from operator controls."
-```
-
----
-
-## Task 7: Operator View
-
-**Files:**
-- Modify: `app.html`
-- Reference: `docs/LINECONIC_LIVE_DESIGN_SYSTEM_V1.md` sections 4.1-4.7
-
-**Step 1: Build the Operator View component tree**
-
-Components (all using Design System V1 tokens):
-
-1. **OperatorView** — root layout grid:
-   ```
-   display: grid;
-   grid-template-columns: 220px 1fr 280px;
-   grid-template-rows: 1fr auto;
-   height: 100vh;
-   background: var(--void);
-   ```
-
-2. **SectionNav** (left sidebar) — per Design System 4.4:
-   - Vertical list of sections from the Run of Show
-   - Active section: `border-left: 2px solid var(--light)`, `--glow-white` on left edge, `--text-primary`
-   - Inactive: `border-left: 2px solid var(--border-subtle)`, `--text-secondary`
-   - Slide count right-aligned in `--text-disabled`
-   - Click: jumps to first slide of that section (instant, no animation)
-   - Font: Space Mono `--type-label`
-
-3. **CurrentSlideCard** (center main) — per Design System 4.3:
-   - Border: `1px solid var(--border-active)`, `box-shadow: var(--glow-white)`
-   - Shows: reveal state badge (top-left), slide counter "14/75" (top-right)
-   - Acronym/primary text in `--type-title`
-   - Answer always visible (operator sees everything) in `--type-label --text-secondary`
-   - Source in `--type-meta`
-   - Host notes field at bottom (per Design System 4.6)
-
-4. **NextSlideCard** (right panel) — per Design System 4.3:
-   - `opacity: 0.5`, no border
-   - "NEXT" label in `--type-meta --text-secondary`
-   - Preview of next slide content
-
-5. **ScoreDisplay** (bottom bar) — per Design System 4.2:
-   - Two score blocks side by side
-   - Score number in Space Mono `--type-title`, cyan glow on O.G., signal glow on R.O.T.
-   - Team label in `--type-label --text-secondary`
-   - +/- buttons: 44x44px, square, `border: 1px solid var(--border-subtle)`
-   - Winning team glow intensifies, losing pulls to 0.3 opacity
-   - Score CUTS on change (no animation)
-
-6. **TimerDisplay** (bottom bar, next to scores):
-   - Bar: `height: 4px`, fill `--light`, track `--surface-03`
-   - Under 10s: fill `--signal` with `--glow-signal`
-   - Under 5s: fill pulses opacity 1->0.4 at 2Hz
-   - Time in Space Mono `--type-label`
-   - Timer is operator-only (absent from Audience View DOM)
-
-7. **ReceiptCounter** (bottom bar):
-   - Manual increment counter in Space Mono
-   - +/- buttons same style as score
-
-8. **ShortcutOverlay** (US-006) — per Design System 4.7:
-   - Triggered by `?` key
-   - `background: rgba(0,0,0,0.95)`, no backdrop blur
-   - Two-column grid: key box on left, action text on right
-   - Key: Space Mono `--type-label`, `--surface-02` box, `border: 1px solid var(--border-subtle)`, square
-   - Action: Space Mono `--type-meta --text-secondary`
-   - Lists all keyboard shortcuts
-   - Close with `?` or `Esc`
-
-**Step 2: Verify Operator View**
+- Attract slide with pink pulsing L
+- Arrow through all 161 slides
+- Transitions fire correctly per type
+- M key unmutes, sounds play
+- T key starts timer with conic border
+- S key toggles scoreboard
+- Receipt rain particles on receipt_rain slide
+- Crate drop animation plays
+- DOA vote bars update
+- QR renders on intermission
 
 Open `app.html?mode=operator`:
-- Section nav on left with all sections listed
-- Current slide card in center with full content
-- Next slide preview on right at 50% opacity
-- Score display at bottom with team colors and +/- buttons
-- Press `?` — shortcut overlay appears
-- Click a section in nav — jumps to first slide
-- Q/A/P/L keys — scores update instantly (no animation)
-- Arrow keys — slide card updates, section nav highlights correct section
+- Section nav on left
+- Current slide in center with reveal badge
+- Next slide preview on right
+- Scores at bottom with +/- buttons
+- Timer bar
+- `?` key shows shortcut overlay
+- Click section to jump
+- Q/A/P/L keys change scores
 
-**Step 3: Commit**
+### Step 3: Commit
 
 ```bash
 git add app.html
-git commit -m "feat: Operator View — full control surface
+git commit -m "feat: complete app.html — Operator + Audience views
 
-Section nav, current/next slide cards, score display, timer,
-receipt counter, shortcut overlay. All Design System V1 compliant.
-12-column grid layout. Zero border-radius."
+Single-file React SPA with all 29 slide renderers, sound engine,
+particle system, timer, DOA voting, QR code, operator controls.
+Full Design System V1 compliance. Ported from TEMPLATE.html."
 ```
 
 ---
 
-## Task 8: Audience Scoreboard + localStorage Persistence + PWA Registration
+## Task 6: Playwright E2E Tests
 
 **Files:**
-- Modify: `app.html`
+- Create: `tests/e2e/app.spec.js`
 
-**Step 1: Port the audience scoreboard bug**
+### Step 1: Install Playwright browsers
 
-From TEMPLATE.html lines 60-67 (`#sbug`):
-- Fixed bottom bar showing CYAN score vs PINK score
-- Team-colored with glow
-- Toggle with S key
-- Only renders in Audience View
+```bash
+npx playwright install chromium
+```
 
-**Step 2: Wire up localStorage persistence (US-004)**
+### Step 2: Write E2E tests
 
-In the React reducer's dispatch wrapper:
-- After every state change, serialize `{ currentSlide, scores, revealState, receipts, muted, timerSeconds, showScoreboard }` to `localStorage.setItem('lineconic-session', JSON.stringify(state))`
-- On app mount, check for `lineconic-session` in localStorage and restore if found
-- This means a browser refresh mid-show restores the exact position
+Create `tests/e2e/app.spec.js`:
 
-**Step 3: Register the service worker (US-003)**
-
-At the bottom of the script block:
 ```javascript
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(err => console.warn('SW registration failed:', err));
-}
+import { test, expect } from '@playwright/test';
+
+test.describe('Routing (US-001)', () => {
+  test('default loads operator view', async ({ page }) => {
+    await page.goto('/app.html');
+    await expect(page.locator('.operator-grid')).toBeVisible();
+  });
+
+  test('?mode=operator loads operator view', async ({ page }) => {
+    await page.goto('/app.html?mode=operator');
+    await expect(page.locator('.operator-grid')).toBeVisible();
+  });
+
+  test('?mode=audience loads audience view', async ({ page }) => {
+    await page.goto('/app.html?mode=audience');
+    await expect(page.locator('.S.on')).toBeVisible();
+    // No operator elements
+    await expect(page.locator('.operator-grid')).not.toBeVisible();
+  });
+});
+
+test.describe('Keyboard Navigation (US-002)', () => {
+  test('arrow right advances slide', async ({ page }) => {
+    await page.goto('/app.html?mode=audience');
+    await page.waitForSelector('.S.on');
+    // First slide is attract
+    const firstSlide = await page.locator('.S.on').innerHTML();
+    await page.keyboard.press('ArrowRight');
+    await page.waitForTimeout(200);
+    const secondSlide = await page.locator('.S.on').innerHTML();
+    expect(firstSlide).not.toBe(secondSlide);
+  });
+
+  test('arrow left goes back', async ({ page }) => {
+    await page.goto('/app.html?mode=audience');
+    await page.waitForSelector('.S.on');
+    await page.keyboard.press('ArrowRight');
+    await page.waitForTimeout(200);
+    await page.keyboard.press('ArrowLeft');
+    await page.waitForTimeout(200);
+    // Should be back at first slide (attract with "L")
+    await expect(page.locator('.S.on')).toContainText('L');
+  });
+
+  test('spacebar advances slide', async ({ page }) => {
+    await page.goto('/app.html?mode=audience');
+    await page.waitForSelector('.S.on');
+    await page.keyboard.press('Space');
+    await page.waitForTimeout(200);
+    // Should have advanced
+    const slideContent = await page.locator('.S.on').innerHTML();
+    expect(slideContent).toBeTruthy();
+  });
+});
+
+test.describe('Shortcut Overlay (US-006)', () => {
+  test('? key toggles shortcut overlay in operator mode', async ({ page }) => {
+    await page.goto('/app.html?mode=operator');
+    await page.waitForSelector('.operator-grid');
+    await page.keyboard.press('?');
+    await expect(page.locator('.shortcut-overlay')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('.shortcut-overlay')).not.toBeVisible();
+  });
+});
+
+test.describe('Session Persistence (US-004)', () => {
+  test('state survives page reload', async ({ page }) => {
+    await page.goto('/app.html?mode=operator');
+    await page.waitForSelector('.operator-grid');
+    // Advance 5 slides
+    for (let i = 0; i < 5; i++) {
+      await page.keyboard.press('ArrowRight');
+      await page.waitForTimeout(100);
+    }
+    // Reload
+    await page.reload();
+    await page.waitForSelector('.operator-grid');
+    // Should still be on slide 5-ish (check slide counter)
+    const counter = await page.locator('[data-testid="slide-counter"]').textContent();
+    expect(counter).toContain('6'); // 1-indexed, so slide 5 = "6/"
+  });
+});
+
+test.describe('Answer Reveal (US-016)', () => {
+  test('R key reveals answer on audience view', async ({ page }) => {
+    await page.goto('/app.html?mode=audience');
+    await page.waitForSelector('.S.on');
+    // Navigate to a question slide (slide 5 is source_q "DID I STUTTER?")
+    for (let i = 0; i < 4; i++) {
+      await page.keyboard.press('ArrowRight');
+      await page.waitForTimeout(100);
+    }
+    // Answer should be blurred
+    const answer = page.locator('.answer');
+    if (await answer.count() > 0) {
+      await expect(answer).not.toHaveClass(/revealed/);
+      await page.keyboard.press('r');
+      await page.waitForTimeout(100);
+      await expect(answer).toHaveClass(/revealed/);
+    }
+  });
+});
+
+test.describe('Scoring (US-019)', () => {
+  test('Q key increments cyan score', async ({ page }) => {
+    await page.goto('/app.html?mode=operator');
+    await page.waitForSelector('.operator-grid');
+    await page.keyboard.press('q');
+    await page.waitForTimeout(100);
+    const cyanScore = await page.locator('[data-testid="cyan-score"]').textContent();
+    expect(parseInt(cyanScore)).toBe(1);
+  });
+
+  test('P key increments pink score', async ({ page }) => {
+    await page.goto('/app.html?mode=operator');
+    await page.waitForSelector('.operator-grid');
+    await page.keyboard.press('p');
+    await page.waitForTimeout(100);
+    const pinkScore = await page.locator('[data-testid="pink-score"]').textContent();
+    expect(parseInt(pinkScore)).toBe(1);
+  });
+});
+
+test.describe('Audience View renders correctly', () => {
+  test('attract slide shows pulsing L', async ({ page }) => {
+    await page.goto('/app.html?mode=audience');
+    await page.waitForSelector('.S.on');
+    await expect(page.locator('.S.on')).toContainText('L');
+  });
+
+  test('audience view hides cursor', async ({ page }) => {
+    await page.goto('/app.html?mode=audience');
+    const cursor = await page.evaluate(() => getComputedStyle(document.body).cursor);
+    expect(cursor).toBe('none');
+  });
+});
+
+test.describe('Section Navigation (US-010)', () => {
+  test('number keys jump to sections in operator mode', async ({ page }) => {
+    await page.goto('/app.html?mode=operator');
+    await page.waitForSelector('.operator-grid');
+    // Press 2 to jump to section 2
+    await page.keyboard.press('2');
+    await page.waitForTimeout(200);
+    // Should no longer be on slide 0
+    const counter = await page.locator('[data-testid="slide-counter"]').textContent();
+    expect(counter).not.toContain('1/');
+  });
+});
 ```
 
-**Step 4: Verify persistence**
-
-1. Open `app.html?mode=operator`
-2. Navigate to slide 15, set cyan score to 5
-3. Refresh the page
-4. Should restore to slide 15 with cyan score 5
-
-**Step 5: Verify offline**
-
-1. Open `app.html` and let it load
-2. Open DevTools > Application > Service Workers — confirm registered
-3. Go offline (DevTools > Network > Offline)
-4. Refresh — app should still load and navigate
-
-**Step 6: Commit**
+### Step 3: Run E2E tests
 
 ```bash
-git add app.html
-git commit -m "feat: audience scoreboard, localStorage persistence, PWA
+npm run test:e2e
+```
 
-Scoreboard bug on audience view. Full session restore on refresh.
-Service worker registered for offline support."
+Expected: All pass (since app.html was built in Task 5).
+
+### Step 4: Fix any failures
+
+If tests reveal bugs, fix in `app.html` and re-run.
+
+### Step 5: Commit
+
+```bash
+git add tests/e2e/
+git commit -m "test: Playwright E2E tests for all core user stories
+
+Covers routing (US-001), keyboard nav (US-002), persistence (US-004),
+shortcuts (US-006), section nav (US-010), reveal (US-016), scoring (US-019).
+Audience view rendering and cursor hiding verified."
 ```
 
 ---
 
-## Task 9: Integration Testing + Bug Fixes
+## Task 7: Final Verification + Push
 
-**Files:**
-- Modify: `app.html` (fixes only)
+**Files:** None (verification + git only)
 
-**Step 1: Full run-through — Audience View**
-
-Open `app.html?mode=audience` and navigate through ALL 161 slides:
-- Verify every slide type renders correctly
-- Verify transitions fire (slam on questions, punch on answers, breath on titles)
-- Verify sound cues play when unmuted
-- Verify Shepard tone on question slides
-- Verify receipt rain particles on receipt_rain slide
-- Verify crate drop animation
-- Verify DOA vote bars update
-- Verify QR code renders on intermission
-- Verify scoreboard toggle
-
-**Step 2: Full run-through — Operator View**
-
-Open `app.html?mode=operator`:
-- Section nav highlights correct section as you navigate
-- Current slide card shows correct content for every slide type
-- Next slide preview is accurate
-- Score +/- buttons work
-- Timer starts and the conic border fuse counts down
-- Shortcut overlay shows all keys
-- Host notes field is editable
-
-**Step 3: Dual-view test**
-
-Open both views in separate windows:
-- Navigate in operator — verify audience view doesn't exist as a separate sync target (they're independent per US-001)
-- This is correct for Sprint 1 — multi-device sync is Phase 2
-
-**Step 4: Persistence test**
-
-Navigate to slide 30, set scores, reveal an answer, refresh both views.
-Verify state restores correctly.
-
-**Step 5: Fix any bugs found**
-
-Address issues. Each fix is its own commit with a descriptive message.
-
-**Step 6: Final commit**
+### Step 1: Run all tests
 
 ```bash
-git add app.html
-git commit -m "fix: integration test fixes
-
-[describe specific fixes]"
+npm test && npm run test:e2e
 ```
 
----
+Expected: ALL pass — unit tests AND e2e tests.
 
-## Task 10: Push Branch + Verify Deploy
+### Step 2: Manual smoke test
 
-**Files:** None (git operations only)
+Open `app.html?mode=audience` — click through 10+ slides, verify visual quality.
+Open `app.html?mode=operator` — verify controls work.
 
-**Step 1: Push the branch**
+### Step 3: Push the branch
 
 ```bash
 git push -u origin sprint-1-core-engine
 ```
 
-**Step 2: Verify main is untouched**
+### Step 4: Verify main is untouched
 
 ```bash
-git log main --oneline -5
+git log main --oneline -3
 ```
 
-Should show only the original commits. The live site at lineconic.live is unaffected.
-
-**Step 3: Test from GitHub Pages (optional)**
-
-If you want to test the branch deploy, you can temporarily switch GitHub Pages to the `sprint-1-core-engine` branch in repo settings. Otherwise, test locally only and merge to main when verified.
-
-**Step 4: Summary**
-
-Sprint 1+2+3 complete on `sprint-1-core-engine` branch:
-- `seed-firebase.js` — CSV to Firebase + JSON
-- `ros-v1.json` — offline Run of Show data
-- `app.html` — full React SPA with Operator + Audience views
-- `sw.js` + `manifest.json` — PWA offline support
-- All 38 user stories from Epics 1-4 addressed
-- Main branch untouched, live site running
+Should show only the original commits.
 
 ---
 
 ## Checklist Before Merge
 
+- [ ] `npm test` — all unit tests pass
+- [ ] `npm run test:e2e` — all Playwright tests pass
 - [ ] All 161 slides render correctly in Audience View
 - [ ] All slide transitions match TEMPLATE.html behavior
 - [ ] Sound engine produces correct cues for each slide type
-- [ ] Shepard tone starts on questions, stops on answers
 - [ ] Particle system works (receipt rain + flutter)
 - [ ] Crate drop animation plays correctly
-- [ ] DOA voting works with Firebase (test with vote page)
+- [ ] DOA voting works with Firebase
 - [ ] QR code renders on intermission
-- [ ] Timer border fuse counts down and dies correctly
+- [ ] Timer border fuse counts down correctly
 - [ ] Operator View shows all components
 - [ ] Section nav jumps work
-- [ ] Score +/- buttons work on operator
+- [ ] Score +/- buttons work
 - [ ] Shortcut overlay shows all keys
 - [ ] localStorage persistence survives refresh
 - [ ] PWA loads offline
 - [ ] No console errors
 - [ ] Design System compliance: zero border-radius, correct tokens, correct fonts
+- [ ] Main branch untouched
