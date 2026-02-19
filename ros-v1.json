@@ -1,0 +1,2277 @@
+{
+  "id": "the-split-table-format-v3",
+  "name": "THE SPLIT — TABLE FORMAT V3",
+  "sections": [
+    {
+      "id": "pre-show",
+      "name": "PRE-SHOW",
+      "slides": [
+        {
+          "id": "s001",
+          "type": "attract",
+          "content": {
+            "primary": "L",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        }
+      ]
+    },
+    {
+      "id": "warm-up",
+      "name": "WARM-UP",
+      "slides": [
+        {
+          "id": "s002",
+          "type": "fishbowl",
+          "content": {
+            "primary": "WRITE YOUR RED FLAG.",
+            "secondary": "DROP IT IN THE BOWL. WE WILL USE IT AGAINST YOU."
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        }
+      ]
+    },
+    {
+      "id": "round-1-guess-the-source",
+      "name": "ROUND 1: GUESS THE SOURCE",
+      "slides": [
+        {
+          "id": "s003",
+          "type": "round_title",
+          "content": {
+            "primary": "ROUND 1",
+            "secondary": "GUESS THE SOURCE"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s004",
+          "type": "tier_title",
+          "content": {
+            "primary": "WE SHOW THE LINE. YOU WRITE WHERE IT'S FROM.",
+            "secondary": "Q1-Q4: 1 POINT | Q5 BONUS: 3 POINTS | Q6-Q9: 1 POINT | Q10 BONUS: 5 POINTS | Q11-Q14: 1 POINT | Q15 BONUS: 10 POINTS"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s005",
+          "type": "source_q",
+          "content": {
+            "primary": "DID I STUTTER?",
+            "secondary": "",
+            "answer": "The Office"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s006",
+          "type": "source_q",
+          "content": {
+            "primary": "I AM IRON MAN",
+            "secondary": "",
+            "answer": "Avengers"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s007",
+          "type": "source_q",
+          "content": {
+            "primary": "HASTA LA VISTA, BABY",
+            "secondary": "",
+            "answer": "Terminator 2"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s008",
+          "type": "source_q",
+          "content": {
+            "primary": "I KISSED A GIRL",
+            "secondary": "",
+            "answer": "Katy Perry"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s009",
+          "type": "bonus_marker",
+          "content": {
+            "primary": "BONUS: 3 POINTS",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s010",
+          "type": "source_q",
+          "content": {
+            "primary": "SHUT UP AND TAKE MY MONEY",
+            "secondary": "",
+            "answer": "Futurama"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": "bonus 3pts",
+          "points": 3
+        },
+        {
+          "id": "s011",
+          "type": "source_q",
+          "content": {
+            "primary": "TO INFINITY AND BEYOND",
+            "secondary": "",
+            "answer": "Toy Story"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s012",
+          "type": "source_q",
+          "content": {
+            "primary": "I SEE DEAD PEOPLE",
+            "secondary": "",
+            "answer": "The Sixth Sense"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s013",
+          "type": "source_q",
+          "content": {
+            "primary": "I WILL ALWAYS LOVE YOU",
+            "secondary": "",
+            "answer": "Whitney Houston"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s014",
+          "type": "source_q",
+          "content": {
+            "primary": "WHO LET THE DOGS OUT",
+            "secondary": "",
+            "answer": "Baha Men"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s015",
+          "type": "bonus_marker",
+          "content": {
+            "primary": "BONUS: 5 POINTS",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s016",
+          "type": "source_q",
+          "content": {
+            "primary": "PARTY ROCK IS IN THE HOUSE TONIGHT",
+            "secondary": "",
+            "answer": "LMFAO"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": "bonus 5pts",
+          "points": 5
+        },
+        {
+          "id": "s017",
+          "type": "source_q",
+          "content": {
+            "primary": "MAY THE FORCE BE WITH YOU",
+            "secondary": "",
+            "answer": "Star Wars"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s018",
+          "type": "source_q",
+          "content": {
+            "primary": "HIT ME BABY ONE MORE TIME",
+            "secondary": "",
+            "answer": "Britney Spears"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s019",
+          "type": "source_q",
+          "content": {
+            "primary": "I'M GONNA TAKE MY HORSE TO THE OLD TOWN ROAD",
+            "secondary": "",
+            "answer": "Lil Nas X"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s020",
+          "type": "source_q",
+          "content": {
+            "primary": "LOOK WHAT YOU MADE ME DO",
+            "secondary": "",
+            "answer": "Taylor Swift"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s021",
+          "type": "bonus_marker",
+          "content": {
+            "primary": "BONUS: 10 POINTS",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s022",
+          "type": "source_q",
+          "content": {
+            "primary": "GOODBYE YELLOW BRICK ROAD",
+            "secondary": "",
+            "answer": "Elton John"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": "bonus 10pts",
+          "points": 10
+        },
+        {
+          "id": "s023",
+          "type": "score",
+          "content": {
+            "primary": "ROUND 1 COMPLETE",
+            "secondary": "SWAP SCORECARDS. MARK THEM."
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s024",
+          "type": "crate_drop",
+          "content": {
+            "primary": "",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        }
+      ]
+    },
+    {
+      "id": "round-2-screen",
+      "name": "ROUND 2: SCREEN",
+      "slides": [
+        {
+          "id": "s025",
+          "type": "round_title",
+          "content": {
+            "primary": "ROUND 2",
+            "secondary": "GUESS THE LINECONIC: SCREEN"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s026",
+          "type": "tier_title",
+          "content": {
+            "primary": "WE SHOW THE ACRONYM. YOU DECODE THE LINE. CINEMA & TV ONLY.",
+            "secondary": "Q1-Q4: 1 POINT | Q5 BONUS: 3 POINTS | Q6-Q9: 1 POINT | Q10 BONUS: 5 POINTS | Q11-Q14: 1 POINT | Q15 BONUS: 10 POINTS"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s027",
+          "type": "acronym_q",
+          "content": {
+            "primary": "I.A.K.",
+            "secondary": "",
+            "answer": "I AM KENOUGH",
+            "source": "Barbie"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s028",
+          "type": "acronym_q",
+          "content": {
+            "primary": "I.A.Y.F.",
+            "secondary": "",
+            "answer": "I AM YOUR FATHER",
+            "source": "Star Wars"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s029",
+          "type": "acronym_q",
+          "content": {
+            "primary": "Y.F.",
+            "secondary": "",
+            "answer": "YOU'RE FIRED!",
+            "source": "The Apprentice"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s030",
+          "type": "acronym_q",
+          "content": {
+            "primary": "W.F.",
+            "secondary": "",
+            "answer": "WAKANDA FOREVER",
+            "source": "Black Panther"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s031",
+          "type": "bonus_marker",
+          "content": {
+            "primary": "BONUS: 3 POINTS",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s032",
+          "type": "acronym_q",
+          "content": {
+            "primary": "W.I.C.",
+            "secondary": "",
+            "answer": "WINTER IS COMING",
+            "source": "Game of Thrones"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": "bonus 3pts",
+          "points": 3
+        },
+        {
+          "id": "s033",
+          "type": "acronym_q",
+          "content": {
+            "primary": "S.H.T.M.L.F.",
+            "secondary": "",
+            "answer": "SAY HELLO TO MY LITTLE FRIEND",
+            "source": "Scarface"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s034",
+          "type": "acronym_q",
+          "content": {
+            "primary": "O.M.F.",
+            "secondary": "",
+            "answer": "OHANA MEANS FAMILY",
+            "source": "Lilo & Stitch"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s035",
+          "type": "acronym_q",
+          "content": {
+            "primary": "B.J.B.",
+            "secondary": "",
+            "answer": "BOND. JAMES BOND.",
+            "source": "007"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s036",
+          "type": "acronym_q",
+          "content": {
+            "primary": "T.Y.S.",
+            "secondary": "",
+            "answer": "TREAT YO SELF",
+            "source": "Parks and Recreation"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s037",
+          "type": "bonus_marker",
+          "content": {
+            "primary": "BONUS: 5 POINTS",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s038",
+          "type": "acronym_q",
+          "content": {
+            "primary": "T.F.R.O.F.C.I.",
+            "secondary": "",
+            "answer": "THE FIRST RULE OF FIGHT CLUB IS",
+            "source": "Fight Club"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": "bonus 5pts",
+          "points": 5
+        },
+        {
+          "id": "s039",
+          "type": "acronym_q",
+          "content": {
+            "primary": "I.A.G.",
+            "secondary": "",
+            "answer": "I AM GROOT",
+            "source": "Guardians of the Galaxy"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s040",
+          "type": "acronym_q",
+          "content": {
+            "primary": "Y.C.H.T.T.",
+            "secondary": "",
+            "answer": "YOU CAN'T HANDLE THE TRUTH!",
+            "source": "A Few Good Men"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s041",
+          "type": "acronym_q",
+          "content": {
+            "primary": "T.N.P.L.H.",
+            "secondary": "",
+            "answer": "THERE'S NO PLACE LIKE HOME",
+            "source": "The Wizard of Oz"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s042",
+          "type": "acronym_q",
+          "content": {
+            "primary": "W.S.S.",
+            "secondary": "",
+            "answer": "WHY SO SERIOUS",
+            "source": "The Dark Knight"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s043",
+          "type": "bonus_marker",
+          "content": {
+            "primary": "BONUS: 10 POINTS",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s044",
+          "type": "acronym_q",
+          "content": {
+            "primary": "Y.A.W.H.",
+            "secondary": "",
+            "answer": "YOU'RE A WIZARD HARRY",
+            "source": "Harry Potter"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": "bonus 10pts",
+          "points": 10
+        },
+        {
+          "id": "s045",
+          "type": "score",
+          "content": {
+            "primary": "ROUND 2 COMPLETE",
+            "secondary": "SWAP SCORECARDS. MARK THEM."
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s046",
+          "type": "crate_drop",
+          "content": {
+            "primary": "",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        }
+      ]
+    },
+    {
+      "id": "fluency-check",
+      "name": "FLUENCY CHECK",
+      "slides": [
+        {
+          "id": "s047",
+          "type": "round_title",
+          "content": {
+            "primary": "FLUENCY CHECK",
+            "secondary": "WE SHOW THE LINE. YOU SHOUT THE SOURCE. NO WRITING. NO SCORING."
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s048",
+          "type": "fluency_line",
+          "content": {
+            "primary": "ALRIGHT, ALRIGHT, ALRIGHT",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s049",
+          "type": "fluency_source",
+          "content": {
+            "primary": "DAZED AND CONFUSED",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s050",
+          "type": "fluency_line",
+          "content": {
+            "primary": "IT'S BRITNEY, BITCH",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s051",
+          "type": "fluency_source",
+          "content": {
+            "primary": "BRITNEY SPEARS",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s052",
+          "type": "fluency_line",
+          "content": {
+            "primary": "ON WEDNESDAYS WE WEAR PINK",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s053",
+          "type": "fluency_source",
+          "content": {
+            "primary": "MEAN GIRLS",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s054",
+          "type": "fluency_line",
+          "content": {
+            "primary": "HOT PRIEST",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s055",
+          "type": "fluency_source",
+          "content": {
+            "primary": "FLEABAG",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s056",
+          "type": "fluency_line",
+          "content": {
+            "primary": "RUN, FORREST, RUN!",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s057",
+          "type": "fluency_source",
+          "content": {
+            "primary": "FORREST GUMP",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s058",
+          "type": "fluency_line",
+          "content": {
+            "primary": "YOU ONLY LIVE ONCE",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s059",
+          "type": "fluency_source",
+          "content": {
+            "primary": "DRAKE",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s060",
+          "type": "fluency_line",
+          "content": {
+            "primary": "HAVE YOU EVER HAD A CASE OF THE MONDAYS",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s061",
+          "type": "fluency_source",
+          "content": {
+            "primary": "OFFICE SPACE",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s062",
+          "type": "fluency_line",
+          "content": {
+            "primary": "HOUSTON, WE HAVE A PROBLEM",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s063",
+          "type": "fluency_source",
+          "content": {
+            "primary": "APOLLO 13",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s064",
+          "type": "fluency_line",
+          "content": {
+            "primary": "HI I'M JUST BEACH",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s065",
+          "type": "fluency_source",
+          "content": {
+            "primary": "BARBIE",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s066",
+          "type": "fluency_line",
+          "content": {
+            "primary": "I'LL BE BACK",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s067",
+          "type": "fluency_source",
+          "content": {
+            "primary": "THE TERMINATOR",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s068",
+          "type": "transition_beat",
+          "content": {
+            "primary": "",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        }
+      ]
+    },
+    {
+      "id": "intermission",
+      "name": "INTERMISSION",
+      "slides": [
+        {
+          "id": "s069",
+          "type": "intermission",
+          "content": {
+            "primary": "INTERMISSION.",
+            "secondary": "10 MINUTES. GET A DRINK."
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s070",
+          "type": "warning",
+          "content": {
+            "primary": "60 SECONDS.",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s071",
+          "type": "blackout",
+          "content": {
+            "primary": "",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        }
+      ]
+    },
+    {
+      "id": "dead-or-alive",
+      "name": "DEAD OR ALIVE",
+      "slides": [
+        {
+          "id": "s072",
+          "type": "round_title",
+          "content": {
+            "primary": "DEAD OR ALIVE",
+            "secondary": "CULTURALLY RELEVANT OR CULTURALLY EXPIRED. YOU DECIDE."
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s073",
+          "type": "doa_ref",
+          "content": {
+            "primary": "SKINNY JEANS",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s074",
+          "type": "doa_vote",
+          "content": {
+            "primary": "SKINNY JEANS",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s075",
+          "type": "doa_verdict_dead",
+          "content": {
+            "primary": "DEAD",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s076",
+          "type": "doa_ref",
+          "content": {
+            "primary": "ROM COMS",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s077",
+          "type": "doa_vote",
+          "content": {
+            "primary": "ROM COMS",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s078",
+          "type": "doa_verdict_alive",
+          "content": {
+            "primary": "ALIVE",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s079",
+          "type": "doa_ref",
+          "content": {
+            "primary": "LAUGH TRACKS",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s080",
+          "type": "doa_vote",
+          "content": {
+            "primary": "LAUGH TRACKS",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s081",
+          "type": "doa_verdict_dead",
+          "content": {
+            "primary": "DEAD",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s082",
+          "type": "doa_ref",
+          "content": {
+            "primary": "NEPO BABIES",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s083",
+          "type": "doa_vote",
+          "content": {
+            "primary": "NEPO BABIES",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s084",
+          "type": "doa_verdict_alive",
+          "content": {
+            "primary": "ALIVE",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s085",
+          "type": "doa_ref",
+          "content": {
+            "primary": "MARVEL PHASE 5",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s086",
+          "type": "doa_vote",
+          "content": {
+            "primary": "MARVEL PHASE 5",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s087",
+          "type": "doa_verdict_dead",
+          "content": {
+            "primary": "DEAD",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s088",
+          "type": "doa_ref",
+          "content": {
+            "primary": "REALITY TV",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s089",
+          "type": "doa_vote",
+          "content": {
+            "primary": "REALITY TV",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s090",
+          "type": "doa_verdict_alive",
+          "content": {
+            "primary": "ALIVE",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s091",
+          "type": "doa_ref",
+          "content": {
+            "primary": "METHOD ACTING",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s092",
+          "type": "doa_vote",
+          "content": {
+            "primary": "METHOD ACTING",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s093",
+          "type": "doa_verdict_dead",
+          "content": {
+            "primary": "DEAD",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s094",
+          "type": "doa_ref",
+          "content": {
+            "primary": "THE OFFICE REBOOT",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s095",
+          "type": "doa_vote",
+          "content": {
+            "primary": "THE OFFICE REBOOT",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s096",
+          "type": "doa_verdict_dead",
+          "content": {
+            "primary": "DEAD",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s097",
+          "type": "doa_ref",
+          "content": {
+            "primary": "A24",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s098",
+          "type": "doa_vote",
+          "content": {
+            "primary": "A24",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s099",
+          "type": "doa_verdict_alive",
+          "content": {
+            "primary": "ALIVE",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s100",
+          "type": "doa_ref",
+          "content": {
+            "primary": "MOVIE THEATRES",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s101",
+          "type": "doa_vote",
+          "content": {
+            "primary": "MOVIE THEATRES",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s102",
+          "type": "doa_verdict_alive",
+          "content": {
+            "primary": "ALIVE",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s103",
+          "type": "transition_beat",
+          "content": {
+            "primary": "",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        }
+      ]
+    },
+    {
+      "id": "round-3-lyrics",
+      "name": "ROUND 3: LYRICS",
+      "slides": [
+        {
+          "id": "s104",
+          "type": "round_title",
+          "content": {
+            "primary": "ROUND 3",
+            "secondary": "GUESS THE LINECONIC: LYRICS"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s105",
+          "type": "tier_title",
+          "content": {
+            "primary": "WE SHOW THE ACRONYM. YOU DECODE THE LINE. MUSIC ONLY.",
+            "secondary": "Q1-Q4: 1 POINT | Q5 BONUS: 3 POINTS | Q6-Q9: 1 POINT | Q10 BONUS: 5 POINTS | Q11-Q14: 1 POINT | Q15 BONUS: 10 POINTS"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s106",
+          "type": "acronym_q",
+          "content": {
+            "primary": "W.T.R.S.S.P.S.U.",
+            "secondary": "",
+            "answer": "WILL THE REAL SLIM SHADY PLEASE STAND UP",
+            "source": "Eminem"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s107",
+          "type": "acronym_q",
+          "content": {
+            "primary": "T.M.W.Y.W.",
+            "secondary": "",
+            "answer": "TELL ME WHAT YOU WANT",
+            "source": "Spice Girls"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s108",
+          "type": "acronym_q",
+          "content": {
+            "primary": "L.O.A.P.",
+            "secondary": "",
+            "answer": "LIVIN ON A PRAYER",
+            "source": "Bon Jovi"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s109",
+          "type": "acronym_q",
+          "content": {
+            "primary": "I.G.M.D.L.",
+            "secondary": "",
+            "answer": "I GOT MY DRIVER'S LICENSE",
+            "source": "Olivia Rodrigo"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s110",
+          "type": "bonus_marker",
+          "content": {
+            "primary": "BONUS: 3 POINTS",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s111",
+          "type": "acronym_q",
+          "content": {
+            "primary": "S.U.B.G.",
+            "secondary": "",
+            "answer": "SINCE U BEEN GONE",
+            "source": "Kelly Clarkson"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": "bonus 3pts",
+          "points": 3
+        },
+        {
+          "id": "s112",
+          "type": "acronym_q",
+          "content": {
+            "primary": "U.C.T.T.",
+            "secondary": "",
+            "answer": "U CAN'T TOUCH THIS",
+            "source": "MC Hammer"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s113",
+          "type": "acronym_q",
+          "content": {
+            "primary": "I.W.S.",
+            "secondary": "",
+            "answer": "I WILL SURVIVE",
+            "source": "Gloria Gaynor"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s114",
+          "type": "acronym_q",
+          "content": {
+            "primary": "I.I.B.",
+            "secondary": "",
+            "answer": "ICE ICE BABY",
+            "source": "Vanilla Ice"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s115",
+          "type": "acronym_q",
+          "content": {
+            "primary": "U.M.U.",
+            "secondary": "",
+            "answer": "UNDER MY UMBRELLA",
+            "source": "Rihanna"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s116",
+          "type": "bonus_marker",
+          "content": {
+            "primary": "BONUS: 5 POINTS",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s117",
+          "type": "acronym_q",
+          "content": {
+            "primary": "S.T.I.U.T.K.",
+            "secondary": "",
+            "answer": "SOMEBODY THAT I USED TO KNOW",
+            "source": "Gotye"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": "bonus 5pts",
+          "points": 5
+        },
+        {
+          "id": "s118",
+          "type": "acronym_q",
+          "content": {
+            "primary": "I.W.I.T.W.",
+            "secondary": "",
+            "answer": "I WANT IT THAT WAY",
+            "source": "Backstreet Boys"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s119",
+          "type": "acronym_q",
+          "content": {
+            "primary": "N.S.",
+            "secondary": "",
+            "answer": "NO SCRUBS",
+            "source": "TLC"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s120",
+          "type": "acronym_q",
+          "content": {
+            "primary": "G.J.W.I.",
+            "secondary": "",
+            "answer": "GETTING JIGGY WITH IT",
+            "source": "Will Smith"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s121",
+          "type": "acronym_q",
+          "content": {
+            "primary": "M.H.W.G.O.",
+            "secondary": "",
+            "answer": "MY HEART WILL GO ON",
+            "source": "Celine Dion"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s122",
+          "type": "bonus_marker",
+          "content": {
+            "primary": "BONUS: 10 POINTS",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s123",
+          "type": "acronym_q",
+          "content": {
+            "primary": "I.M.H.I.T.P.I.M.",
+            "secondary": "",
+            "answer": "IT'S ME HI I'M THE PROBLEM IT'S ME",
+            "source": "Taylor Swift"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": "bonus 10pts",
+          "points": 10
+        },
+        {
+          "id": "s124",
+          "type": "score",
+          "content": {
+            "primary": "ROUND 3 COMPLETE",
+            "secondary": "SWAP SCORECARDS. MARK THEM."
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s125",
+          "type": "crate_drop",
+          "content": {
+            "primary": "",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        }
+      ]
+    },
+    {
+      "id": "round-4-mixed",
+      "name": "ROUND 4: MIXED",
+      "slides": [
+        {
+          "id": "s126",
+          "type": "round_title",
+          "content": {
+            "primary": "ROUND 4",
+            "secondary": "GUESS THE LINECONIC: EVERYTHING"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s127",
+          "type": "tier_title",
+          "content": {
+            "primary": "SCREEN + LYRICS. NO RESTRICTIONS. HARDEST REFERENCES.",
+            "secondary": "Q1-Q4: 1 POINT | Q5 BONUS: 3 POINTS | Q6-Q9: 1 POINT | Q10 BONUS: 5 POINTS | Q11-Q14: 1 POINT | Q15 BONUS: 10 POINTS"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s128",
+          "type": "acronym_q",
+          "content": {
+            "primary": "S.M.N.",
+            "secondary": "",
+            "answer": "SAY MY NAME",
+            "source": "Destiny's Child"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s129",
+          "type": "acronym_q",
+          "content": {
+            "primary": "I.A.T.D.",
+            "secondary": "",
+            "answer": "I AM THE DANGER",
+            "source": "Breaking Bad"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s130",
+          "type": "acronym_q",
+          "content": {
+            "primary": "Y.G.N.A.B.B.",
+            "secondary": "",
+            "answer": "YOU'RE GONNA NEED A BIGGER BOAT",
+            "source": "Jaws"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s131",
+          "type": "acronym_q",
+          "content": {
+            "primary": "Y.C.S.W.U.",
+            "secondary": "",
+            "answer": "YOU CAN'T SIT WITH US",
+            "source": "Mean Girls"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s132",
+          "type": "bonus_marker",
+          "content": {
+            "primary": "BONUS: 3 POINTS",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s133",
+          "type": "acronym_q",
+          "content": {
+            "primary": "O.A.L.O.",
+            "secondary": "",
+            "answer": "OGRES ARE LIKE ONIONS",
+            "source": "Shrek"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": "bonus 3pts",
+          "points": 3
+        },
+        {
+          "id": "s134",
+          "type": "acronym_q",
+          "content": {
+            "primary": "W.G.P.C.G.R.",
+            "secondary": "",
+            "answer": "WITH GREAT POWER COMES GREAT RESPONSIBILITY",
+            "source": "Spider-Man"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s135",
+          "type": "acronym_q",
+          "content": {
+            "primary": "T.W.S.S.",
+            "secondary": "",
+            "answer": "THAT'S WHAT SHE SAID",
+            "source": "The Office"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s136",
+          "type": "acronym_q",
+          "content": {
+            "primary": "L.I.G.",
+            "secondary": "",
+            "answer": "LET IT GO",
+            "source": "Frozen"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s137",
+          "type": "acronym_q",
+          "content": {
+            "primary": "W.A.T.",
+            "secondary": "",
+            "answer": "WHAT ARE THOSE",
+            "source": "Vine"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s138",
+          "type": "bonus_marker",
+          "content": {
+            "primary": "BONUS: 5 POINTS",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s139",
+          "type": "acronym_q",
+          "content": {
+            "primary": "Y.S.N.P.",
+            "secondary": "",
+            "answer": "YOU SHALL NOT PASS",
+            "source": "The Lord of the Rings"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": "bonus 5pts",
+          "points": 5
+        },
+        {
+          "id": "s140",
+          "type": "acronym_q",
+          "content": {
+            "primary": "I.V.A.T.",
+            "secondary": "",
+            "answer": "I VOLUNTEER AS TRIBUTE",
+            "source": "Hunger Games"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s141",
+          "type": "acronym_q",
+          "content": {
+            "primary": "H.Y.D.",
+            "secondary": "",
+            "answer": "HOW YOU DOIN'",
+            "source": "Friends"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s142",
+          "type": "acronym_q",
+          "content": {
+            "primary": "N.G.G.Y.U.",
+            "secondary": "",
+            "answer": "NEVER GONNA GIVE YOU UP",
+            "source": "Rick Astley"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s143",
+          "type": "acronym_q",
+          "content": {
+            "primary": "W.D.T.F.S.",
+            "secondary": "",
+            "answer": "WHAT DOES THE FOX SAY",
+            "source": "Ylvis"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s144",
+          "type": "bonus_marker",
+          "content": {
+            "primary": "BONUS: 10 POINTS",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s145",
+          "type": "acronym_q",
+          "content": {
+            "primary": "S.M.T.M.",
+            "secondary": "",
+            "answer": "SHOW ME THE MONEY",
+            "source": "Jerry Maguire"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": "bonus 10pts",
+          "points": 10
+        },
+        {
+          "id": "s146",
+          "type": "score",
+          "content": {
+            "primary": "ROUND 4 COMPLETE",
+            "secondary": "SWAP SCORECARDS. MARK THEM."
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        }
+      ]
+    },
+    {
+      "id": "the-verdict",
+      "name": "THE VERDICT",
+      "slides": [
+        {
+          "id": "s147",
+          "type": "verdict",
+          "content": {
+            "primary": "THE VERDICT.",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s148",
+          "type": "sentence",
+          "content": {
+            "primary": "THE SENTENCE.",
+            "secondary": "LOSING TABLE. IN UNISON.|'YOU CAN'T SIT WITH US': MEAN GIRLS."
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s149",
+          "type": "receipt_rain",
+          "content": {
+            "primary": "MAKE IT RAIN.",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s150",
+          "type": "last_line",
+          "content": {
+            "primary": "NOBODY PUTS BABY IN A CORNER.",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s151",
+          "type": "endcard",
+          "content": {
+            "primary": "L",
+            "secondary": "STOP BEING UNCULTURED."
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        }
+      ]
+    },
+    {
+      "id": "bonus-hot-seat",
+      "name": "BONUS: HOT SEAT",
+      "slides": [
+        {
+          "id": "s152",
+          "type": "round_title",
+          "content": {
+            "primary": "BONUS ROUND",
+            "secondary": "THE HOT SEAT"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s153",
+          "type": "hotseat_rules",
+          "content": {
+            "primary": "ROOM SPLITS. WINNING TABLE SENDS A CHAMPION.",
+            "secondary": "BACK TO SCREEN. YOUR HALF SCREAMS CLUES.|OTHER HALF STAYS QUIET.|30 SECONDS PER PROMPT."
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s154",
+          "type": "hotseat_prompt",
+          "content": {
+            "primary": "BABY SHARK",
+            "secondary": "",
+            "source": "Pinkfong"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s155",
+          "type": "hotseat_prompt",
+          "content": {
+            "primary": "SMELLS LIKE TEEN SPIRIT",
+            "secondary": "",
+            "source": "Nirvana"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s156",
+          "type": "hotseat_prompt",
+          "content": {
+            "primary": "NOT TODAY SATAN",
+            "secondary": "",
+            "source": "RuPaul's Drag Race"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s157",
+          "type": "hotseat_prompt",
+          "content": {
+            "primary": "YOU CAN'T SIT WITH US",
+            "secondary": "",
+            "source": "Mean Girls"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s158",
+          "type": "hotseat_prompt",
+          "content": {
+            "primary": "LIFE IS LIKE A BOX OF CHOCOLATES",
+            "secondary": "",
+            "source": "Forrest Gump"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s159",
+          "type": "hotseat_prompt",
+          "content": {
+            "primary": "JUST KEEP SWIMMING",
+            "secondary": "",
+            "source": "Finding Nemo"
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": 30,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s160",
+          "type": "score",
+          "content": {
+            "primary": "HOT SEAT COMPLETE.",
+            "secondary": ""
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        },
+        {
+          "id": "s161",
+          "type": "endcard",
+          "content": {
+            "primary": "L",
+            "secondary": "YOU'VE BEEN LINECONIC."
+          },
+          "reveal_state": "hidden",
+          "team": "neutral",
+          "timer_seconds": null,
+          "host_notes": null,
+          "points": null
+        }
+      ]
+    }
+  ],
+  "created": 1771525184945
+}
