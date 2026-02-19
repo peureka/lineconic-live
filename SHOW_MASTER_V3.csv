@@ -26,23 +26,23 @@ slide_number,section,slide_type,secondary_text,primary_text,answer,answer_source
 25,ROUND 2: SCREEN,round_title,GUESS THE LINECONIC: SCREEN,ROUND 2,,,
 26,ROUND 2: SCREEN,tier_title,Q1-Q4: 1 POINT | Q5 BONUS: 3 POINTS | Q6-Q9: 1 POINT | Q10 BONUS: 5 POINTS | Q11-Q14: 1 POINT | Q15 BONUS: 10 POINTS,WE SHOW THE ACRONYM. YOU DECODE THE LINE. CINEMA & TV ONLY.,,,
 27,ROUND 2: SCREEN,acronym_q,,I.A.K.,I AM KENOUGH,Barbie,
-28,ROUND 2: SCREEN,acronym_q,,N.T.N.S.,NO TEA NO SHADE,RuPaul's Drag Race,
+28,ROUND 2: SCREEN,acronym_q,,I.A.Y.F.,I AM YOUR FATHER,Star Wars,
 29,ROUND 2: SCREEN,acronym_q,,Y.F.,YOU'RE FIRED!,The Apprentice,
 30,ROUND 2: SCREEN,acronym_q,,W.F.,WAKANDA FOREVER,Black Panther,
 31,ROUND 2: SCREEN,bonus_marker,,BONUS: 3 POINTS,,,
-32,ROUND 2: SCREEN,acronym_q,,N.S.F.Y.,NO SOUP FOR YOU,Seinfeld,bonus 3pts
+32,ROUND 2: SCREEN,acronym_q,,W.I.C.,WINTER IS COMING,Game of Thrones,bonus 3pts
 33,ROUND 2: SCREEN,acronym_q,,S.H.T.M.L.F.,SAY HELLO TO MY LITTLE FRIEND,Scarface,
-34,ROUND 2: SCREEN,acronym_q,,M.V.,MISS VANJIE,RuPaul's Drag Race,
+34,ROUND 2: SCREEN,acronym_q,,O.M.F.,OHANA MEANS FAMILY,Lilo & Stitch,
 35,ROUND 2: SCREEN,acronym_q,,B.J.B.,BOND. JAMES BOND.,007,
 36,ROUND 2: SCREEN,acronym_q,,T.Y.S.,TREAT YO SELF,Parks and Recreation,
 37,ROUND 2: SCREEN,bonus_marker,,BONUS: 5 POINTS,,,
-38,ROUND 2: SCREEN,acronym_q,,W.A.Y.T.W.T.Y.A.,WHY ARE YOU THE WAY THAT YOU ARE,The Office,bonus 5pts
-39,ROUND 2: SCREEN,acronym_q,,G.T.T.C.,GET TO THE CHOPPER,Predator,
+38,ROUND 2: SCREEN,acronym_q,,T.F.R.O.F.C.I.,THE FIRST RULE OF FIGHT CLUB IS,Fight Club,bonus 5pts
+39,ROUND 2: SCREEN,acronym_q,,I.A.G.,I AM GROOT,Guardians of the Galaxy,
 40,ROUND 2: SCREEN,acronym_q,,Y.C.H.T.T.,YOU CAN'T HANDLE THE TRUTH!,A Few Good Men,
 41,ROUND 2: SCREEN,acronym_q,,T.N.P.L.H.,THERE'S NO PLACE LIKE HOME,The Wizard of Oz,
-42,ROUND 2: SCREEN,acronym_q,,H.L.A.Y.K.,HERE'S LOOKING AT YOU KID,Casablanca,
+42,ROUND 2: SCREEN,acronym_q,,W.S.S.,WHY SO SERIOUS,The Dark Knight,
 43,ROUND 2: SCREEN,bonus_marker,,BONUS: 10 POINTS,,,
-44,ROUND 2: SCREEN,acronym_q,,I.H.W.S.H.,I'LL HAVE WHAT SHE'S HAVING,When Harry Met Sally,bonus 10pts
+44,ROUND 2: SCREEN,acronym_q,,Y.A.W.H.,YOU'RE A WIZARD HARRY,Harry Potter,bonus 10pts
 45,ROUND 2: SCREEN,score,SWAP SCORECARDS. MARK THEM.,ROUND 2 COMPLETE,,,
 46,ROUND 2: SCREEN,crate_drop,,,,,
 47,FLUENCY CHECK,round_title,WE SHOW THE LINE. YOU SHOUT THE SOURCE. NO WRITING. NO SCORING.,FLUENCY CHECK,,,
@@ -106,22 +106,22 @@ slide_number,section,slide_type,secondary_text,primary_text,answer,answer_source
 105,ROUND 3: LYRICS,tier_title,Q1-Q4: 1 POINT | Q5 BONUS: 3 POINTS | Q6-Q9: 1 POINT | Q10 BONUS: 5 POINTS | Q11-Q14: 1 POINT | Q15 BONUS: 10 POINTS,WE SHOW THE ACRONYM. YOU DECODE THE LINE. MUSIC ONLY.,,,
 106,ROUND 3: LYRICS,acronym_q,,W.T.R.S.S.P.S.U.,WILL THE REAL SLIM SHADY PLEASE STAND UP,Eminem,
 107,ROUND 3: LYRICS,acronym_q,,T.M.W.Y.W.,TELL ME WHAT YOU WANT,Spice Girls,
-108,ROUND 3: LYRICS,acronym_q,,H.M.B.O.M.T.,HIT ME BABY ONE MORE TIME,Britney Spears,
+108,ROUND 3: LYRICS,acronym_q,,L.O.A.P.,LIVIN ON A PRAYER,Bon Jovi,
 109,ROUND 3: LYRICS,acronym_q,,I.G.M.D.L.,I GOT MY DRIVER'S LICENSE,Olivia Rodrigo,
 110,ROUND 3: LYRICS,bonus_marker,,BONUS: 3 POINTS,,,
 111,ROUND 3: LYRICS,acronym_q,,S.U.B.G.,SINCE U BEEN GONE,Kelly Clarkson,bonus 3pts
 112,ROUND 3: LYRICS,acronym_q,,U.C.T.T.,U CAN'T TOUCH THIS,MC Hammer,
-113,ROUND 3: LYRICS,acronym_q,,S.B.T.R.,SNAP BACK TO REALITY,Eminem,
+113,ROUND 3: LYRICS,acronym_q,,I.W.S.,I WILL SURVIVE,Gloria Gaynor,
 114,ROUND 3: LYRICS,acronym_q,,I.I.B.,ICE ICE BABY,Vanilla Ice,
-115,ROUND 3: LYRICS,acronym_q,,I.S.J.,I'M SO JULIA,Charli XCX/Brat,
+115,ROUND 3: LYRICS,acronym_q,,U.M.U.,UNDER MY UMBRELLA,Rihanna,
 116,ROUND 3: LYRICS,bonus_marker,,BONUS: 5 POINTS,,,
-117,ROUND 3: LYRICS,acronym_q,,S.L.B.Y.C.F.W.M.,SAID LIL BITCH YOU CANT FUCK WITH ME,Cardi B,bonus 5pts
+117,ROUND 3: LYRICS,acronym_q,,S.T.I.U.T.K.,SOMEBODY THAT I USED TO KNOW,Gotye,bonus 5pts
 118,ROUND 3: LYRICS,acronym_q,,I.W.I.T.W.,I WANT IT THAT WAY,Backstreet Boys,
 119,ROUND 3: LYRICS,acronym_q,,N.S.,NO SCRUBS,TLC,
 120,ROUND 3: LYRICS,acronym_q,,G.J.W.I.,GETTING JIGGY WITH IT,Will Smith,
 121,ROUND 3: LYRICS,acronym_q,,M.H.W.G.O.,MY HEART WILL GO ON,Celine Dion,
 122,ROUND 3: LYRICS,bonus_marker,,BONUS: 10 POINTS,,,
-123,ROUND 3: LYRICS,acronym_q,,C.I.L.,CRAZY IN LOVE,Beyonce,bonus 10pts
+123,ROUND 3: LYRICS,acronym_q,,I.M.H.I.T.P.I.M.,IT'S ME HI I'M THE PROBLEM IT'S ME,Taylor Swift,bonus 10pts
 124,ROUND 3: LYRICS,score,SWAP SCORECARDS. MARK THEM.,ROUND 3 COMPLETE,,,
 125,ROUND 3: LYRICS,crate_drop,,,,,
 126,ROUND 4: MIXED,round_title,GUESS THE LINECONIC: EVERYTHING,ROUND 4,,,
@@ -131,19 +131,19 @@ slide_number,section,slide_type,secondary_text,primary_text,answer,answer_source
 130,ROUND 4: MIXED,acronym_q,,Y.G.N.A.B.B.,YOU'RE GONNA NEED A BIGGER BOAT,Jaws,
 131,ROUND 4: MIXED,acronym_q,,Y.C.S.W.U.,YOU CAN'T SIT WITH US,Mean Girls,
 132,ROUND 4: MIXED,bonus_marker,,BONUS: 3 POINTS,,,
-133,ROUND 4: MIXED,acronym_q,,G.I.L.W.G.S.,GET IN LOSER WE'RE GOING SHOPPING,Mean Girls,bonus 3pts
-134,ROUND 4: MIXED,acronym_q,,I.A.T.O.W.K.,I AM THE ONE WHO KNOCKS,Breaking Bad,
-135,ROUND 4: MIXED,acronym_q,,S.U.,SHUT UP,Simple Life,
+133,ROUND 4: MIXED,acronym_q,,O.A.L.O.,OGRES ARE LIKE ONIONS,Shrek,bonus 3pts
+134,ROUND 4: MIXED,acronym_q,,W.G.P.C.G.R.,WITH GREAT POWER COMES GREAT RESPONSIBILITY,Spider-Man,
+135,ROUND 4: MIXED,acronym_q,,T.W.S.S.,THAT'S WHAT SHE SAID,The Office,
 136,ROUND 4: MIXED,acronym_q,,L.I.G.,LET IT GO,Frozen,
 137,ROUND 4: MIXED,acronym_q,,W.A.T.,WHAT ARE THOSE,Vine,
 138,ROUND 4: MIXED,bonus_marker,,BONUS: 5 POINTS,,,
-139,ROUND 4: MIXED,acronym_q,,T.L.D.N.E.,THE LIMIT DOES NOT EXIST,Mean Girls,bonus 5pts
+139,ROUND 4: MIXED,acronym_q,,Y.S.N.P.,YOU SHALL NOT PASS,The Lord of the Rings,bonus 5pts
 140,ROUND 4: MIXED,acronym_q,,I.V.A.T.,I VOLUNTEER AS TRIBUTE,Hunger Games,
 141,ROUND 4: MIXED,acronym_q,,H.Y.D.,HOW YOU DOIN',Friends,
 142,ROUND 4: MIXED,acronym_q,,N.G.G.Y.U.,NEVER GONNA GIVE YOU UP,Rick Astley,
 143,ROUND 4: MIXED,acronym_q,,W.D.T.F.S.,WHAT DOES THE FOX SAY,Ylvis,
 144,ROUND 4: MIXED,bonus_marker,,BONUS: 10 POINTS,,,
-145,ROUND 4: MIXED,acronym_q,,I.S.D.P.,I SEE DEAD PEOPLE,The Sixth Sense,bonus 10pts
+145,ROUND 4: MIXED,acronym_q,,S.M.T.M.,SHOW ME THE MONEY,Jerry Maguire,bonus 10pts
 146,ROUND 4: MIXED,score,SWAP SCORECARDS. MARK THEM.,ROUND 4 COMPLETE,,,
 147,THE VERDICT,verdict,,THE VERDICT.,,,
 148,THE VERDICT,sentence,LOSING TABLE. IN UNISON.|'YOU CAN'T SIT WITH US': MEAN GIRLS.,THE SENTENCE.,,,
