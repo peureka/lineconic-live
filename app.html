@@ -382,6 +382,10 @@ function reducer(state,action){
     case'TOGGLE_MUTE':return{...state,muted:!state.muted};
     case'CLOSE_OVERLAYS':return{...state,showShortcuts:false,showHostPanel:false};
     case'INCREMENT_RECEIPTS':return{...state,receipts:state.receipts+1};
+    case'SET_SCORES':return{...state,scores:action.payload};
+    case'SET_REVEAL_STATE':return{...state,revealState:action.payload};
+    case'SET_SCOREBOARD':return{...state,showScoreboard:action.payload};
+    case'SET_MUTED':return{...state,muted:action.payload};
     case'SET_SHOW':return{...state,show:action.payload,currentSlide:0};
     default:return state;
   }
@@ -733,6 +737,55 @@ function App(){
     const toSave={currentSlide:state.currentSlide,scores:state.scores,revealState:state.revealState,showScoreboard:state.showScoreboard,muted:state.muted,receipts:state.receipts};
     localStorage.setItem('lineconic_state',JSON.stringify(toSave));
   },[state.currentSlide,state.scores,state.revealState,state.showScoreboard,state.muted,state.receipts]);
+
+// ═══ SYNC: Operator → Firebase + BroadcastChannel ═══
+const bcRef=useRef(null);
+const syncSkipRef=useRef(false);
+
+useEffect(()=>{
+  try{bcRef.current=new BroadcastChannel('lineconic-ctrl')}catch(e){}
+  return()=>{if(bcRef.current)bcRef.current.close()};
+},[]);
+
+useEffect(()=>{
+  if(mode!=='operator'||!state.show||syncSkipRef.current)return;
+  const sync={slide:state.currentSlide,scores:state.scores,revealState:state.revealState,scoreboard:state.showScoreboard,muted:state.muted};
+  if(fbdb){fbdb.ref('live/'+state.show.id+'/state').set(sync).catch(()=>{})}
+  if(bcRef.current){bcRef.current.postMessage({type:'sync',...sync})}
+},[state.currentSlide,state.scores,state.revealState,state.showScoreboard,state.muted]);
+
+useEffect(()=>{
+  if(mode==='operator'||!state.show)return;
+  const showId=state.show.id;
+  let fbUnsub=null;
+  if(fbdb){
+    const ref=fbdb.ref('live/'+showId+'/state');
+    const handler=snap=>{
+      const d=snap.val();if(!d)return;
+      syncSkipRef.current=true;
+      if(d.slide!==undefined)dispatch({type:'GO_TO_SLIDE',payload:d.slide});
+      if(d.scores)dispatch({type:'SET_SCORES',payload:d.scores});
+      if(d.revealState)dispatch({type:'SET_REVEAL_STATE',payload:d.revealState});
+      if(d.scoreboard!==undefined)dispatch({type:'SET_SCOREBOARD',payload:d.scoreboard});
+      if(d.muted!==undefined)dispatch({type:'SET_MUTED',payload:d.muted});
+      syncSkipRef.current=false;
+    };
+    ref.on('value',handler);
+    fbUnsub=()=>ref.off('value',handler);
+  }
+  const bcHandler=ev=>{
+    const d=ev.data;if(d.type!=='sync')return;
+    syncSkipRef.current=true;
+    if(d.slide!==undefined)dispatch({type:'GO_TO_SLIDE',payload:d.slide});
+    if(d.scores)dispatch({type:'SET_SCORES',payload:d.scores});
+    if(d.revealState)dispatch({type:'SET_REVEAL_STATE',payload:d.revealState});
+    if(d.scoreboard!==undefined)dispatch({type:'SET_SCOREBOARD',payload:d.scoreboard});
+    if(d.muted!==undefined)dispatch({type:'SET_MUTED',payload:d.muted});
+    syncSkipRef.current=false;
+  };
+  if(bcRef.current)bcRef.current.onmessage=bcHandler;
+  return()=>{if(fbUnsub)fbUnsub();if(bcRef.current)bcRef.current.onmessage=null};
+},[mode,state.show]);
 
   // Set cursor style for audience mode
   useEffect(()=>{
