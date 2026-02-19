@@ -215,6 +215,9 @@ body.answers-mode,body.answers-mode html{overflow:auto!important;height:auto!imp
 .shortcut-key{font-family:'Space Mono',monospace;font-size:var(--type-label);background:var(--surface-02);border:1px solid var(--border-subtle);padding:6px 12px;color:var(--text-primary);text-align:center;min-width:60px}
 .shortcut-action{font-family:'Space Mono',monospace;font-size:var(--type-meta);color:var(--text-secondary);text-transform:uppercase}
 
+/* Reward Tier Overlay */
+.reward-overlay{position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:400;display:flex;align-items:center;justify-content:center;animation:slam .18s cubic-bezier(.2,1,.3,1) both}
+
 /* Quick Access Buttons */
 .quick-btn{display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border-subtle);background:transparent;color:var(--text-secondary);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap}
 .quick-btn:hover{background:var(--surface-03);color:var(--text-primary)}
@@ -229,6 +232,15 @@ body.answers-mode,body.answers-mode html{overflow:auto!important;height:auto!imp
 /* Bottom Bar */
 .operator-bottom{grid-column:2;grid-row:2;background:var(--surface-01);border-top:1px solid var(--border-subtle);padding:var(--space-02) var(--space-04);display:flex;align-items:center;justify-content:space-between}
 .receipt-counter{font-family:'Space Mono',monospace;font-size:var(--type-meta);color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em}
+
+/* Launcher View */
+.launcher-view{position:fixed;inset:0;background:var(--void);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-06)}
+.launcher-title{font-family:'Anton','Impact',sans-serif;text-transform:uppercase;font-size:clamp(48px,12vw,120px);letter-spacing:.06em;line-height:1;text-align:center}
+.launcher-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-03);width:100%;max-width:400px;padding:0 var(--space-04)}
+.launcher-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:var(--space-04) var(--space-03);border:1px solid var(--border-subtle);background:transparent;color:var(--text-primary);font-family:'Space Mono',monospace;font-size:var(--type-label);letter-spacing:.08em;text-transform:uppercase;cursor:pointer;text-decoration:none;transition:border-color .15s,box-shadow .15s}
+.launcher-btn:hover{border-color:var(--signal);box-shadow:0 0 12px rgba(255,0,127,.4)}
+.launcher-btn-sub{font-size:10px;color:var(--text-disabled);letter-spacing:.05em}
+.launcher-meta{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-disabled);letter-spacing:.08em;text-transform:uppercase;text-align:center}
 
 /* Audience View wrapper */
 .audience-view{position:fixed;inset:0;background:var(--void)}
@@ -534,9 +546,34 @@ function SlideRenderer({slide,revealed}){
 }
 
 // ═══════════════════════════════════════
+// LAUNCHER VIEW (Homepage)
+// ═══════════════════════════════════════
+function LauncherView({showName}){
+  const base=window.location.origin+'/app.html';
+  return(
+    <div className="launcher-view">
+      <div>
+        <div className="launcher-title hp">LINECONIC</div>
+        <div className="launcher-title hs" style={{fontSize:'clamp(16px,4vw,32px)',letterSpacing:'.2em',marginTop:8}}>LIVE</div>
+      </div>
+      <div className="launcher-grid">
+        <a className="launcher-btn" href={base+'?mode=operator'}><span>OPERATOR</span><span className="launcher-btn-sub">HOST CONTROLS</span></a>
+        <a className="launcher-btn" href={base+'?mode=audience'} target="_blank" rel="noopener"><span>AUDIENCE</span><span className="launcher-btn-sub">SCREEN OUTPUT</span></a>
+        <a className="launcher-btn" href={base+'?mode=answers'} target="_blank" rel="noopener"><span>ANSWERS</span><span className="launcher-btn-sub">ANSWER SHEET</span></a>
+        <a className="launcher-btn" href={base+'?mode=vote'} target="_blank" rel="noopener"><span>VOTE</span><span className="launcher-btn-sub">AUDIENCE PHONES</span></a>
+      </div>
+      <div>
+        <ConnectionSignal/>
+        {showName&&<div className="launcher-meta" style={{marginTop:8}}>{showName}</div>}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════
 // AUDIENCE VIEW (The Monolith)
 // ═══════════════════════════════════════
-function AudienceView({state,dispatch,slideRef:externalSlideRef}){
+function AudienceView({state,dispatch,slideRef:externalSlideRef,rewardTier}){
   const flat=useMemo(()=>flattenSlides(state.show),[state.show]);
   const slide=flat[state.currentSlide];
   const prevSlideRef=useRef(null);
@@ -580,6 +617,7 @@ function AudienceView({state,dispatch,slideRef:externalSlideRef}){
         <div className="vs">VS</div>
         <div className="team"><span className="sc-pk">{state.scores[1]}</span><span className="lbl">PINK</span></div>
       </div>
+      <RewardTierOverlay tier={rewardTier}/>
     </div>
   );
 }
@@ -747,6 +785,7 @@ function ShortcutOverlay({onClose}){
     ['SPACE / \u2192','ADVANCE SLIDE'],['←','PREVIOUS SLIDE'],['R','REVEAL / HIDE ANSWER'],
     ['Q / W','CYAN SCORE +/-'],['P / O','PINK SCORE +/-'],['1 \u2013 9','JUMP TO SECTION'],
     ['T','START TIMER'],['A','AUTO-TIMER'],['D','AUTO-ADVANCE'],
+    ['C','ADD RECEIPT'],['G','REWARD TIER'],
     ['S','TOGGLE SCOREBOARD'],['M','MUTE / UNMUTE'],['F','FULLSCREEN'],
     ['?','THIS MENU'],['ESC','CLOSE'],
   ];
@@ -755,6 +794,18 @@ function ShortcutOverlay({onClose}){
       <div className="shortcut-grid">
         {shortcuts.map(([key,action])=><React.Fragment key={key}><div className="shortcut-key">{key}</div><div className="shortcut-action">{action}</div></React.Fragment>)}
       </div>
+    </div>
+  );
+}
+
+function RewardTierOverlay({tier}){
+  if(!tier)return null;
+  const tiers={cancel:{label:'INSTANT CANCEL',cls:'hp',border:'nb-pk'},grind:{label:'THE GRIND',cls:'hg',border:'nb-gd'},flop:{label:'THE FLOP',cls:'hs',border:'nb-wh'}};
+  const t=tiers[tier];if(!t)return null;
+  return(
+    <div className="reward-overlay">
+      <div className={'nb '+t.border}></div>
+      <div className={'D '+t.cls} style={{fontSize:'clamp(60px,14vw,200px)'}}>{t.label}</div>
     </div>
   );
 }
@@ -800,7 +851,7 @@ function OperatorView({state,dispatch,onTimerAction,autoTimer,autoAdvance,setAut
         <div style={{fontFamily:"'Space Mono',monospace",fontSize:'var(--type-meta)',color:'var(--text-disabled)',marginTop:'auto',textAlign:'center'}}>PRESS ? FOR SHORTCUTS</div>
       </div>
       <div className="operator-bottom">
-        <div className="receipt-counter">RECEIPTS: {state.receipts}</div>
+        <button className="receipt-counter" onClick={()=>dispatch({type:'INCREMENT_RECEIPTS'})} style={{cursor:'pointer',background:'transparent',border:'1px solid var(--border-subtle)'}}>RECEIPTS: {state.receipts} +</button>
         <div data-testid="slide-counter" style={{fontFamily:"'Space Mono',monospace",fontSize:'var(--type-meta)',color:'var(--text-secondary)'}}>{state.currentSlide+1}/{flat.length}</div>
       </div>
       {state.showShortcuts&&<ShortcutOverlay onClose={()=>dispatch({type:'CLOSE_OVERLAYS'})}/>}
@@ -937,7 +988,8 @@ function AnswersView({show}){
 // ═══════════════════════════════════════
 function App(){
   const params=new URLSearchParams(window.location.search);
-  const mode=params.get('mode')||'operator';
+  const mode=params.get('mode')||'launcher';
+  const isLauncher=mode==='launcher';
   const isAudience=mode==='audience';
   const isVote=mode==='vote';
   const isAnswers=mode==='answers';
@@ -958,6 +1010,7 @@ function App(){
   autoTimerRef.current=autoTimer;
   autoAdvanceRef.current=autoAdvance;
   const autoTimerDuration=useRef(30);
+  const[rewardTier,setRewardTier]=useState(null);
 
   // Load show data
   useEffect(()=>{
@@ -996,10 +1049,10 @@ useEffect(()=>{
 
 useEffect(()=>{
   if(mode!=='operator'||!state.show||syncSkipRef.current)return;
-  const sync={slide:state.currentSlide,scores:state.scores,revealState:state.revealState,scoreboard:state.showScoreboard,muted:state.muted};
+  const sync={slide:state.currentSlide,scores:state.scores,revealState:state.revealState,scoreboard:state.showScoreboard,muted:state.muted,rewardTier:rewardTier};
   if(fbdb){fbdb.ref('live/'+state.show.id+'/state').set(sync).catch(()=>{})}
   if(bcRef.current){bcRef.current.postMessage({type:'sync',...sync})}
-},[state.currentSlide,state.scores,state.revealState,state.showScoreboard,state.muted]);
+},[state.currentSlide,state.scores,state.revealState,state.showScoreboard,state.muted,rewardTier]);
 
 useEffect(()=>{
   if(mode==='operator'||!state.show)return;
@@ -1015,6 +1068,7 @@ useEffect(()=>{
       if(d.revealState)dispatch({type:'SET_REVEAL_STATE',payload:d.revealState});
       if(d.scoreboard!==undefined)dispatch({type:'SET_SCOREBOARD',payload:d.scoreboard});
       if(d.muted!==undefined)dispatch({type:'SET_MUTED',payload:d.muted});
+      if(d.rewardTier!==undefined)setRewardTier(d.rewardTier);
       syncSkipRef.current=false;
     };
     ref.on('value',handler);
@@ -1028,6 +1082,7 @@ useEffect(()=>{
     if(d.revealState)dispatch({type:'SET_REVEAL_STATE',payload:d.revealState});
     if(d.scoreboard!==undefined)dispatch({type:'SET_SCOREBOARD',payload:d.scoreboard});
     if(d.muted!==undefined)dispatch({type:'SET_MUTED',payload:d.muted});
+    if(d.rewardTier!==undefined)setRewardTier(d.rewardTier);
     syncSkipRef.current=false;
   };
   if(bcRef.current)bcRef.current.onmessage=ev=>{
@@ -1118,6 +1173,8 @@ useEffect(()=>{
         case'o':case'O':dispatch({type:'SCORE_PINK',payload:-1});break;
         case'a':case'A':setAutoTimer(function(v){return!v});break;
         case'd':case'D':setAutoAdvance(function(v){return!v});break;
+        case'c':case'C':dispatch({type:'INCREMENT_RECEIPTS'});break;
+        case'g':case'G':setRewardTier(function(v){const cycle=[null,'cancel','grind','flop'];const i=cycle.indexOf(v);return cycle[(i+1)%cycle.length]});break;
         case'v':case'V':{const flat=flattenSlides(s.show);const slide=flat[s.currentSlide];if(slide&&slide.type==='doa_vote'&&fbdb&&s.show){fbdb.ref('live/'+s.show.id+'/topic').set(slide.content.primary||null)}break}
         case'f':case'F':if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();break;
         case'?':dispatch({type:'TOGGLE_SHORTCUTS'});break;
@@ -1130,11 +1187,14 @@ useEffect(()=>{
     return()=>window.removeEventListener('keydown',handleKey);
   },[]);
 
+  if(isLauncher)return <LauncherView showName={state.show?state.show.name||state.show.id:null}/>;
+
   if(!state.show)return <div style={{background:'#000',color:'var(--signal)',width:'100vw',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Space Mono',monospace"}}>LOADING SHOW DATA...</div>;
 
   if(isVote)return <VoteView showId={state.show?.id}/>;
   if(isAnswers)return <AnswersView show={state.show}/>;
-  return isAudience?<AudienceView state={state} dispatch={dispatch} slideRef={audienceSlideRef}/>:<OperatorView state={state} dispatch={dispatch} onTimerAction={broadcastTimerAction} autoTimer={autoTimer} autoAdvance={autoAdvance} setAutoTimer={setAutoTimer} setAutoAdvance={setAutoAdvance} autoAdvanceRef={autoAdvanceRef} autoTimerDuration={autoTimerDuration}/>;
+  if(isAudience)return <AudienceView state={state} dispatch={dispatch} slideRef={audienceSlideRef} rewardTier={rewardTier}/>;
+  return <OperatorView state={state} dispatch={dispatch} onTimerAction={broadcastTimerAction} autoTimer={autoTimer} autoAdvance={autoAdvance} setAutoTimer={setAutoTimer} setAutoAdvance={setAutoAdvance} autoAdvanceRef={autoAdvanceRef} autoTimerDuration={autoTimerDuration}/>;
 }
 
 // ═══════════════════════════════════════
