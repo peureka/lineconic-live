@@ -69,7 +69,7 @@ html,body{width:100vw;height:100vh;overflow:hidden;background:var(--bk);font-fam
 #sbug .vs{color:rgba(255,255,255,.2);font-size:10px}
 
 /* ── MISC ── */
-.srcbar{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.9);padding:8px 28px;font-family:'Space Mono',monospace;font-size:clamp(10px,1.2vw,15px);color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.06em}
+.srcbar{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.9);padding:14px 40px;font-family:'Space Mono',monospace;font-size:clamp(18px,2.5vw,32px);color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.06em}
 .rule{width:50%;height:1px;background:rgba(255,255,255,.3);margin:12px auto}
 .ans-list{font-family:'Space Mono',monospace;text-align:center;line-height:2;padding:3% 8%;width:100%;overflow-y:auto;max-height:80vh}
 .ans-list div{color:var(--wh);text-shadow:0 0 6px rgba(255,255,255,.3);font-size:clamp(12px,1.8vw,20px)}
@@ -335,7 +335,7 @@ const R={};
 R.attract=s=>'<div class="D hp" style="font-size:clamp(120px,40vw,350px);animation:pulse 2s ease-in-out infinite">'+e(s.primary_text||'L')+'</div>';
 R.fishbowl=s=>'<div class="nb nb-pk"></div><div class="D hp" style="font-size:clamp(32px,5vw,64px);margin-bottom:16px">'+e(s.primary_text)+'</div><div class="M hs" style="font-size:clamp(12px,1.8vw,22px)">'+e(s.secondary_text||'')+'</div>';
 R.round_title=s=>'<div class="D hw" style="font-size:clamp(50px,10vw,150px);margin-bottom:10px">'+e(s.primary_text||'')+'</div>'+(s.secondary_text?'<div class="D hw fit" style="font-size:'+aSz(s.secondary_text)+';'+nw()+'">'+e(s.secondary_text)+'</div>':'');
-R.tier_title=s=>{const ln=(s.secondary_text||'').split('|').map(l=>'<div>'+e(l.trim())+'</div>').join('');return'<div class="nb nb-wh"></div><div class="D hs" style="font-size:clamp(18px,2.5vw,32px);margin-bottom:8px;padding:0 5%">'+e(s.primary_text||'')+'</div><div class="rule"></div><div class="M" style="color:rgba(255,255,255,.5);font-size:clamp(11px,1.3vw,16px);line-height:2">'+ln+'</div>'};
+R.tier_title=s=>{const ln=(s.secondary_text||'').split('|').map(l=>'<div>'+e(l.trim())+'</div>').join('');return'<div class="nb nb-wh"></div><div class="D hs" style="font-size:clamp(28px,4vw,56px);margin-bottom:16px;padding:0 5%">'+e(s.primary_text||'')+'</div><div class="rule"></div><div class="M" style="color:rgba(255,255,255,.5);font-size:clamp(18px,2.2vw,28px);line-height:2.2">'+ln+'</div>'};
 R.bonus_marker=s=>'<div class="nb nb-gd"></div><div class="D hg" style="font-size:clamp(48px,8vw,120px)">'+e(s.primary_text||'')+'</div>';
 R.source_q=s=>'<div class="nb nb-pk"></div><div class="tb pk"></div><div class="D hw fit" style="font-size:'+aSz(s.primary_text)+';'+nw()+'">'+e(s.primary_text||'')+'</div>';
 R.source_a=s=>'<div class="nb nb-wh"></div><div class="D hw fit" style="font-size:'+aSz(s.primary_text)+';'+nw()+'">'+e(s.primary_text||'')+'</div>';
