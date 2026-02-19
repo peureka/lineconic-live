@@ -12,6 +12,7 @@
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════
@@ -342,25 +343,21 @@ function resetVotes(topic){
 // QR CODE (from TEMPLATE.html)
 // ═══════════════════════════════════════
 function drawQR(canvas){
-  if(!canvas)return;const x=canvas.getContext('2d');const url='https://lineconic.live/vote';
-  const mods=encodeQR(url);const sz=mods.length;const px=Math.floor(200/sz);const off=Math.floor((200-sz*px)/2);
-  x.fillStyle='#fff';x.fillRect(0,0,200,200);x.fillStyle='#000';
-  for(let r=0;r<sz;r++)for(let cl=0;cl<sz;cl++){if(mods[r][cl])x.fillRect(off+cl*px,off+r*px,px,px)}
-}
-function encodeQR(text){
-  const size=25;const m=Array.from({length:size},()=>Array(size).fill(0));const f=Array.from({length:size},()=>Array(size).fill(false));
-  function finder(r,c){for(let dr=-1;dr<=7;dr++)for(let dc=-1;dc<=7;dc++){const rr=r+dr,cc=c+dc;if(rr<0||rr>=size||cc<0||cc>=size)continue;const inOuter=(dr===-1||dr===7||dc===-1||dc===7);const inBorder=(dr===0||dr===6||dc===0||dc===6);const inCenter=(dr>=2&&dr<=4&&dc>=2&&dc<=4);m[rr][cc]=(!inOuter&&(inBorder||inCenter))?1:0;f[rr][cc]=true}}
-  finder(0,0);finder(0,size-7);finder(size-7,0);
-  const ax=18,ay=18;for(let dr=-2;dr<=2;dr++)for(let dc=-2;dc<=2;dc++){const rr=ay+dr,cc=ax+dc;m[rr][cc]=(Math.abs(dr)===2||Math.abs(dc)===2||(!dr&&!dc))?1:0;f[rr][cc]=true}
-  for(let i=8;i<size-8;i++){m[6][i]=i%2===0?1:0;f[6][i]=true;m[i][6]=i%2===0?1:0;f[i][6]=true}
-  m[size-8][8]=1;f[size-8][8]=true;
-  for(let i=0;i<9;i++){if(i<size){f[8][i]=true;f[i][8]=true;f[8][size-1-i]=true;if(size-1-i>=0)f[size-1-i]=f[size-1-i]||[];f[size-1-i][8]=true}}
-  const bytes=[];for(let i=0;i<text.length;i++)bytes.push(text.charCodeAt(i));
-  let byteIdx=0,bitIdx=7,upward=true;
-  for(let right=size-1;right>=1;right-=2){if(right===6)right=5;const rows=upward?Array.from({length:size},(_,i)=>size-1-i):Array.from({length:size},(_,i)=>i);for(const row of rows){for(let dx=0;dx<=1;dx++){const col=right-dx;if(col<0||col>=size)continue;if(f[row][col])continue;let bit=0;if(byteIdx<bytes.length){bit=(bytes[byteIdx]>>bitIdx)&1;bitIdx--;if(bitIdx<0){bitIdx=7;byteIdx++}}else{bit=((row+col)%2===0)?1:0}m[row][col]=bit^((row+col)%2===0?1:0)}}upward=!upward}
-  const fmt=[1,0,1,0,1,0,0,0,0,0,1,0,0,1,0];
-  for(let i=0;i<15;i++){if(i<6)m[8][i]=fmt[i];else if(i===6)m[8][7]=fmt[i];else if(i===7)m[8][8]=fmt[i];else if(i===8)m[7][8]=fmt[i];else m[14-i][8]=fmt[i];if(i<8)m[8][size-1-i]=fmt[i];else m[size-15+i][8]=fmt[i]}
-  return m;
+  if(!canvas)return;
+  const x=canvas.getContext('2d');
+  const url='https://lineconic.live/vote';
+  const qr=qrcode(0,'L');
+  qr.addData(url);
+  qr.make();
+  const sz=qr.getModuleCount();
+  const cvSz=canvas.width;
+  const px=Math.floor(cvSz/sz);
+  const off=Math.floor((cvSz-sz*px)/2);
+  x.fillStyle='#fff';x.fillRect(0,0,cvSz,cvSz);
+  x.fillStyle='#000';
+  for(let r=0;r<sz;r++)for(let cl=0;cl<sz;cl++){
+    if(qr.isDark(r,cl))x.fillRect(off+cl*px,off+r*px,px,px);
+  }
 }
 
 // ═══════════════════════════════════════
@@ -444,7 +441,7 @@ function ScoreSlide({slide}){
 function IntermissionSlide({slide}){
   const qrRef=useRef(null);
   useEffect(()=>{if(qrRef.current)drawQR(qrRef.current)},[]);
-  return <><div className="D hw" style={{fontSize:'clamp(40px,7vw,100px)',marginBottom:20}}>{slide.content.primary||''}</div><div className="M hs" style={{fontSize:'clamp(14px,2vw,24px)',marginBottom:30}}>{slide.content.secondary||''}</div><canvas ref={qrRef} width="200" height="200" style={{imageRendering:'pixelated',width:160,height:160,border:'4px solid rgba(255,255,255,.2)'}}></canvas><div className="M" style={{color:'rgba(255,255,255,.3)',fontSize:'clamp(10px,1.2vw,14px)',marginTop:12,letterSpacing:'.08em'}}>SCAN TO VOTE : LINECONIC.LIVE/VOTE</div></>;
+  return <><div className="D hw" style={{fontSize:'clamp(40px,7vw,100px)',marginBottom:20}}>{slide.content.primary||''}</div><div className="M hs" style={{fontSize:'clamp(14px,2vw,24px)',marginBottom:30}}>{slide.content.secondary||''}</div><canvas ref={qrRef} width={400} height={400} style={{imageRendering:'pixelated',width:'clamp(200px,28vw,320px)',height:'clamp(200px,28vw,320px)',border:'5px solid rgba(255,255,255,.3)'}}></canvas><div className="M" style={{color:'rgba(255,255,255,.5)',fontSize:'clamp(16px,2.5vw,28px)',marginTop:16,letterSpacing:'.1em'}}>LINECONIC.LIVE/VOTE</div></>;
 }
 function DoaVoteSlide({slide}){
   const total=votes.dead+votes.alive;const dp=total>0?Math.round(votes.dead/total*100):50;const ap=total>0?100-dp:50;
