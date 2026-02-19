@@ -500,11 +500,13 @@ function SlideRenderer({slide,revealed}){
 // ═══════════════════════════════════════
 // AUDIENCE VIEW (The Monolith)
 // ═══════════════════════════════════════
-function AudienceView({state,dispatch}){
+function AudienceView({state,dispatch,slideRef:externalSlideRef}){
   const flat=useMemo(()=>flattenSlides(state.show),[state.show]);
   const slide=flat[state.currentSlide];
   const prevSlideRef=useRef(null);
-  const slideRef=useRef(null);
+  const localSlideRef=useRef(null);
+  // Use external ref if provided (for timer sync), otherwise local
+  const slideRef=externalSlideRef||localSlideRef;
 
   useEffect(()=>{
     if(!slide)return;
@@ -621,7 +623,7 @@ function ScoreDisplay({scores,dispatch}){
   );
 }
 
-function TimerDisplay(){
+function TimerDisplay({onTimerAction}){
   const[time,setTime]=useState(30);
   const[running,setRunning]=useState(false);
   const[pct,setPct]=useState(100);
@@ -642,9 +644,9 @@ function TimerDisplay(){
       <div className="timer-bar-track"><div className={'timer-bar-fill'+(danger?' danger':'')+(critical?' critical':'')} style={{width:pct+'%'}}></div></div>
       <div className="timer-time">{running?String(Math.floor(time/60)).padStart(2,'0')+':'+String(time%60).padStart(2,'0'):'--:--'}</div>
       <div className="timer-buttons">
-        <button className="timer-btn" onClick={()=>{startTimerSystem(30,null);setRunning(true);setPct(100)}}>30s</button>
-        <button className="timer-btn" onClick={()=>{if(timerState.paused)resumeTimerSystem();else pauseTimerSystem()}}>{timerState.paused?'RESUME':'PAUSE'}</button>
-        <button className="timer-btn" onClick={()=>{stopTimerSystem();setRunning(false);setPct(100)}}>STOP</button>
+        <button className="timer-btn" onClick={()=>{startTimerSystem(30,null);setRunning(true);setPct(100);if(onTimerAction)onTimerAction('start',30)}}>30s</button>
+        <button className="timer-btn" onClick={()=>{if(timerState.paused){resumeTimerSystem();if(onTimerAction)onTimerAction('resume')}else{pauseTimerSystem();if(onTimerAction)onTimerAction('pause')}}}>{timerState.paused?'RESUME':'PAUSE'}</button>
+        <button className="timer-btn" onClick={()=>{stopTimerSystem();setRunning(false);setPct(100);if(onTimerAction)onTimerAction('stop')}}>STOP</button>
       </div>
     </div>
   );
@@ -666,7 +668,7 @@ function ShortcutOverlay({onClose}){
   );
 }
 
-function OperatorView({state,dispatch}){
+function OperatorView({state,dispatch,onTimerAction}){
   const flat=useMemo(()=>flattenSlides(state.show),[state.show]);
   const slide=flat[state.currentSlide];
   const nextSlide=flat[state.currentSlide+1]||null;
@@ -682,7 +684,7 @@ function OperatorView({state,dispatch}){
       </div>
       <div className="operator-right">
         <ScoreDisplay scores={state.scores} dispatch={dispatch}/>
-        <TimerDisplay/>
+        <TimerDisplay onTimerAction={onTimerAction}/>
         <div style={{fontFamily:"'Space Mono',monospace",fontSize:'var(--type-meta)',color:'var(--text-disabled)',marginTop:'auto',textAlign:'center'}}>PRESS ? FOR SHORTCUTS</div>
       </div>
       <div className="operator-bottom">
@@ -908,8 +910,52 @@ useEffect(()=>{
     if(d.muted!==undefined)dispatch({type:'SET_MUTED',payload:d.muted});
     syncSkipRef.current=false;
   };
-  if(bcRef.current)bcRef.current.onmessage=bcHandler;
+  if(bcRef.current)bcRef.current.onmessage=ev=>{
+    const d=ev.data;
+    if(d.type==='sync')bcHandler(ev);
+    if(d.type==='timer')handleTimerMsg(d);
+  };
   return()=>{if(fbUnsub)fbUnsub();if(bcRef.current)bcRef.current.onmessage=null};
+},[mode,state.show]);
+
+// ═══ TIMER SYNC ═══
+const audienceSlideRef=useRef(null);
+
+function broadcastTimerAction(action,duration){
+  const s=stateRef.current;
+  const msg={type:'timer',action:action,duration:duration||0,timestamp:Date.now()};
+  if(fbdb&&s.show)fbdb.ref('live/'+s.show.id+'/timer').set(msg).catch(()=>{});
+  if(bcRef.current)bcRef.current.postMessage(msg);
+}
+
+function handleTimerMsg(d){
+  if(!d||d.type!=='timer')return;
+  // Find the .tb element on current audience slide
+  const tbEl=audienceSlideRef.current?audienceSlideRef.current.querySelector('.tb'):null;
+  switch(d.action){
+    case'start':{
+      const elapsed=(Date.now()-d.timestamp)/1000;
+      const remaining=Math.max(0,d.duration-elapsed);
+      if(remaining>0.5)startTimerSystem(remaining,tbEl);
+      break;
+    }
+    case'pause':pauseTimerSystem();break;
+    case'resume':resumeTimerSystem();break;
+    case'stop':stopTimerSystem();break;
+  }
+}
+
+// Audience listens for timer events via Firebase
+useEffect(()=>{
+  if(mode==='operator'||!state.show)return;
+  if(!fbdb)return;
+  const ref=fbdb.ref('live/'+state.show.id+'/timer');
+  const handler=snap=>{
+    const d=snap.val();
+    if(d)handleTimerMsg(d);
+  };
+  ref.on('value',handler);
+  return()=>ref.off('value',handler);
 },[mode,state.show]);
 
   // Set cursor style for audience mode
@@ -930,7 +976,7 @@ useEffect(()=>{
         case'End':{const flat=flattenSlides(s.show);dispatch({type:'GO_TO_SLIDE',payload:flat.length-1});break}
         case'r':case'R':dispatch({type:'TOGGLE_REVEAL'});break;
         case's':case'S':dispatch({type:'TOGGLE_SCOREBOARD'});break;
-        case't':case'T':startTimerSystem(30,null);break;
+        case't':case'T':startTimerSystem(30,null);broadcastTimerAction('start',30);break;
         case'm':case'M':dispatch({type:'TOGGLE_MUTE'});break;
         case'q':case'Q':dispatch({type:'SCORE_CYAN',payload:1});break;
         case'a':case'A':dispatch({type:'SCORE_CYAN',payload:-1});break;
@@ -952,7 +998,7 @@ useEffect(()=>{
 
   if(isVote)return <VoteView showId={state.show?.id}/>;
   if(isAnswers)return <AnswersView show={state.show}/>;
-  return isAudience?<AudienceView state={state} dispatch={dispatch}/>:<OperatorView state={state} dispatch={dispatch}/>;
+  return isAudience?<AudienceView state={state} dispatch={dispatch} slideRef={audienceSlideRef}/>:<OperatorView state={state} dispatch={dispatch} onTimerAction={broadcastTimerAction}/>;
 }
 
 // ═══════════════════════════════════════
