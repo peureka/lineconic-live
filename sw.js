@@ -1,5 +1,6 @@
 const CACHE_NAME = 'lineconic-v1';
 const PRECACHE = [
+  '/app',
   '/app.html',
   '/ros-v1.json',
   'https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap',

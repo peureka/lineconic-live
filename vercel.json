@@ -1,3 +1,10 @@
 {
-  "cleanUrls": false
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/", "destination": "/app.html" },
+    { "source": "/vote", "destination": "/app.html" },
+    { "source": "/audience", "destination": "/app.html" },
+    { "source": "/answers", "destination": "/app.html" },
+    { "source": "/operator", "destination": "/app.html" }
+  ]
 }

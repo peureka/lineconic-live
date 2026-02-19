@@ -1,7 +1,7 @@
 {
   "name": "LINECONIC LIVE",
   "short_name": "LINECONIC",
-  "start_url": "/app.html?mode=operator",
+  "start_url": "/operator",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
