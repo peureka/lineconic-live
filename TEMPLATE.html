@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%%TITLE%%</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/2.0.4/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
@@ -344,7 +344,7 @@ R.acronym_a=s=>'<div class="nb nb-pk"></div><div class="D hw fit" style="font-si
 R.fluency_line=s=>'<div class="nb nb-wh"></div><div class="D hw fit" style="font-size:'+aSz(s.primary_text)+';'+nw()+'">'+e(s.primary_text||'')+'</div>';
 R.fluency_source=s=>'<div class="D hw fit" style="font-size:'+aSz(s.primary_text)+';'+nw()+'">'+e(s.primary_text||'')+'</div>';
 R.score=s=>'<div class="D hw" style="font-size:clamp(28px,4vw,56px)">'+e(s.primary_text||'')+'</div>'+(s.secondary_text?'<div class="M hs" style="font-size:clamp(12px,1.5vw,18px);margin-top:14px">'+e(s.secondary_text)+'</div>':'');
-R.intermission=s=>'<div class="D hw" style="font-size:clamp(40px,7vw,100px);margin-bottom:20px">'+e(s.primary_text||'')+'</div><div class="M hs" style="font-size:clamp(14px,2vw,24px);margin-bottom:30px">'+e(s.secondary_text||'')+'</div><canvas id="qr" width="200" height="200" style="image-rendering:pixelated;width:160px;height:160px;border:4px solid rgba(255,255,255,.2)"></canvas><div class="M" style="color:rgba(255,255,255,.3);font-size:clamp(10px,1.2vw,14px);margin-top:12px;letter-spacing:.08em">SCAN TO VOTE : LINECONIC.LIVE/VOTE</div>';
+R.intermission=s=>'<div class="D hw" style="font-size:clamp(40px,7vw,100px);margin-bottom:20px">'+e(s.primary_text||'')+'</div><div class="M hs" style="font-size:clamp(14px,2vw,24px);margin-bottom:24px">'+e(s.secondary_text||'')+'</div><canvas id="qr" width="400" height="400" style="image-rendering:pixelated;width:clamp(200px,28vw,320px);height:clamp(200px,28vw,320px);border:5px solid rgba(255,255,255,.3)"></canvas><div class="M" style="color:rgba(255,255,255,.5);font-size:clamp(16px,2.5vw,28px);margin-top:16px;letter-spacing:.1em">LINECONIC.LIVE/VOTE</div>';
 R.doa_vote=s=>{const ref=e(s.primary_text||'');return'<div class="nb nb-wh"></div><div class="D hw" style="font-size:'+aSz(s.primary_text)+';'+nw()+';margin-bottom:30px">'+ref+'</div><div class="vote-bars" style="width:70%;max-width:600px"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span class="M" style="color:var(--pk);font-size:clamp(12px,1.5vw,18px);letter-spacing:.1em">DEAD</span><span class="M" style="color:var(--cy);font-size:clamp(12px,1.5vw,18px);letter-spacing:.1em">ALIVE</span></div><div style="width:100%;height:clamp(24px,4vh,40px);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);position:relative;overflow:hidden"><div class="vbar-dead" style="position:absolute;left:0;top:0;bottom:0;width:50%;background:linear-gradient(90deg,var(--pk),rgba(255,0,127,.3));transition:width .6s cubic-bezier(.4,0,.2,1)"></div><div class="vbar-alive" style="position:absolute;right:0;top:0;bottom:0;width:50%;background:linear-gradient(270deg,var(--cy),rgba(0,255,255,.3));transition:width .6s cubic-bezier(.4,0,.2,1)"></div></div><div style="display:flex;justify-content:space-between;margin-top:8px"><span class="vpct-dead M" style="color:var(--pk);font-size:clamp(18px,3vw,36px)">50%</span><span class="vpct-alive M" style="color:var(--cy);font-size:clamp(18px,3vw,36px)">50%</span></div></div>';};
 R.warning=s=>'<div class="D hw" style="font-size:clamp(60px,12vw,180px)">'+e(s.primary_text||'')+'</div>';
 R.blackout=()=>'';
@@ -514,17 +514,18 @@ function updateVoteBars(){
 
 // QR Code via qrcode-generator library
 function drawQR(){
-  const c=document.getElementById('qr');
-  if(!c)return;
-  const x=c.getContext('2d');
+  const cv=document.getElementById('qr');
+  if(!cv)return;
+  const x=cv.getContext('2d');
   const url='https://lineconic.live/vote/';
   const qr=qrcode(0,'L');
   qr.addData(url);
   qr.make();
   const sz=qr.getModuleCount();
-  const px=Math.floor(200/sz);
-  const off=Math.floor((200-sz*px)/2);
-  x.fillStyle='#fff';x.fillRect(0,0,200,200);
+  const cw=cv.width; // 400
+  const px=Math.floor(cw/sz);
+  const off=Math.floor((cw-sz*px)/2);
+  x.fillStyle='#fff';x.fillRect(0,0,cw,cw);
   x.fillStyle='#000';
   for(let r=0;r<sz;r++)for(let cl=0;cl<sz;cl++){
     if(qr.isDark(r,cl))x.fillRect(off+cl*px,off+r*px,px,px);
