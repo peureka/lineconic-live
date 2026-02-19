@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OPERATOR</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bk:#000;--cy:#00FFFF;--pk:#FF007F;--wh:#FFF;--gd:#FFD700}
+html,body{width:100%;min-height:100vh;background:var(--bk);font-family:'Space Mono',monospace;color:var(--wh);-webkit-font-smoothing:antialiased}
+
+.wrap{max-width:720px;margin:0 auto;padding:24px 24px 80px}
+
+/* Header */
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.1)}
+.hdr h1{font-size:14px;letter-spacing:.15em;color:var(--pk)}
+.status{font-size:10px;letter-spacing:.08em;display:flex;align-items:center;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:#f44;transition:background .3s}
+.dot.on{background:#0f0}
+
+/* Card */
+.card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);padding:20px;margin-bottom:16px}
+.card h2{font-size:10px;letter-spacing:.12em;color:rgba(255,255,255,.3);text-transform:uppercase;margin-bottom:12px}
+
+/* Current slide */
+.slide-num{font-size:32px;font-weight:700;color:var(--cy);margin-bottom:4px}
+.slide-meta{font-size:11px;color:rgba(255,255,255,.4);letter-spacing:.06em;margin-bottom:12px}
+.slide-primary{font-size:18px;font-weight:700;color:var(--wh);margin-bottom:4px;line-height:1.3}
+.slide-secondary{font-size:13px;color:rgba(255,255,255,.4);margin-bottom:12px}
+.answer-box{background:rgba(255,0,127,.08);border:1px solid rgba(255,0,127,.2);padding:10px 14px;margin-bottom:8px}
+.answer-label{font-size:9px;color:var(--pk);letter-spacing:.1em;margin-bottom:4px}
+.answer-text{font-size:14px;color:var(--pk);font-weight:700}
+.answer-source{font-size:11px;color:rgba(255,0,127,.6);margin-top:2px}
+.next-preview{font-size:11px;color:rgba(255,255,255,.3);margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06)}
+
+/* Nav buttons */
+.nav{display:flex;gap:8px;margin-bottom:16px}
+.nav button{flex:1;padding:16px;font-family:'Space Mono',monospace;font-size:14px;font-weight:700;letter-spacing:.08em;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);color:var(--wh);cursor:pointer;transition:all .15s}
+.nav button:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.25)}
+.nav button:active{background:rgba(0,255,255,.15);border-color:var(--cy)}
+.nav .prev{border-color:rgba(255,255,255,.08)}
+.nav .next-btn{border-color:var(--cy);color:var(--cy)}
+
+/* Go-to */
+.goto{display:flex;gap:8px;margin-bottom:16px}
+.goto input{flex:1;padding:10px;font-family:'Space Mono',monospace;font-size:13px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:var(--wh);outline:none}
+.goto input:focus{border-color:var(--cy)}
+.goto button{padding:10px 20px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.08em;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);color:var(--wh);cursor:pointer}
+
+/* Controls grid */
+.ctrl-row{display:flex;gap:8px;margin-bottom:8px}
+.ctrl-row button{flex:1;padding:10px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.06em;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:var(--wh);cursor:pointer;transition:all .15s}
+.ctrl-row button:hover{background:rgba(255,255,255,.08)}
+.ctrl-row button:active{background:rgba(0,255,255,.1)}
+.ctrl-row button.active{color:var(--cy);border-color:rgba(0,255,255,.3)}
+.ctrl-row button.on{color:var(--cy);border-color:rgba(0,255,255,.4);background:rgba(0,255,255,.08)}
+
+/* Score inputs */
+.score-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.score-row label{font-size:10px;letter-spacing:.08em;width:50px}
+.score-row input{width:80px;padding:8px;font-family:'Space Mono',monospace;font-size:13px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:var(--wh);text-align:center;outline:none}
+.score-row input:focus{border-color:var(--cy)}
+.score-row button{padding:8px 16px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.06em;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:var(--wh);cursor:pointer}
+
+/* DOA */
+.doa-row{display:flex;gap:8px;margin-bottom:8px}
+.doa-row button{flex:1;padding:10px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.06em;cursor:pointer;border:1px solid}
+.btn-dead{background:rgba(255,0,127,.06);border-color:rgba(255,0,127,.3);color:var(--pk)}
+.btn-alive{background:rgba(0,255,255,.06);border-color:rgba(0,255,255,.3);color:var(--cy)}
+.btn-dead:active{background:rgba(255,0,127,.2)}
+.btn-alive:active{background:rgba(0,255,255,.2)}
+.vote-info{font-size:10px;color:rgba(255,255,255,.3);letter-spacing:.06em;margin-bottom:8px}
+
+/* Timer display */
+.timer-display{font-size:11px;color:rgba(255,255,255,.3);margin-bottom:8px;letter-spacing:.06em}
+
+/* Duration buttons */
+.dur-row{display:flex;gap:4px;margin-bottom:8px}
+.dur-row button{padding:8px 14px;font-family:'Space Mono',monospace;font-size:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:var(--wh);cursor:pointer}
+.dur-row button.active{color:var(--cy);border-color:rgba(0,255,255,.4);background:rgba(0,255,255,.08)}
+
+/* Keyboard hint */
+.keys{font-size:9px;color:rgba(255,255,255,.15);line-height:1.8;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hdr">
+  <h1>OPERATOR</h1>
+  <div class="status"><span id="conn-text">DISCONNECTED</span><span class="dot" id="conn-dot"></span></div>
+</div>
+
+<!-- CURRENT SLIDE -->
+<div class="card" id="now-card">
+  <h2>NOW PLAYING</h2>
+  <div class="slide-num" id="slide-num">--/--</div>
+  <div class="slide-meta" id="slide-meta">Waiting for presentation...</div>
+  <div class="slide-primary" id="slide-primary"></div>
+  <div class="slide-secondary" id="slide-secondary"></div>
+  <div class="answer-box" id="answer-box" style="display:none">
+    <div class="answer-label">ANSWER</div>
+    <div class="answer-text" id="answer-text"></div>
+    <div class="answer-source" id="answer-source"></div>
+  </div>
+  <div class="next-preview" id="next-preview"></div>
+</div>
+
+<!-- NAVIGATION -->
+<div class="nav">
+  <button class="prev" onclick="send('go',{slide:currentSlide-1})">PREV</button>
+  <button class="next-btn" onclick="send('go',{slide:currentSlide+1})">NEXT</button>
+</div>
+<div class="goto">
+  <input type="number" id="goto-input" placeholder="Slide #" min="1">
+  <button onclick="goToSlide()">GO</button>
+  <button onclick="send('fullscreen')">FULLSCREEN</button>
+</div>
+
+<!-- TIMER -->
+<div class="card">
+  <h2>TIMER</h2>
+  <div class="dur-row">
+    <button class="dur-btn" data-dur="10" onclick="send('timer-dur',{seconds:10});setLocalDur(10)">10s</button>
+    <button class="dur-btn active" data-dur="30" onclick="send('timer-dur',{seconds:30});setLocalDur(30)">30s</button>
+    <button class="dur-btn" data-dur="60" onclick="send('timer-dur',{seconds:60});setLocalDur(60)">60s</button>
+  </div>
+  <div class="ctrl-row">
+    <button onclick="send('timer-start')">START</button>
+    <button onclick="send('timer-pause')">PAUSE</button>
+    <button onclick="send('timer-stop')">STOP</button>
+  </div>
+  <div class="ctrl-row">
+    <button id="at-btn" onclick="send('auto-timer')">AUTO-TIMER: OFF</button>
+    <button id="aa-btn" onclick="send('auto-advance')">AUTO-ADVANCE: OFF</button>
+  </div>
+</div>
+
+<!-- SCOREBOARD -->
+<div class="card">
+  <h2>SCOREBOARD</h2>
+  <div class="score-row">
+    <label style="color:var(--cy)">CYAN</label>
+    <input type="number" id="sc0" value="0">
+    <button onclick="setScore(0)">SET</button>
+  </div>
+  <div class="score-row">
+    <label style="color:var(--pk)">PINK</label>
+    <input type="number" id="sc1" value="0">
+    <button onclick="setScore(1)">SET</button>
+  </div>
+  <div class="ctrl-row">
+    <button id="sbug-btn" onclick="send('score-toggle')">SHOW SCOREBOARD</button>
+  </div>
+</div>
+
+<!-- DOA VOTING -->
+<div class="card">
+  <h2>DEAD OR ALIVE</h2>
+  <div class="doa-row">
+    <button class="btn-dead" onclick="send('vote',{side:'dead'})">+ DEAD</button>
+    <button class="btn-alive" onclick="send('vote',{side:'alive'})">+ ALIVE</button>
+  </div>
+  <div class="doa-row">
+    <button class="btn-dead" onclick="send('vote5',{side:'dead'})" style="font-size:9px">+5 DEAD</button>
+    <button class="btn-alive" onclick="send('vote5',{side:'alive'})" style="font-size:9px">+5 ALIVE</button>
+  </div>
+  <div class="vote-info" id="vote-info">DEAD: 0 | ALIVE: 0 | TOTAL: 0</div>
+  <div class="ctrl-row">
+    <button onclick="send('vote-reset')">RESET VOTES</button>
+  </div>
+</div>
+
+<!-- AUDIO -->
+<div class="card">
+  <h2>AUDIO</h2>
+  <div class="ctrl-row">
+    <button id="mute-btn" onclick="send('mute')">MUTE AUDIO</button>
+  </div>
+</div>
+
+<div class="keys">
+  KEYBOARD: ARROW RIGHT / SPACE = next | ARROW LEFT = prev | NUMBER + ENTER = go to slide
+</div>
+
+</div>
+
+<script>
+// ═════════════════════════════════════════
+// BROADCAST CHANNEL
+// ═════════════════════════════════════════
+const bc=new BroadcastChannel('lineconic-ctrl');
+let currentSlide=0,totalSlides=0,connected=false;
+let pingInterval=null;
+
+function send(type,data){
+  bc.postMessage(Object.assign({type:type},data||{}));
+}
+
+// Ping presentation to check connection
+function startPing(){
+  if(pingInterval)clearInterval(pingInterval);
+  pingInterval=setInterval(()=>{
+    send('ping');
+    // If no response in 2s, mark disconnected
+    setTimeout(()=>{
+      if(!connected)updateConnection(false);
+    },2000);
+    connected=false;
+  },3000);
+  send('ping');
+}
+
+function updateConnection(on){
+  const dot=document.getElementById('conn-dot');
+  const txt=document.getElementById('conn-text');
+  dot.classList.toggle('on',on);
+  txt.textContent=on?'CONNECTED':'DISCONNECTED';
+}
+
+// ═════════════════════════════════════════
+// STATE HANDLER
+// ═════════════════════════════════════════
+bc.onmessage=ev=>{
+  const d=ev.data;
+  if(d.type!=='state')return;
+  connected=true;
+  updateConnection(true);
+
+  currentSlide=d.slide;
+  totalSlides=d.total;
+  const s=d.slideData||{};
+  const n=d.nextData||null;
+
+  // Slide info
+  document.getElementById('slide-num').textContent=(d.slide+1)+'/'+d.total;
+  document.getElementById('slide-meta').textContent=(s.slide_type||'')+' | '+(s.section||'');
+  document.getElementById('slide-primary').textContent=s.primary_text||'';
+  document.getElementById('slide-secondary').textContent=s.secondary_text||'';
+
+  // Answer hint
+  const aBox=document.getElementById('answer-box');
+  if(s.answer||s.answer_source){
+    aBox.style.display='block';
+    document.getElementById('answer-text').textContent=s.answer||'';
+    document.getElementById('answer-source').textContent=s.answer_source?'Source: '+s.answer_source:'';
+  }else{
+    aBox.style.display='none';
+  }
+
+  // Next preview
+  const np=document.getElementById('next-preview');
+  if(n){
+    np.textContent='NEXT: '+n.slide_type+' | '+(n.primary_text||'').substring(0,50);
+  }else{
+    np.textContent='END OF SHOW';
+  }
+
+  // Votes
+  if(d.votes){
+    const total=(d.votes.dead||0)+(d.votes.alive||0);
+    document.getElementById('vote-info').textContent='DEAD: '+(d.votes.dead||0)+' | ALIVE: '+(d.votes.alive||0)+' | TOTAL: '+total;
+  }
+
+  // Scores
+  if(d.scores){
+    document.getElementById('sc0').value=d.scores[0]||0;
+    document.getElementById('sc1').value=d.scores[1]||0;
+  }
+
+  // Toggle states
+  const atBtn=document.getElementById('at-btn');
+  atBtn.textContent='AUTO-TIMER: '+(d.autoTimer?'ON':'OFF');
+  atBtn.classList.toggle('on',d.autoTimer);
+
+  const aaBtn=document.getElementById('aa-btn');
+  aaBtn.textContent='AUTO-ADVANCE: '+(d.autoAdv?'ON':'OFF');
+  aaBtn.classList.toggle('on',d.autoAdv);
+
+  const muteBtn=document.getElementById('mute-btn');
+  muteBtn.textContent=d.muted?'UNMUTE AUDIO':'MUTE AUDIO';
+  muteBtn.classList.toggle('on',d.muted);
+
+  const sbBtn=document.getElementById('sbug-btn');
+  sbBtn.textContent=d.sbugOn?'HIDE SCOREBOARD':'SHOW SCOREBOARD';
+  sbBtn.classList.toggle('on',d.sbugOn);
+};
+
+// ═════════════════════════════════════════
+// CONTROLS
+// ═════════════════════════════════════════
+function setScore(team){
+  const val=parseInt(document.getElementById('sc'+team).value)||0;
+  send('score-set',{team:team,value:val});
+}
+
+function goToSlide(){
+  const v=parseInt(document.getElementById('goto-input').value);
+  if(v>=1&&v<=totalSlides){
+    send('go',{slide:v-1});
+    document.getElementById('goto-input').value='';
+  }
+}
+
+function setLocalDur(s){
+  document.querySelectorAll('.dur-btn').forEach(b=>{b.classList.toggle('active',parseInt(b.dataset.dur)===s)});
+}
+
+// Keyboard
+document.addEventListener('keydown',ev=>{
+  if(ev.target.tagName==='INPUT'){
+    if(ev.key==='Enter'){
+      if(ev.target.id==='goto-input')goToSlide();
+      return;
+    }
+    return;
+  }
+  switch(ev.key){
+    case'ArrowRight':case' ':case'PageDown':ev.preventDefault();send('go',{slide:currentSlide+1});break;
+    case'ArrowLeft':case'PageUp':ev.preventDefault();send('go',{slide:currentSlide-1});break;
+    case'Home':send('go',{slide:0});break;
+    case'End':send('go',{slide:totalSlides-1});break;
+    case't':case'T':send('timer-start');break;
+    case'p':case'P':send('timer-pause');break;
+    case's':case'S':send('score-toggle');break;
+    case'm':case'M':send('mute');break;
+  }
+});
+
+// Start polling for connection
+startPing();
+</script>
+</body>
+</html>

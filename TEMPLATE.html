@@ -620,6 +620,7 @@ function go(n){
   hNext.textContent=c+1<t?'NEXT: '+S[c+1].slide_type+' | '+(S[c+1].primary_text||'').substring(0,40):'END';
   // Auto-timer on question slides
   if(autoTimer&&['source_q','acronym_q','hotseat_prompt'].includes(S[c].slide_type)){startTimer(autoSec)}
+  broadcastState();
 }
 
 // ═════════════════════════════════════════
@@ -661,6 +662,34 @@ document.addEventListener('contextmenu',ev=>{ev.preventDefault();go(c-1)});
 let tch=0;document.addEventListener('touchstart',ev=>{tch=ev.touches[0].clientX});
 document.addEventListener('touchend',ev=>{const dx=ev.changedTouches[0].clientX-tch;if(Math.abs(dx)>50){dx<0?go(c+1):go(c-1)}});
 if(document.fonts){document.fonts.ready.then(()=>go(0))}else{setTimeout(()=>go(0),300)}
+
+// ═════════════════════════════════════════
+// BROADCAST CHANNEL (Operator sync)
+// ═════════════════════════════════════════
+const _bc=new BroadcastChannel('lineconic-ctrl');
+function broadcastState(){
+  _bc.postMessage({type:'state',slide:c,total:t,slideData:S[c],nextData:c+1<t?S[c+1]:null,scores:scores,sbugOn:sbugOn,muted:muted,autoTimer:autoTimer,autoAdv:autoAdv,autoSec:autoSec,votes:votes});
+}
+_bc.onmessage=ev=>{
+  const d=ev.data;
+  switch(d.type){
+    case'ping':broadcastState();break;
+    case'go':go(d.slide);break;
+    case'timer-start':startTimer(d.seconds||autoSec);break;
+    case'timer-pause':togglePause();break;
+    case'timer-stop':stopTimer();break;
+    case'timer-dur':setDur(d.seconds);break;
+    case'score-set':if(d.team===0){scores[0]=d.value;sc0.textContent=scores[0];si0.value=d.value}else{scores[1]=d.value;sc1.textContent=scores[1];si1.value=d.value}broadcastState();break;
+    case'score-toggle':toggleScore();broadcastState();break;
+    case'mute':toggleMute();broadcastState();break;
+    case'auto-timer':toggleAutoTimer();broadcastState();break;
+    case'auto-advance':toggleAutoAdv();broadcastState();break;
+    case'vote':castVote(d.side);break;
+    case'vote5':for(let i=0;i<5;i++)castVote(d.side);break;
+    case'vote-reset':resetVotes();break;
+    case'fullscreen':if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();break;
+  }
+};
 </script>
 </body>
 </html>

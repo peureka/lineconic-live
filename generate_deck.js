@@ -174,12 +174,14 @@ function buildSlides(mode) {
     if (hasAnswer) {
       qnum++;
 
-      // Question slide — answer NEVER shown here
+      // Question slide — answer NEVER rendered but included for operator sync
       slides.push({
         slide_type: type,
         section,
         primary_text: row.primary_text || "",
         secondary_text: type === "acronym_q" ? (row.answer_source || "") : "",
+        answer: (row.answer || "").toUpperCase(),
+        answer_source: row.answer_source || "",
       });
 
       // Track for answer sheet
