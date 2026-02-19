@@ -54,6 +54,7 @@
 *{margin:0;padding:0;box-sizing:border-box;border-radius:0 !important}
 html,body{width:100vw;height:100vh;overflow:hidden;background:var(--void);font-family:'Space Mono','Consolas',monospace;-webkit-font-smoothing:antialiased}
 body.audience-mode{cursor:none}
+body.answers-mode,body.answers-mode html{overflow:auto!important;height:auto!important}
 
 /* ═══════════════════════════════════════
    SLIDE BASE (from TEMPLATE.html)
@@ -202,6 +203,11 @@ body.audience-mode{cursor:none}
 .timer-buttons{display:flex;gap:var(--space-02);margin-top:var(--space-02)}
 .timer-btn{flex:1;height:36px;border:1px solid var(--border-subtle);background:transparent;color:var(--text-primary);font-family:'Space Mono',monospace;font-size:var(--type-meta);cursor:pointer;text-transform:uppercase;letter-spacing:.05em}
 .timer-btn:hover{background:var(--surface-03)}
+.auto-toggle{display:flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid var(--border-subtle);background:transparent;color:var(--text-secondary);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;width:100%}
+.auto-toggle:hover{background:var(--surface-03)}
+.auto-toggle.on{border-color:var(--cyan);color:var(--cyan);text-shadow:0 0 6px rgba(0,255,255,.5)}
+.auto-toggle-dot{width:8px;height:8px;border:1px solid var(--text-disabled);flex-shrink:0}
+.auto-toggle.on .auto-toggle-dot{background:var(--cyan);border-color:var(--cyan);box-shadow:0 0 6px rgba(0,255,255,.7)}
 
 /* Shortcut Overlay */
 .shortcut-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:500;display:flex;align-items:center;justify-content:center}
@@ -331,10 +337,10 @@ function stopParticles(){if(partAnim){cancelAnimationFrame(partAnim);partAnim=nu
 // ═══════════════════════════════════════
 // TIMER SYSTEM
 // ═══════════════════════════════════════
-let timerState={running:false,paused:false,remaining:0,total:0,rafId:null,elRef:null};
-function startTimerSystem(sec,el){
+let timerState={running:false,paused:false,remaining:0,total:0,rafId:null,elRef:null,onEnd:null};
+function startTimerSystem(sec,el,onEnd){
   stopTimerSystem();
-  timerState={running:true,paused:false,remaining:sec*1000,total:sec*1000,rafId:null,elRef:el};
+  timerState={running:true,paused:false,remaining:sec*1000,total:sec*1000,rafId:null,elRef:el,onEnd:onEnd||null};
   if(el){el.classList.add('active');el.classList.remove('dead')}
   resumeTimerSystem();
 }
@@ -347,7 +353,7 @@ function resumeTimerSystem(){
     timerState.remaining=Math.max(0,startR-(now-t0));
     const pct=timerState.remaining/timerState.total;
     if(timerState.elRef)timerState.elRef.style.setProperty('--tp',(pct*100)+'%');
-    if(timerState.remaining<=0){if(timerState.elRef){timerState.elRef.classList.add('dead');timerState.elRef.classList.remove('active')}tone(200,.3,'square',.1);setTimeout(()=>tone(150,.3,'square',.08),150);timerState.running=false;return}
+    if(timerState.remaining<=0){if(timerState.elRef){timerState.elRef.classList.add('dead');timerState.elRef.classList.remove('active')}tone(200,.3,'square',.1);setTimeout(()=>tone(150,.3,'square',.08),150);timerState.running=false;if(timerState.onEnd)setTimeout(timerState.onEnd,800);return}
     timerState.rafId=requestAnimationFrame(tick);
   })(performance.now());
 }
@@ -655,7 +661,7 @@ function ScoreDisplay({scores,dispatch}){
   );
 }
 
-function TimerDisplay({onTimerAction}){
+function TimerDisplay({onTimerAction,autoAdvanceRef,autoTimerDuration,dispatch}){
   const[time,setTime]=useState(30);
   const[running,setRunning]=useState(false);
   const[pct,setPct]=useState(100);
@@ -670,7 +676,11 @@ function TimerDisplay({onTimerAction}){
     return()=>clearInterval(interval);
   },[running]);
   const danger=pct<33;const critical=pct<17;
-  function startDuration(sec){startTimerSystem(sec,null);setRunning(true);setPct(100);if(onTimerAction)onTimerAction('start',sec)}
+  function startDuration(sec){
+    if(autoTimerDuration)autoTimerDuration.current=sec;
+    const onEnd=(autoAdvanceRef&&autoAdvanceRef.current)?function(){dispatch({type:'NEXT_SLIDE'})}:null;
+    startTimerSystem(sec,null,onEnd);setRunning(true);setPct(100);if(onTimerAction)onTimerAction('start',sec);
+  }
   return (
     <div className="timer-display">
       <div className="timer-label">TIMER</div>
@@ -735,8 +745,9 @@ function ConnectionSignal(){
 function ShortcutOverlay({onClose}){
   const shortcuts=[
     ['SPACE / \u2192','ADVANCE SLIDE'],['←','PREVIOUS SLIDE'],['R','REVEAL / HIDE ANSWER'],
-    ['Q / A','CYAN SCORE +/-'],['P / L','PINK SCORE +/-'],['1 \u2013 9','JUMP TO SECTION'],
-    ['T','START TIMER'],['S','TOGGLE SCOREBOARD'],['M','MUTE / UNMUTE'],['F','FULLSCREEN'],
+    ['Q / W','CYAN SCORE +/-'],['P / O','PINK SCORE +/-'],['1 \u2013 9','JUMP TO SECTION'],
+    ['T','START TIMER'],['A','AUTO-TIMER'],['D','AUTO-ADVANCE'],
+    ['S','TOGGLE SCOREBOARD'],['M','MUTE / UNMUTE'],['F','FULLSCREEN'],
     ['?','THIS MENU'],['ESC','CLOSE'],
   ];
   return (
@@ -748,7 +759,25 @@ function ShortcutOverlay({onClose}){
   );
 }
 
-function OperatorView({state,dispatch,onTimerAction}){
+function AutoToggles({autoTimer,autoAdvance,setAutoTimer,setAutoAdvance}){
+  return(
+    <div style={{display:'flex',flexDirection:'column',gap:'var(--space-01)'}}>
+      <div style={{fontFamily:"'Space Mono',monospace",fontSize:'var(--type-meta)',color:'var(--text-secondary)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:2}}>AUTOMATION</div>
+      <button className={'auto-toggle'+(autoTimer?' on':'')} onClick={()=>setAutoTimer(function(v){return!v})}>
+        <span className="auto-toggle-dot"></span>
+        <span>AUTO-TIMER {autoTimer?'ON':'OFF'}</span>
+        <span style={{marginLeft:'auto',opacity:.5}}>[A]</span>
+      </button>
+      <button className={'auto-toggle'+(autoAdvance?' on':'')} onClick={()=>setAutoAdvance(function(v){return!v})}>
+        <span className="auto-toggle-dot"></span>
+        <span>AUTO-ADVANCE {autoAdvance?'ON':'OFF'}</span>
+        <span style={{marginLeft:'auto',opacity:.5}}>[D]</span>
+      </button>
+    </div>
+  );
+}
+
+function OperatorView({state,dispatch,onTimerAction,autoTimer,autoAdvance,setAutoTimer,setAutoAdvance,autoAdvanceRef,autoTimerDuration}){
   const flat=useMemo(()=>flattenSlides(state.show),[state.show]);
   const slide=flat[state.currentSlide];
   const nextSlide=flat[state.currentSlide+1]||null;
@@ -765,8 +794,9 @@ function OperatorView({state,dispatch,onTimerAction}){
       <div className="operator-right">
         <ConnectionSignal/>
         <QuickAccessButtons/>
+        <AutoToggles autoTimer={autoTimer} autoAdvance={autoAdvance} setAutoTimer={setAutoTimer} setAutoAdvance={setAutoAdvance}/>
         <ScoreDisplay scores={state.scores} dispatch={dispatch}/>
-        <TimerDisplay onTimerAction={onTimerAction}/>
+        <TimerDisplay onTimerAction={onTimerAction} autoAdvanceRef={autoAdvanceRef} autoTimerDuration={autoTimerDuration} dispatch={dispatch}/>
         <div style={{fontFamily:"'Space Mono',monospace",fontSize:'var(--type-meta)',color:'var(--text-disabled)',marginTop:'auto',textAlign:'center'}}>PRESS ? FOR SHORTCUTS</div>
       </div>
       <div className="operator-bottom">
@@ -896,6 +926,7 @@ function buildAnswersHTML(show){
 }
 function AnswersView({show}){
   const ref=useRef(null);
+  useEffect(function(){document.body.classList.add('answers-mode');return function(){document.body.classList.remove('answers-mode')}},[]);
   useEffect(function(){if(show&&ref.current)ref.current.innerHTML=buildAnswersHTML(show)},[show]);
   if(!show)return <div data-testid="answers-view" style={{background:'#000',color:'var(--signal)',padding:40,fontFamily:"'Space Mono',monospace"}}>LOADING...</div>;
   return <div data-testid="answers-view" className="answers-wrap" ref={ref}></div>;
@@ -920,6 +951,13 @@ function App(){
   const[state,dispatch]=useReducer(reducer,savedState);
   const stateRef=useRef(state);
   stateRef.current=state;
+  const[autoTimer,setAutoTimer]=useState(false);
+  const[autoAdvance,setAutoAdvance]=useState(false);
+  const autoTimerRef=useRef(false);
+  const autoAdvanceRef=useRef(false);
+  autoTimerRef.current=autoTimer;
+  autoAdvanceRef.current=autoAdvance;
+  const autoTimerDuration=useRef(30);
 
   // Load show data
   useEffect(()=>{
@@ -1040,6 +1078,20 @@ useEffect(()=>{
   return()=>ref.off('value',handler);
 },[mode,state.show]);
 
+// ═══ AUTO-TIMER: start timer on question slides ═══
+useEffect(()=>{
+  if(mode!=='operator'||!autoTimerRef.current||!state.show)return;
+  const flat=flattenSlides(state.show);
+  const slide=flat[state.currentSlide];
+  if(!slide)return;
+  const isQ=slide.type==='source_q'||slide.type==='acronym_q'||slide.type==='hotseat_prompt';
+  if(!isQ)return;
+  const dur=autoTimerDuration.current;
+  const onEnd=autoAdvanceRef.current?function(){dispatch({type:'NEXT_SLIDE'})}:null;
+  startTimerSystem(dur,null,onEnd);
+  broadcastTimerAction('start',dur);
+},[state.currentSlide,autoTimer]);
+
   // Set cursor style for audience mode
   useEffect(()=>{
     if(isAudience)document.body.classList.add('audience-mode');
@@ -1058,12 +1110,14 @@ useEffect(()=>{
         case'End':{const flat=flattenSlides(s.show);stopTimerSystem();broadcastTimerAction('stop');dispatch({type:'GO_TO_SLIDE',payload:flat.length-1});break}
         case'r':case'R':dispatch({type:'TOGGLE_REVEAL'});break;
         case's':case'S':dispatch({type:'TOGGLE_SCOREBOARD'});break;
-        case't':case'T':startTimerSystem(30,null);broadcastTimerAction('start',30);break;
+        case't':case'T':{const dur=autoTimerDuration.current||30;const onEnd=autoAdvanceRef.current?function(){dispatch({type:'NEXT_SLIDE'})}:null;startTimerSystem(dur,null,onEnd);broadcastTimerAction('start',dur);break}
         case'm':case'M':dispatch({type:'TOGGLE_MUTE'});break;
         case'q':case'Q':dispatch({type:'SCORE_CYAN',payload:1});break;
-        case'a':case'A':dispatch({type:'SCORE_CYAN',payload:-1});break;
+        case'w':case'W':dispatch({type:'SCORE_CYAN',payload:-1});break;
         case'p':case'P':dispatch({type:'SCORE_PINK',payload:1});break;
-        case'l':case'L':dispatch({type:'SCORE_PINK',payload:-1});break;
+        case'o':case'O':dispatch({type:'SCORE_PINK',payload:-1});break;
+        case'a':case'A':setAutoTimer(function(v){return!v});break;
+        case'd':case'D':setAutoAdvance(function(v){return!v});break;
         case'v':case'V':{const flat=flattenSlides(s.show);const slide=flat[s.currentSlide];if(slide&&slide.type==='doa_vote'&&fbdb&&s.show){fbdb.ref('live/'+s.show.id+'/topic').set(slide.content.primary||null)}break}
         case'f':case'F':if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();break;
         case'?':dispatch({type:'TOGGLE_SHORTCUTS'});break;
@@ -1080,7 +1134,7 @@ useEffect(()=>{
 
   if(isVote)return <VoteView showId={state.show?.id}/>;
   if(isAnswers)return <AnswersView show={state.show}/>;
-  return isAudience?<AudienceView state={state} dispatch={dispatch} slideRef={audienceSlideRef}/>:<OperatorView state={state} dispatch={dispatch} onTimerAction={broadcastTimerAction}/>;
+  return isAudience?<AudienceView state={state} dispatch={dispatch} slideRef={audienceSlideRef}/>:<OperatorView state={state} dispatch={dispatch} onTimerAction={broadcastTimerAction} autoTimer={autoTimer} autoAdvance={autoAdvance} setAutoTimer={setAutoTimer} setAutoAdvance={setAutoAdvance} autoAdvanceRef={autoAdvanceRef} autoTimerDuration={autoTimerDuration}/>;
 }
 
 // ═══════════════════════════════════════
