@@ -154,3 +154,26 @@ test.describe('Section Navigation (US-010)', () => {
     expect(counter).not.toContain('1/');
   });
 });
+
+test.describe('Route Modes', () => {
+  test('?mode=vote loads vote view', async ({ page }) => {
+    await page.goto('/app.html?mode=vote');
+    await expect(page.locator('[data-testid="vote-view"]')).toBeVisible({ timeout: OPERATOR_LOAD_TIMEOUT });
+  });
+
+  test('?mode=answers loads answers view', async ({ page }) => {
+    await page.goto('/app.html?mode=answers');
+    await expect(page.locator('[data-testid="answers-view"]')).toBeVisible({ timeout: OPERATOR_LOAD_TIMEOUT });
+  });
+});
+
+test.describe('Multi-Device Sync', () => {
+  test('operator view renders and advances correctly', async ({ page }) => {
+    await page.goto('/app.html?mode=operator');
+    await page.waitForSelector('.operator-grid', { timeout: OPERATOR_LOAD_TIMEOUT });
+    await page.keyboard.press('ArrowRight');
+    await page.waitForTimeout(200);
+    const counter = await page.locator('[data-testid="slide-counter"]').first().textContent();
+    expect(counter).toContain('2');
+  });
+});

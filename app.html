@@ -695,12 +695,137 @@ function OperatorView({state,dispatch}){
 }
 
 // ═══════════════════════════════════════
+// VOTE VIEW (audience phone voting)
+// ═══════════════════════════════════════
+function VoteView({showId}){
+  const[topic,setTopic]=useState(null);
+  const[voteData,setVoteData]=useState({dead:0,alive:0});
+  const[voted,setVoted]=useState(null);
+  const[flash,setFlash]=useState(null);
+
+  useEffect(()=>{
+    if(!fbdb)return;
+    const topicRef=fbdb.ref('live/'+(showId||'default')+'/topic');
+    topicRef.on('value',snap=>{
+      const t=snap.val();
+      setTopic(t);
+      setVoted(null);
+      setVoteData({dead:0,alive:0});
+    });
+    return()=>topicRef.off();
+  },[showId]);
+
+  useEffect(()=>{
+    if(!fbdb||!topic)return;
+    const key=topic.replace(/[^a-zA-Z0-9]/g,'_');
+    const voteRef=fbdb.ref('votes/'+key);
+    voteRef.on('value',snap=>{
+      const v=snap.val()||{};
+      setVoteData({dead:v.dead||0,alive:v.alive||0});
+    });
+    return()=>voteRef.off();
+  },[topic]);
+
+  function doVote(side){
+    if(voted||!topic)return;
+    setVoted(side);
+    setFlash(side);
+    setTimeout(()=>setFlash(null),300);
+    const key=topic.replace(/[^a-zA-Z0-9]/g,'_');
+    if(fbdb)fbdb.ref('votes/'+key+'/'+side).transaction(c=>(c||0)+1);
+  }
+
+  const total=voteData.dead+voteData.alive;
+  const deadPct=total?Math.round(voteData.dead/total*100):50;
+  const alivePct=total?100-deadPct:50;
+  const waiting=!topic;
+
+  return(
+    <div data-testid="vote-view" style={{background:'#000',color:'#fff',fontFamily:"'Anton','Impact',sans-serif",minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>
+      <div style={{maxWidth:420,padding:'40px 24px',textAlign:'center',width:'100%'}}>
+        <div style={{fontSize:72,color:'var(--signal)',textShadow:'0 0 10px rgba(255,0,127,.9),0 0 30px rgba(255,0,127,.5),0 0 60px rgba(255,0,127,.2)',marginBottom:8,letterSpacing:'.08em'}}>L</div>
+        <div style={{fontFamily:"'Space Mono',monospace",fontSize:10,color:'rgba(255,255,255,.3)',letterSpacing:'.15em',textTransform:'uppercase',marginBottom:48}}>DEAD OR ALIVE</div>
+        <div style={{fontSize:14,fontFamily:"'Space Mono',monospace",color:'rgba(255,255,255,.5)',letterSpacing:'.1em',textTransform:'uppercase',marginBottom:24}}>IS THIS CULTURALLY...</div>
+        <div data-testid="vote-topic" style={{fontSize:'clamp(36px,10vw,56px)',textTransform:'uppercase',letterSpacing:'.04em',color:waiting?'rgba(255,255,255,.15)':'#fff',textShadow:waiting?'none':'0 0 10px rgba(255,255,255,.6),0 0 30px rgba(255,255,255,.3)',marginBottom:40,lineHeight:1.1,transition:'all .3s'}}>{topic||'WAITING FOR HOST...'}</div>
+        <div style={{display:'flex',gap:16,width:'100%',marginBottom:32,opacity:waiting?.15:1,pointerEvents:waiting?'none':'auto'}}>
+          <button onClick={()=>doVote('dead')} data-testid="vote-dead" style={{flex:1,padding:'24px 16px',fontFamily:"'Anton',sans-serif",fontSize:28,letterSpacing:'.08em',cursor:'pointer',textTransform:'uppercase',background:flash==='dead'?'#FF007F':'transparent',color:flash==='dead'?'#000':'#FF007F',border:'2px solid #FF007F',boxShadow:'0 0 12px rgba(255,0,127,.3)',opacity:voted&&voted!=='dead'?.15:1,pointerEvents:voted?'none':'auto'}}>DEAD</button>
+          <button onClick={()=>doVote('alive')} data-testid="vote-alive" style={{flex:1,padding:'24px 16px',fontFamily:"'Anton',sans-serif",fontSize:28,letterSpacing:'.08em',cursor:'pointer',textTransform:'uppercase',background:flash==='alive'?'#00FFFF':'transparent',color:flash==='alive'?'#000':'#00FFFF',border:'2px solid #00FFFF',boxShadow:'0 0 12px rgba(0,255,255,.3)',opacity:voted&&voted!=='alive'?.15:1,pointerEvents:voted?'none':'auto'}}>ALIVE</button>
+        </div>
+        <div style={{width:'100%',marginBottom:16}}>
+          <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
+            <span style={{fontFamily:"'Space Mono',monospace",fontSize:11,letterSpacing:'.08em',color:'#FF007F'}}>{voteData.dead} DEAD</span>
+            <span style={{fontFamily:"'Space Mono',monospace",fontSize:11,letterSpacing:'.08em',color:'#00FFFF'}}>{voteData.alive} ALIVE</span>
+          </div>
+          <div style={{width:'100%',height:8,background:'rgba(255,255,255,.05)',position:'relative',overflow:'hidden'}}>
+            <div style={{position:'absolute',left:0,top:0,bottom:0,width:deadPct+'%',background:'linear-gradient(90deg,#FF007F,rgba(255,0,127,.3))',transition:'width .4s ease'}}/>
+            <div style={{position:'absolute',right:0,top:0,bottom:0,width:alivePct+'%',background:'linear-gradient(270deg,#00FFFF,rgba(0,255,255,.3))',transition:'width .4s ease'}}/>
+          </div>
+        </div>
+        <div style={{display:'flex',justifyContent:'space-between'}}>
+          <span style={{fontSize:'clamp(24px,6vw,36px)',fontFamily:"'Space Mono',monospace",color:'#FF007F',textShadow:'0 0 8px rgba(255,0,127,.4)'}}>{deadPct}%</span>
+          <span style={{fontSize:'clamp(24px,6vw,36px)',fontFamily:"'Space Mono',monospace",color:'#00FFFF',textShadow:'0 0 8px rgba(0,255,255,.4)'}}>{alivePct}%</span>
+        </div>
+        {voted&&<div style={{fontFamily:"'Space Mono',monospace",fontSize:11,color:'rgba(255,255,255,.3)',marginTop:24,letterSpacing:'.08em',textTransform:'uppercase'}}>VOTE CAST — {voted.toUpperCase()}</div>}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════
+// ANSWERS VIEW (host answer sheet)
+// ═══════════════════════════════════════
+function AnswersView({show}){
+  if(!show)return <div data-testid="answers-view" style={{background:'#000',color:'var(--signal)',padding:40,fontFamily:"'Space Mono',monospace"}}>LOADING...</div>;
+  const sections=show.sections||[];
+
+  return(
+    <div data-testid="answers-view" style={{background:'#000',color:'#fff',fontFamily:"'Space Mono',monospace",padding:40,maxWidth:900,margin:'0 auto'}}>
+      <h1 style={{color:'#FF007F',fontSize:32,letterSpacing:'.1em',marginBottom:8,fontFamily:"'Anton',sans-serif"}}>HOST ANSWER SHEET</h1>
+      <div style={{color:'rgba(255,255,255,.3)',fontSize:11,letterSpacing:'.15em',textTransform:'uppercase',marginBottom:48}}>{show.name||show.id}</div>
+      {sections.map((sec,si)=>{
+        const hasAnswers=sec.slides.some(s=>s.content&&(s.content.answer||s.content.source));
+        if(!hasAnswers)return null;
+        return(
+          <div key={si} style={{marginBottom:48}}>
+            <div style={{color:'#00FFFF',fontSize:18,letterSpacing:'.08em',marginBottom:16,fontWeight:700}}>{sec.name||sec.id}</div>
+            <table style={{width:'100%',borderCollapse:'collapse'}}>
+              <thead>
+                <tr>
+                  <th style={{textAlign:'left',color:'rgba(255,255,255,.3)',fontSize:10,letterSpacing:'.1em',textTransform:'uppercase',padding:'6px 8px',borderBottom:'1px solid rgba(255,255,255,.1)'}}>Q</th>
+                  <th style={{textAlign:'left',color:'rgba(255,255,255,.3)',fontSize:10,letterSpacing:'.1em',textTransform:'uppercase',padding:'6px 8px',borderBottom:'1px solid rgba(255,255,255,.1)'}}>LINE</th>
+                  <th style={{textAlign:'left',color:'rgba(255,255,255,.3)',fontSize:10,letterSpacing:'.1em',textTransform:'uppercase',padding:'6px 8px',borderBottom:'1px solid rgba(255,255,255,.1)'}}>ANSWER</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sec.slides.filter(s=>s.content&&(s.content.answer||s.content.source)).map((s,qi)=>{
+                  const isBonus=s.content.notes&&s.content.notes.includes('bonus');
+                  return(
+                    <tr key={qi} style={{background:isBonus?'rgba(255,215,0,.06)':'transparent'}}>
+                      <td style={{padding:8,borderBottom:'1px solid rgba(255,255,255,.06)',fontSize:13,color:isBonus?'#FFD700':'rgba(255,255,255,.3)',width:30,textAlign:'right',paddingRight:12}}>{qi+1}</td>
+                      <td style={{padding:8,borderBottom:'1px solid rgba(255,255,255,.06)',fontSize:13,color:'#fff'}}>{s.content.primary||''}</td>
+                      <td style={{padding:8,borderBottom:'1px solid rgba(255,255,255,.06)',fontSize:13,color:'#FF007F',width:180}}>{s.content.answer||s.content.source||''}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        );
+      })}
+      <style>{`@media print{body{background:#fff!important;color:#000!important}h1{color:#FF007F!important}}`}</style>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════
 // APP (root component)
 // ═══════════════════════════════════════
 function App(){
   const params=new URLSearchParams(window.location.search);
   const mode=params.get('mode')||'operator';
   const isAudience=mode==='audience';
+  const isVote=mode==='vote';
+  const isAnswers=mode==='answers';
 
   // Load saved state from localStorage
   const savedState=useMemo(()=>{
@@ -811,6 +936,7 @@ useEffect(()=>{
         case'a':case'A':dispatch({type:'SCORE_CYAN',payload:-1});break;
         case'p':case'P':dispatch({type:'SCORE_PINK',payload:1});break;
         case'l':case'L':dispatch({type:'SCORE_PINK',payload:-1});break;
+        case'v':case'V':{const flat=flattenSlides(s.show);const slide=flat[s.currentSlide];if(slide&&slide.type==='doa_vote'&&fbdb&&s.show){fbdb.ref('live/'+s.show.id+'/topic').set(slide.content.primary||null)}break}
         case'f':case'F':if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();break;
         case'?':dispatch({type:'TOGGLE_SHORTCUTS'});break;
         case'Escape':dispatch({type:'CLOSE_OVERLAYS'});break;
@@ -824,6 +950,8 @@ useEffect(()=>{
 
   if(!state.show)return <div style={{background:'#000',color:'var(--signal)',width:'100vw',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Space Mono',monospace"}}>LOADING SHOW DATA...</div>;
 
+  if(isVote)return <VoteView showId={state.show?.id}/>;
+  if(isAnswers)return <AnswersView show={state.show}/>;
   return isAudience?<AudienceView state={state} dispatch={dispatch}/>:<OperatorView state={state} dispatch={dispatch}/>;
 }
 
