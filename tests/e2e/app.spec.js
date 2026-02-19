@@ -4,10 +4,10 @@ import { test, expect } from '@playwright/test';
 const OPERATOR_LOAD_TIMEOUT = 15000;
 
 test.describe('Routing (US-001)', () => {
-  test('default loads operator view', async ({ page }) => {
+  test('default loads launcher view', async ({ page }) => {
     await page.goto('/app.html');
-    await page.waitForSelector('.operator-grid', { timeout: OPERATOR_LOAD_TIMEOUT });
-    await expect(page.locator('.operator-grid')).toBeVisible();
+    await page.waitForSelector('.launcher-view', { timeout: OPERATOR_LOAD_TIMEOUT });
+    await expect(page.locator('.launcher-view')).toBeVisible();
   });
 
   test('?mode=operator loads operator view', async ({ page }) => {
@@ -37,14 +37,16 @@ test.describe('Keyboard Navigation (US-002)', () => {
   });
 
   test('arrow left goes back', async ({ page }) => {
-    await page.goto('/app.html?mode=audience');
-    await page.waitForSelector('.S.on', { timeout: OPERATOR_LOAD_TIMEOUT });
+    await page.goto('/app.html?mode=operator');
+    await page.waitForSelector('.operator-grid', { timeout: OPERATOR_LOAD_TIMEOUT });
     await page.keyboard.press('ArrowRight');
     await page.waitForTimeout(300);
+    const after = await page.locator('[data-testid="slide-counter"]').first().textContent();
+    expect(after).toContain('2/');
     await page.keyboard.press('ArrowLeft');
     await page.waitForTimeout(300);
-    // Should be back at first slide (attract with "L")
-    await expect(page.locator('.S.on')).toContainText('L');
+    const back = await page.locator('[data-testid="slide-counter"]').first().textContent();
+    expect(back).toContain('1/');
   });
 
   test('spacebar advances slide', async ({ page }) => {
