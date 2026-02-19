@@ -100,6 +100,17 @@ Replace hand-rolled QR encoder in `app.html` with `qrcode-generator` library (CD
 
 Add `favicon.svg` (pink L on black) from `main`.
 
+### 7. UI Fixes from `main` (Font Sizes & Overflow)
+
+Port the readability improvements from `main` commit `65e0416`:
+
+- **tier_title primary text:** `clamp(18px, 2.5vw, 32px)` → `clamp(28px, 4vw, 56px)` — readable from back of room
+- **tier_title scoring lines:** `clamp(11px, 1.3vw, 16px)` → `clamp(18px, 2.2vw, 28px)` — line-height bumped to 2.2
+- **srcbar hints:** `clamp(10px, 1.2vw, 15px)` → `clamp(18px, 2.5vw, 32px)` — padding increased to `14px 40px`
+- **No text overflow onto second lines:** Use `white-space: nowrap` + `overflow: hidden` + `text-overflow: ellipsis` on single-line display elements, and `fit` class with `max-width: 92%` on fitted text
+
+These are applied to the slide renderers in `app.html`.
+
 ---
 
 ## What We're NOT Porting
