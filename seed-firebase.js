@@ -2,8 +2,8 @@
 import fs from 'fs';
 import { buildRunOfShow } from './lib/ros-builder.js';
 
-const CSV_PATH = 'SHOW_MASTER_V2.csv';
-const SHOW_NAME = 'THE SPLIT — TABLE FORMAT V2';
+const CSV_PATH = 'SHOW_MASTER_V3.csv';
+const SHOW_NAME = 'THE SPLIT — TABLE FORMAT V3';
 const FIREBASE_URL = 'https://lineconic-live-default-rtdb.europe-west1.firebasedatabase.app';
 
 console.log(`Parsing ${CSV_PATH}...`);

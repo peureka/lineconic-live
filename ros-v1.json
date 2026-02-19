@@ -1,6 +1,6 @@
 {
-  "id": "the-split-table-format-v2",
-  "name": "THE SPLIT — TABLE FORMAT V2",
+  "id": "the-split-table-format-v3",
+  "name": "THE SPLIT — TABLE FORMAT V3",
   "sections": [
     {
       "id": "pre-show",
@@ -268,7 +268,7 @@
           "id": "s019",
           "type": "source_q",
           "content": {
-            "primary": "OLD TOWN ROAD",
+            "primary": "I'M GONNA TAKE MY HORSE TO THE OLD TOWN ROAD",
             "secondary": "",
             "answer": "Lil Nas X"
           },
@@ -396,10 +396,10 @@
           "id": "s028",
           "type": "acronym_q",
           "content": {
-            "primary": "N.T.N.S.",
+            "primary": "I.A.Y.F.",
             "secondary": "",
-            "answer": "NO TEA NO SHADE",
-            "source": "RuPaul's Drag Race"
+            "answer": "I AM YOUR FATHER",
+            "source": "Star Wars"
           },
           "reveal_state": "hidden",
           "team": "neutral",
@@ -454,10 +454,10 @@
           "id": "s032",
           "type": "acronym_q",
           "content": {
-            "primary": "N.S.F.Y.",
+            "primary": "W.I.C.",
             "secondary": "",
-            "answer": "NO SOUP FOR YOU",
-            "source": "Seinfeld"
+            "answer": "WINTER IS COMING",
+            "source": "Game of Thrones"
           },
           "reveal_state": "hidden",
           "team": "neutral",
@@ -484,10 +484,10 @@
           "id": "s034",
           "type": "acronym_q",
           "content": {
-            "primary": "M.V.",
+            "primary": "O.M.F.",
             "secondary": "",
-            "answer": "MISS VANJIE",
-            "source": "RuPaul's Drag Race"
+            "answer": "OHANA MEANS FAMILY",
+            "source": "Lilo & Stitch"
           },
           "reveal_state": "hidden",
           "team": "neutral",
@@ -542,10 +542,10 @@
           "id": "s038",
           "type": "acronym_q",
           "content": {
-            "primary": "W.A.Y.T.W.T.Y.A.",
+            "primary": "T.F.R.O.F.C.I.",
             "secondary": "",
-            "answer": "WHY ARE YOU THE WAY THAT YOU ARE",
-            "source": "The Office"
+            "answer": "THE FIRST RULE OF FIGHT CLUB IS",
+            "source": "Fight Club"
           },
           "reveal_state": "hidden",
           "team": "neutral",
@@ -557,10 +557,10 @@
           "id": "s039",
           "type": "acronym_q",
           "content": {
-            "primary": "G.T.T.C.",
+            "primary": "I.A.G.",
             "secondary": "",
-            "answer": "GET TO THE CHOPPER",
-            "source": "Predator"
+            "answer": "I AM GROOT",
+            "source": "Guardians of the Galaxy"
           },
           "reveal_state": "hidden",
           "team": "neutral",
@@ -602,10 +602,10 @@
           "id": "s042",
           "type": "acronym_q",
           "content": {
-            "primary": "H.L.A.Y.K.",
+            "primary": "W.S.S.",
             "secondary": "",
-            "answer": "HERE'S LOOKING AT YOU KID",
-            "source": "Casablanca"
+            "answer": "WHY SO SERIOUS",
+            "source": "The Dark Knight"
           },
           "reveal_state": "hidden",
           "team": "neutral",
@@ -630,10 +630,10 @@
           "id": "s044",
           "type": "acronym_q",
           "content": {
-            "primary": "I.H.W.S.H.",
+            "primary": "Y.A.W.H.",
             "secondary": "",
-            "answer": "I'LL HAVE WHAT SHE'S HAVING",
-            "source": "When Harry Met Sally"
+            "answer": "YOU'RE A WIZARD HARRY",
+            "source": "Harry Potter"
           },
           "reveal_state": "hidden",
           "team": "neutral",
@@ -1492,10 +1492,10 @@
           "id": "s108",
           "type": "acronym_q",
           "content": {
-            "primary": "H.M.B.O.M.T.",
+            "primary": "L.O.A.P.",
             "secondary": "",
-            "answer": "HIT ME BABY ONE MORE TIME",
-            "source": "Britney Spears"
+            "answer": "LIVIN ON A PRAYER",
+            "source": "Bon Jovi"
           },
           "reveal_state": "hidden",
           "team": "neutral",
@@ -1565,10 +1565,10 @@
           "id": "s113",
           "type": "acronym_q",
           "content": {
-            "primary": "S.B.T.R.",
+            "primary": "I.W.S.",
             "secondary": "",
-            "answer": "SNAP BACK TO REALITY",
-            "source": "Eminem"
+            "answer": "I WILL SURVIVE",
+            "source": "Gloria Gaynor"
           },
           "reveal_state": "hidden",
           "team": "neutral",
@@ -1595,10 +1595,10 @@
           "id": "s115",
           "type": "acronym_q",
           "content": {
-            "primary": "I.S.J.",
+            "primary": "U.M.U.",
             "secondary": "",
-            "answer": "I'M SO JULIA",
-            "source": "Charli XCX/Brat"
+            "answer": "UNDER MY UMBRELLA",
+            "source": "Rihanna"
           },
           "reveal_state": "hidden",
           "team": "neutral",
@@ -1623,10 +1623,10 @@
           "id": "s117",
           "type": "acronym_q",
           "content": {
-            "primary": "S.L.B.Y.C.F.W.M.",
+            "primary": "S.T.I.U.T.K.",
             "secondary": "",
-            "answer": "SAID LIL BITCH YOU CANT FUCK WITH ME",
-            "source": "Cardi B"
+            "answer": "SOMEBODY THAT I USED TO KNOW",
+            "source": "Gotye"
           },
           "reveal_state": "hidden",
           "team": "neutral",
@@ -1711,10 +1711,10 @@
           "id": "s123",
           "type": "acronym_q",
           "content": {
-            "primary": "C.I.L.",
+            "primary": "I.M.H.I.T.P.I.M.",
             "secondary": "",
-            "answer": "CRAZY IN LOVE",
-            "source": "Beyonce"
+            "answer": "IT'S ME HI I'M THE PROBLEM IT'S ME",
+            "source": "Taylor Swift"
           },
           "reveal_state": "hidden",
           "team": "neutral",
@@ -1857,10 +1857,10 @@
           "id": "s133",
           "type": "acronym_q",
           "content": {
-            "primary": "G.I.L.W.G.S.",
+            "primary": "O.A.L.O.",
             "secondary": "",
-            "answer": "GET IN LOSER WE'RE GOING SHOPPING",
-            "source": "Mean Girls"
+            "answer": "OGRES ARE LIKE ONIONS",
+            "source": "Shrek"
           },
           "reveal_state": "hidden",
           "team": "neutral",
@@ -1872,10 +1872,10 @@
           "id": "s134",
           "type": "acronym_q",
           "content": {
-            "primary": "I.A.T.O.W.K.",
+            "primary": "W.G.P.C.G.R.",
             "secondary": "",
-            "answer": "I AM THE ONE WHO KNOCKS",
-            "source": "Breaking Bad"
+            "answer": "WITH GREAT POWER COMES GREAT RESPONSIBILITY",
+            "source": "Spider-Man"
           },
           "reveal_state": "hidden",
           "team": "neutral",
@@ -1887,10 +1887,10 @@
           "id": "s135",
           "type": "acronym_q",
           "content": {
-            "primary": "S.U.",
+            "primary": "T.W.S.S.",
             "secondary": "",
-            "answer": "SHUT UP",
-            "source": "Simple Life"
+            "answer": "THAT'S WHAT SHE SAID",
+            "source": "The Office"
           },
           "reveal_state": "hidden",
           "team": "neutral",
@@ -1945,10 +1945,10 @@
           "id": "s139",
           "type": "acronym_q",
           "content": {
-            "primary": "T.L.D.N.E.",
+            "primary": "Y.S.N.P.",
             "secondary": "",
-            "answer": "THE LIMIT DOES NOT EXIST",
-            "source": "Mean Girls"
+            "answer": "YOU SHALL NOT PASS",
+            "source": "The Lord of the Rings"
           },
           "reveal_state": "hidden",
           "team": "neutral",
@@ -2033,10 +2033,10 @@
           "id": "s145",
           "type": "acronym_q",
           "content": {
-            "primary": "I.S.D.P.",
+            "primary": "S.M.T.M.",
             "secondary": "",
-            "answer": "I SEE DEAD PEOPLE",
-            "source": "The Sixth Sense"
+            "answer": "SHOW ME THE MONEY",
+            "source": "Jerry Maguire"
           },
           "reveal_state": "hidden",
           "team": "neutral",
@@ -2081,7 +2081,7 @@
           "type": "sentence",
           "content": {
             "primary": "THE SENTENCE.",
-            "secondary": "LOSING TABLE. ON YOUR KNEES.|'YOU CAN'T SIT WITH US': MEAN GIRLS.|IN UNISON. THE ROOM FILMS."
+            "secondary": "LOSING TABLE. IN UNISON.|'YOU CAN'T SIT WITH US': MEAN GIRLS."
           },
           "reveal_state": "hidden",
           "team": "neutral",
@@ -2273,5 +2273,5 @@
       ]
     }
   ],
-  "created": 1771452193298
+  "created": 1771525184945
 }
