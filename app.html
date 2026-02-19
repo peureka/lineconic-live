@@ -110,7 +110,7 @@ body.audience-mode{cursor:none}
 #sbug .vs{color:rgba(255,255,255,.2);font-size:10px}
 
 /* MISC */
-.srcbar{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.9);padding:8px 28px;font-family:'Space Mono',monospace;font-size:clamp(10px,1.2vw,15px);color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.06em}
+.srcbar{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.9);padding:14px 40px;font-family:'Space Mono',monospace;font-size:clamp(18px,2.5vw,32px);color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.06em}
 .rule{width:50%;height:1px;background:rgba(255,255,255,.3);margin:12px auto}
 .ans-list{font-family:'Space Mono',monospace;text-align:center;line-height:2;padding:3% 8%;width:100%;overflow-y:auto;max-height:80vh}
 .ans-list div{color:var(--wh);text-shadow:0 0 6px rgba(255,255,255,.3);font-size:clamp(12px,1.8vw,20px)}
@@ -415,7 +415,7 @@ function RoundTitleSlide({slide}){
 }
 function TierTitleSlide({slide}){
   const lines=(slide.content.secondary||'').split('|').map(l=>l.trim());
-  return <><div className="nb nb-wh"></div><div className="D hs" style={{fontSize:'clamp(18px,2.5vw,32px)',marginBottom:8,padding:'0 5%'}}>{slide.content.primary||''}</div><div className="rule"></div><div className="M" style={{color:'rgba(255,255,255,.5)',fontSize:'clamp(11px,1.3vw,16px)',lineHeight:2}}>{lines.map((l,i)=><div key={i}>{l}</div>)}</div></>;
+  return <><div className="nb nb-wh"></div><div className="D hs" style={{fontSize:'clamp(28px,4vw,56px)',marginBottom:16,padding:'0 5%'}}>{slide.content.primary||''}</div><div className="rule"></div><div className="M" style={{color:'rgba(255,255,255,.5)',fontSize:'clamp(18px,2.2vw,28px)',lineHeight:'2.2'}}>{lines.map((l,i)=><div key={i}>{l}</div>)}</div></>;
 }
 function BonusMarkerSlide({slide}){
   return <><div className="nb nb-gd"></div><div className="D hg" style={{fontSize:'clamp(48px,8vw,120px)'}}>{slide.content.primary||''}</div></>;
