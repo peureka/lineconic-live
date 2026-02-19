@@ -209,6 +209,17 @@ body.audience-mode{cursor:none}
 .shortcut-key{font-family:'Space Mono',monospace;font-size:var(--type-label);background:var(--surface-02);border:1px solid var(--border-subtle);padding:6px 12px;color:var(--text-primary);text-align:center;min-width:60px}
 .shortcut-action{font-family:'Space Mono',monospace;font-size:var(--type-meta);color:var(--text-secondary);text-transform:uppercase}
 
+/* Quick Access Buttons */
+.quick-btn{display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border-subtle);background:transparent;color:var(--text-secondary);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap}
+.quick-btn:hover{background:var(--surface-03);color:var(--text-primary)}
+.quick-btn-row{display:flex;gap:var(--space-02);flex-wrap:wrap}
+
+/* Connection Signal */
+.conn-signal{display:flex;align-items:center;gap:6px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.conn-dot{width:8px;height:8px;display:inline-block}
+.conn-dot.on{background:var(--cyan);box-shadow:0 0 6px rgba(0,255,255,.8)}
+.conn-dot.off{background:var(--signal);box-shadow:0 0 6px rgba(255,0,127,.8);animation:bloomPulse 1s ease-in-out infinite}
+
 /* Bottom Bar */
 .operator-bottom{grid-column:2;grid-row:2;background:var(--surface-01);border-top:1px solid var(--border-subtle);padding:var(--space-02) var(--space-04);display:flex;align-items:center;justify-content:space-between}
 .receipt-counter{font-family:'Space Mono',monospace;font-size:var(--type-meta);color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em}
@@ -216,6 +227,25 @@ body.audience-mode{cursor:none}
 /* Audience View wrapper */
 .audience-view{position:fixed;inset:0;background:var(--void)}
 .audience-view .slide-wrapper{position:absolute;inset:0}
+
+/* Answers View */
+.answers-wrap{background:#000;color:#fff;font-family:'Space Mono',monospace;padding:40px;max-width:900px;margin:0 auto;min-height:100vh}
+.ans-h1{color:#FF007F;font-size:32px;letter-spacing:.1em;margin-bottom:8px;font-family:'Anton',sans-serif}
+.ans-sub{color:rgba(255,255,255,.3);font-size:11px;letter-spacing:.15em;margin-bottom:48px;text-transform:uppercase}
+.ans-sec{margin-bottom:48px}
+.ans-rt{color:#00FFFF;font-size:18px;letter-spacing:.08em;margin-bottom:4px;font-weight:700}
+.ans-rd{color:rgba(255,255,255,.3);font-size:11px;margin-bottom:16px;letter-spacing:.06em}
+.ans-tbl{width:100%;border-collapse:collapse;margin-bottom:8px}
+.ans-th{text-align:left;color:rgba(255,255,255,.3);font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.1)}
+.ans-td{padding:8px;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px;vertical-align:top;color:#fff}
+.ans-pk{color:#FF007F}
+.ans-cy{color:#00FFFF;letter-spacing:.04em}
+.ans-gd{color:#FFD700}
+.ans-dim{color:rgba(255,255,255,.4)}
+.ans-bold{font-weight:700}
+.ans-grid2{display:grid;grid-template-columns:1fr 1fr;gap:4px 24px}
+.ans-pair{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px}
+@media print{.answers-wrap{background:#fff!important;color:#000!important}.ans-h1{color:#FF007F!important}.ans-rt{color:#0088aa!important}.ans-cy{color:#0088aa!important}.ans-pk{color:#FF007F!important}.ans-td,.ans-th{border-bottom-color:rgba(0,0,0,.1)!important}}
 </style>
 </head>
 <body>
@@ -512,6 +542,8 @@ function AudienceView({state,dispatch,slideRef:externalSlideRef}){
     if(!slide)return;
     const el=slideRef.current;
     if(!el)return;
+    // Reset timer on slide change
+    stopTimerSystem();
     // Remove old transition classes
     el.className='S on';
     void el.offsetHeight;
@@ -638,16 +670,64 @@ function TimerDisplay({onTimerAction}){
     return()=>clearInterval(interval);
   },[running]);
   const danger=pct<33;const critical=pct<17;
+  function startDuration(sec){startTimerSystem(sec,null);setRunning(true);setPct(100);if(onTimerAction)onTimerAction('start',sec)}
   return (
     <div className="timer-display">
       <div className="timer-label">TIMER</div>
       <div className="timer-bar-track"><div className={'timer-bar-fill'+(danger?' danger':'')+(critical?' critical':'')} style={{width:pct+'%'}}></div></div>
       <div className="timer-time">{running?String(Math.floor(time/60)).padStart(2,'0')+':'+String(time%60).padStart(2,'0'):'--:--'}</div>
       <div className="timer-buttons">
-        <button className="timer-btn" onClick={()=>{startTimerSystem(30,null);setRunning(true);setPct(100);if(onTimerAction)onTimerAction('start',30)}}>30s</button>
+        <button className="timer-btn" onClick={()=>startDuration(10)}>10s</button>
+        <button className="timer-btn" onClick={()=>startDuration(15)}>15s</button>
+        <button className="timer-btn" onClick={()=>startDuration(30)}>30s</button>
+        <button className="timer-btn" onClick={()=>startDuration(60)}>1m</button>
+      </div>
+      <div className="timer-buttons" style={{marginTop:'var(--space-01)'}}>
         <button className="timer-btn" onClick={()=>{if(timerState.paused){resumeTimerSystem();if(onTimerAction)onTimerAction('resume')}else{pauseTimerSystem();if(onTimerAction)onTimerAction('pause')}}}>{timerState.paused?'RESUME':'PAUSE'}</button>
         <button className="timer-btn" onClick={()=>{stopTimerSystem();setRunning(false);setPct(100);if(onTimerAction)onTimerAction('stop')}}>STOP</button>
       </div>
+    </div>
+  );
+}
+
+function QuickAccessButtons(){
+  const base=window.location.origin+'/app.html';
+  const[copied,setCopied]=useState(null);
+  function openTab(mode){window.open(base+'?mode='+mode,'_blank')}
+  function copyLink(mode){
+    navigator.clipboard.writeText(base+'?mode='+mode).then(()=>{setCopied(mode);setTimeout(()=>setCopied(null),1500)}).catch(()=>{});
+  }
+  return(
+    <div style={{display:'flex',flexDirection:'column',gap:'var(--space-01)'}}>
+      <div style={{fontFamily:"'Space Mono',monospace",fontSize:'var(--type-meta)',color:'var(--text-secondary)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:2}}>QUICK ACCESS</div>
+      <div className="quick-btn-row">
+        <button className="quick-btn" onClick={()=>openTab('answers')}>ANSWERS ↗</button>
+        <button className="quick-btn" onClick={()=>copyLink('answers')}>{copied==='answers'?'COPIED!':'COPY LINK'}</button>
+      </div>
+      <div className="quick-btn-row">
+        <button className="quick-btn" onClick={()=>openTab('vote')}>VOTE ↗</button>
+        <button className="quick-btn" onClick={()=>copyLink('vote')}>{copied==='vote'?'COPIED!':'COPY LINK'}</button>
+      </div>
+      <div className="quick-btn-row">
+        <button className="quick-btn" onClick={()=>openTab('audience')}>AUDIENCE ↗</button>
+      </div>
+    </div>
+  );
+}
+
+function ConnectionSignal(){
+  const[connected,setConnected]=useState(false);
+  useEffect(()=>{
+    if(!fbdb)return;
+    const ref=fbdb.ref('.info/connected');
+    const handler=snap=>{setConnected(!!snap.val())};
+    ref.on('value',handler);
+    return()=>ref.off('value',handler);
+  },[]);
+  return(
+    <div className="conn-signal">
+      <span className={'conn-dot '+(connected?'on':'off')}></span>
+      <span style={{color:connected?'var(--cyan)':'var(--signal)'}}>{connected?'CONNECTED':'OFFLINE'}</span>
     </div>
   );
 }
@@ -683,6 +763,8 @@ function OperatorView({state,dispatch,onTimerAction}){
         <NextSlideCard slide={nextSlide}/>
       </div>
       <div className="operator-right">
+        <ConnectionSignal/>
+        <QuickAccessButtons/>
         <ScoreDisplay scores={state.scores} dispatch={dispatch}/>
         <TimerDisplay onTimerAction={onTimerAction}/>
         <div style={{fontFamily:"'Space Mono',monospace",fontSize:'var(--type-meta)',color:'var(--text-disabled)',marginTop:'auto',textAlign:'center'}}>PRESS ? FOR SHORTCUTS</div>
@@ -774,49 +856,49 @@ function VoteView({showId}){
 }
 
 // ═══════════════════════════════════════
-// ANSWERS VIEW (host answer sheet)
+// ANSWERS VIEW — uses DOM API for perf (avoids Babel JSX overhead)
 // ═══════════════════════════════════════
+function buildAnswersHTML(show){
+  const secs=show.sections||[];
+  let h='<h1 class="ans-h1">HOST ANSWER SHEET</h1><div class="ans-sub">LINECONIC LIVE — FOR HOST EYES ONLY</div>';
+  secs.forEach(function(sec){
+    const sl=sec.slides||[];const types=sl.map(function(s){return s.type});
+    const ts=sl.find(function(s){return s.type==='round_title'||s.type==='tier_title'});
+    const desc=ts&&ts.content&&ts.content.secondary?(ts.content.secondary||'').replace(/\|/g,' '):'';
+    const hdr='<div class="ans-rt">'+esc(sec.name)+'</div>'+(desc?'<div class="ans-rd">'+esc(desc)+'</div>':'');
+    if(types.includes('fluency_line')){
+      let g='';for(let i=0;i<sl.length;i++){if(sl[i].type==='fluency_line'){const src=sl[i+1]&&sl[i+1].type==='fluency_source'?sl[i+1].content.primary:'';g+='<div class="ans-pair"><span>'+esc(sl[i].content.primary||'')+'</span><span class="ans-dim">'+esc(src)+'</span></div>';}}
+      h+='<div class="ans-sec">'+hdr+'<div class="ans-grid2">'+g+'</div></div>';return;
+    }
+    if(types.includes('doa_vote')){
+      let g='';for(let i=0;i<sl.length;i++){if(sl[i].type==='doa_vote'){let v='',c='';for(let j=i+1;j<sl.length&&j<i+4;j++){if(sl[j].type==='doa_verdict_dead'){v='DEAD';c='ans-pk';break}if(sl[j].type==='doa_verdict_alive'){v='ALIVE';c='ans-cy';break}}g+='<div class="ans-pair"><span>'+esc(sl[i].content.primary||'')+'</span><span class="'+c+' ans-bold">'+v+'</span></div>';}}
+      h+='<div class="ans-sec">'+hdr+'<div class="ans-grid2">'+g+'</div></div>';return;
+    }
+    if(types.includes('hotseat_prompt')){
+      let g='';sl.forEach(function(s){if(s.type==='hotseat_prompt')g+='<div class="ans-pair"><span>'+esc(s.content.primary||'')+'</span><span class="ans-dim">'+esc(s.content.source||'')+'</span></div>';});
+      h+='<div class="ans-sec">'+hdr+g+'</div>';return;
+    }
+    if(types.includes('verdict')||types.includes('sentence')){
+      let g='';sl.forEach(function(s){if(s.type==='verdict'||s.type==='sentence'){g+='<div class="ans-dim" style="margin-bottom:6px">'+esc(s.content.primary||'')+'</div>';(s.content.secondary||'').split('|').forEach(function(l){if(l.trim())g+='<div class="ans-pk ans-bold" style="margin-bottom:6px">'+esc(l.trim())+'</div>';});}});
+      h+='<div class="ans-sec">'+hdr+g+'</div>';return;
+    }
+    if(types.includes('source_q')||types.includes('acronym_q')){
+      const isAcr=types.includes('acronym_q');const qt=isAcr?'acronym_q':'source_q';
+      let rows='',qn=0,bonus=null;
+      sl.forEach(function(s){
+        if(s.type==='bonus_marker'){bonus=s.content.primary||'BONUS';rows+='<tr><td colspan="4" style="padding:12px 8px 4px"><span class="ans-gd" style="font-size:10px;letter-spacing:.08em">&#9733; '+esc(bonus)+'</span></td></tr>';return;}
+        if(s.type===qt){qn++;const c=s.content;const bg=bonus?' style="background:rgba(255,215,0,.06)"':'';const nc=bonus?'ans-gd':'ans-dim';const sc=isAcr?' ans-cy':'';rows+='<tr'+bg+'><td class="ans-td '+nc+'" style="width:30px;text-align:right;padding-right:12px">'+qn+'</td><td class="ans-td'+sc+'">'+esc(c.primary||'')+'</td><td class="ans-td">'+(isAcr?esc(c.answer||'—'):'—')+'</td><td class="ans-td ans-pk" style="width:180px">'+esc(c.source||'')+'</td></tr>';bonus=null;}
+      });
+      h+='<div class="ans-sec">'+hdr+'<table class="ans-tbl"><thead><tr><th class="ans-th">#</th><th class="ans-th">SHOWN</th><th class="ans-th">ANSWER</th><th class="ans-th">SOURCE</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+    }
+  });
+  return h;
+}
 function AnswersView({show}){
+  const ref=useRef(null);
+  useEffect(function(){if(show&&ref.current)ref.current.innerHTML=buildAnswersHTML(show)},[show]);
   if(!show)return <div data-testid="answers-view" style={{background:'#000',color:'var(--signal)',padding:40,fontFamily:"'Space Mono',monospace"}}>LOADING...</div>;
-  const sections=show.sections||[];
-
-  return(
-    <div data-testid="answers-view" style={{background:'#000',color:'#fff',fontFamily:"'Space Mono',monospace",padding:40,maxWidth:900,margin:'0 auto'}}>
-      <h1 style={{color:'#FF007F',fontSize:32,letterSpacing:'.1em',marginBottom:8,fontFamily:"'Anton',sans-serif"}}>HOST ANSWER SHEET</h1>
-      <div style={{color:'rgba(255,255,255,.3)',fontSize:11,letterSpacing:'.15em',textTransform:'uppercase',marginBottom:48}}>{show.name||show.id}</div>
-      {sections.map((sec,si)=>{
-        const hasAnswers=sec.slides.some(s=>s.content&&(s.content.answer||s.content.source));
-        if(!hasAnswers)return null;
-        return(
-          <div key={si} style={{marginBottom:48}}>
-            <div style={{color:'#00FFFF',fontSize:18,letterSpacing:'.08em',marginBottom:16,fontWeight:700}}>{sec.name||sec.id}</div>
-            <table style={{width:'100%',borderCollapse:'collapse'}}>
-              <thead>
-                <tr>
-                  <th style={{textAlign:'left',color:'rgba(255,255,255,.3)',fontSize:10,letterSpacing:'.1em',textTransform:'uppercase',padding:'6px 8px',borderBottom:'1px solid rgba(255,255,255,.1)'}}>Q</th>
-                  <th style={{textAlign:'left',color:'rgba(255,255,255,.3)',fontSize:10,letterSpacing:'.1em',textTransform:'uppercase',padding:'6px 8px',borderBottom:'1px solid rgba(255,255,255,.1)'}}>LINE</th>
-                  <th style={{textAlign:'left',color:'rgba(255,255,255,.3)',fontSize:10,letterSpacing:'.1em',textTransform:'uppercase',padding:'6px 8px',borderBottom:'1px solid rgba(255,255,255,.1)'}}>ANSWER</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sec.slides.filter(s=>s.content&&(s.content.answer||s.content.source)).map((s,qi)=>{
-                  const isBonus=s.content.notes&&s.content.notes.includes('bonus');
-                  return(
-                    <tr key={qi} style={{background:isBonus?'rgba(255,215,0,.06)':'transparent'}}>
-                      <td style={{padding:8,borderBottom:'1px solid rgba(255,255,255,.06)',fontSize:13,color:isBonus?'#FFD700':'rgba(255,255,255,.3)',width:30,textAlign:'right',paddingRight:12}}>{qi+1}</td>
-                      <td style={{padding:8,borderBottom:'1px solid rgba(255,255,255,.06)',fontSize:13,color:'#fff'}}>{s.content.primary||''}</td>
-                      <td style={{padding:8,borderBottom:'1px solid rgba(255,255,255,.06)',fontSize:13,color:'#FF007F',width:180}}>{s.content.answer||s.content.source||''}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        );
-      })}
-      <style>{`@media print{body{background:#fff!important;color:#000!important}h1{color:#FF007F!important}}`}</style>
-    </div>
-  );
+  return <div data-testid="answers-view" className="answers-wrap" ref={ref}></div>;
 }
 
 // ═══════════════════════════════════════
@@ -970,10 +1052,10 @@ useEffect(()=>{
       if(ev.target.tagName==='INPUT')return;
       const s=stateRef.current;
       switch(ev.key){
-        case'ArrowRight':case' ':case'PageDown':ev.preventDefault();dispatch({type:'NEXT_SLIDE'});break;
-        case'ArrowLeft':case'PageUp':ev.preventDefault();dispatch({type:'PREV_SLIDE'});break;
-        case'Home':dispatch({type:'GO_TO_SLIDE',payload:0});break;
-        case'End':{const flat=flattenSlides(s.show);dispatch({type:'GO_TO_SLIDE',payload:flat.length-1});break}
+        case'ArrowRight':case' ':case'PageDown':ev.preventDefault();stopTimerSystem();broadcastTimerAction('stop');dispatch({type:'NEXT_SLIDE'});break;
+        case'ArrowLeft':case'PageUp':ev.preventDefault();stopTimerSystem();broadcastTimerAction('stop');dispatch({type:'PREV_SLIDE'});break;
+        case'Home':stopTimerSystem();broadcastTimerAction('stop');dispatch({type:'GO_TO_SLIDE',payload:0});break;
+        case'End':{const flat=flattenSlides(s.show);stopTimerSystem();broadcastTimerAction('stop');dispatch({type:'GO_TO_SLIDE',payload:flat.length-1});break}
         case'r':case'R':dispatch({type:'TOGGLE_REVEAL'});break;
         case's':case'S':dispatch({type:'TOGGLE_SCOREBOARD'});break;
         case't':case'T':startTimerSystem(30,null);broadcastTimerAction('start',30);break;
