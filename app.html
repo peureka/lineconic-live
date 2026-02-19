@@ -246,6 +246,61 @@ body.answers-mode,body.answers-mode html{overflow:auto!important;height:auto!imp
 .audience-view{position:fixed;inset:0;background:var(--void)}
 .audience-view .slide-wrapper{position:absolute;inset:0}
 
+/* ═══════════════════════════════════════
+   MOBILE RESPONSIVE — PORTRAIT
+   ═══════════════════════════════════════ */
+@media(max-width:600px){
+  /* Neon borders: tighter inset on small screens */
+  .nb-pk,.nb-cy,.nb-wh,.nb-gd{inset:12px}
+  .tb{inset:10px}
+  /* Source bar */
+  .srcbar{bottom:20px;padding:10px 20px;font-size:clamp(11px,3vw,18px)}
+  /* Scoreboard */
+  #sbug{height:36px;gap:20px;font-size:11px}
+  #sbug .sc-cy,#sbug .sc-pk{font-size:14px;min-width:24px}
+  #sbug .lbl{font-size:9px}
+  #sbug .vs{font-size:8px}
+  /* Launcher refinements */
+  .launcher-view{gap:var(--space-05);padding:0 var(--space-03)}
+  .launcher-title{font-size:clamp(40px,14vw,100px)}
+  .launcher-grid{gap:var(--space-02);padding:0 var(--space-03)}
+  .launcher-btn{padding:var(--space-03) var(--space-02);font-size:clamp(11px,3vw,14px)}
+  .launcher-btn-sub{font-size:clamp(8px,2.2vw,10px)}
+  /* Answers view */
+  .answers-wrap{padding:20px 16px}
+  .ans-h1{font-size:24px}
+}
+
+/* ═══════════════════════════════════════
+   MOBILE RESPONSIVE — LANDSCAPE
+   ═══════════════════════════════════════ */
+@media(max-height:500px) and (orientation:landscape){
+  /* Neon borders: tight inset for short viewports */
+  .nb-pk,.nb-cy,.nb-wh,.nb-gd{inset:10px}
+  .tb{inset:8px}
+  /* Source bar */
+  .srcbar{bottom:14px;padding:6px 16px;font-size:clamp(10px,2vh,16px)}
+  /* Scoreboard */
+  #sbug{height:28px;gap:16px;font-size:10px}
+  #sbug .sc-cy,#sbug .sc-pk{font-size:12px}
+  #sbug .lbl{font-size:8px}
+  /* Answer reveal text */
+  .answer{bottom:40px!important;font-size:clamp(10px,2vh,16px)!important}
+  /* Launcher in landscape */
+  .launcher-view{flex-direction:row;gap:var(--space-05);padding:var(--space-03)}
+  .launcher-title{font-size:clamp(28px,8vh,72px)}
+  .launcher-grid{max-width:320px;gap:var(--space-02)}
+  .launcher-btn{padding:var(--space-02) var(--space-02);font-size:clamp(10px,1.8vh,13px)}
+  .launcher-btn-sub{font-size:clamp(7px,1.4vh,10px)}
+}
+
+/* ═══════════════════════════════════════
+   VOTE VIEW — MOBILE
+   ═══════════════════════════════════════ */
+@media(max-width:600px){
+  [data-testid="vote-view"]{padding:var(--space-03)!important}
+}
+
 /* Answers View */
 .answers-wrap{background:#000;color:#fff;font-family:'Space Mono',monospace;padding:40px;max-width:900px;margin:0 auto;min-height:100vh}
 .ans-h1{color:#FF007F;font-size:32px;letter-spacing:.1em;margin-bottom:8px;font-family:'Anton',sans-serif}
@@ -442,11 +497,11 @@ function reducer(state,action){
 // ═══════════════════════════════════════
 // RENDERER HELPERS (inlined from lib/renderers.js)
 // ═══════════════════════════════════════
-function qSz(t){const l=(t||'').length;if(l<=4)return'clamp(100px,22vw,280px)';if(l<=8)return'clamp(80px,16vw,220px)';if(l<=14)return'clamp(60px,12vw,170px)';if(l<=20)return'clamp(50px,9vw,130px)';return'clamp(36px,6vw,90px)'}
-function aSz(t){const l=(t||'').length;if(l<=8)return'clamp(60px,11vw,160px)';if(l<=14)return'clamp(50px,9vw,130px)';if(l<=20)return'clamp(42px,7vw,100px)';if(l<=28)return'clamp(34px,5.5vw,80px)';if(l<=38)return'clamp(26px,4.2vw,62px)';if(l<=50)return'clamp(22px,3.3vw,48px)';return'clamp(16px,2.5vw,36px)'}
+function qSz(t){const l=(t||'').length;if(l<=4)return'clamp(72px,22vw,280px)';if(l<=8)return'clamp(56px,16vw,220px)';if(l<=14)return'clamp(36px,10vw,170px)';if(l<=20)return'clamp(28px,7vw,130px)';return'clamp(22px,5vw,90px)'}
+function aSz(t){const l=(t||'').length;if(l<=8)return'clamp(40px,11vw,160px)';if(l<=14)return'clamp(32px,8vw,130px)';if(l<=20)return'clamp(28px,6.5vw,100px)';if(l<=28)return'clamp(22px,5vw,80px)';if(l<=38)return'clamp(18px,3.8vw,62px)';if(l<=50)return'clamp(16px,3vw,48px)';return'clamp(14px,2.5vw,36px)'}
 function tx(type){switch(type){case'source_q':case'acronym_q':case'fluency_line':case'bonus_marker':return't-slam';case'source_a':case'acronym_a':case'fluency_source':case'doa_verdict_dead':case'doa_verdict_alive':return't-punch';case'round_title':case'verdict':case'intermission':case'last_line':case'endcard':return't-breath';case'receipt_rain':return't-shake';case'crate_drop':return't-fade';default:return't-fade'}}
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-function nwStyle(){return{whiteSpace:'nowrap',maxWidth:'92%',padding:'2vh 4%'}}
+function nwStyle(){return{whiteSpace:'nowrap',maxWidth:'calc(100% - 32px)',padding:'2vh 16px',overflow:'visible'}}
 
 // ═══════════════════════════════════════
 // REACT COMPONENTS — SLIDE RENDERERS
@@ -457,7 +512,7 @@ function AttractSlide({slide}){
   return <div className="D hp" style={{fontSize:'clamp(120px,40vw,350px)',animation:'pulse 2s ease-in-out infinite'}}>{slide.content.primary||'L'}</div>;
 }
 function FishbowlSlide({slide}){
-  return <><div className="nb nb-pk"></div><div className="D hp" style={{fontSize:'clamp(32px,5vw,64px)',marginBottom:16}}>{slide.content.primary}</div><div className="M hs" style={{fontSize:'clamp(12px,1.8vw,22px)'}}>{slide.content.secondary||''}</div></>;
+  return <><div className="nb nb-pk"></div><div className="D hp" style={{fontSize:'clamp(28px,6vw,64px)',marginBottom:16,padding:'0 8%'}}>{slide.content.primary}</div><div className="M hs" style={{fontSize:'clamp(12px,2.5vw,22px)',padding:'0 8%'}}>{slide.content.secondary||''}</div></>;
 }
 function RoundTitleSlide({slide}){
   return <><div className="D hw" style={{fontSize:'clamp(50px,10vw,150px)',marginBottom:10}}>{slide.content.primary||''}</div>{slide.content.secondary?<div className="D hw" style={{fontSize:aSz(slide.content.secondary),...nwStyle()}}>{slide.content.secondary}</div>:null}</>;
@@ -467,7 +522,7 @@ function TierTitleSlide({slide}){
   return <><div className="nb nb-wh"></div><div className="D hs" style={{fontSize:'clamp(28px,4vw,56px)',marginBottom:16,padding:'0 5%'}}>{slide.content.primary||''}</div><div className="rule"></div><div className="M" style={{color:'rgba(255,255,255,.5)',fontSize:'clamp(18px,2.2vw,28px)',lineHeight:'2.2'}}>{lines.map((l,i)=><div key={i}>{l}</div>)}</div></>;
 }
 function BonusMarkerSlide({slide}){
-  return <><div className="nb nb-gd"></div><div className="D hg" style={{fontSize:'clamp(48px,8vw,120px)'}}>{slide.content.primary||''}</div></>;
+  return <><div className="nb nb-gd"></div><div className="D hg" style={{fontSize:'clamp(36px,8vw,120px)',padding:'0 8%'}}>{slide.content.primary||''}</div></>;
 }
 function SourceQSlide({slide,revealed}){
   return <><div className="nb nb-pk"></div><div className="tb pk"></div><div className="D hw" style={{fontSize:aSz(slide.content.primary),...nwStyle()}}>{slide.content.primary||''}</div>{slide.content.answer?<div className={'answer'+(revealed?' revealed':'')} style={{position:'absolute',bottom:60,left:'50%',transform:'translateX(-50%)',fontFamily:"'Space Mono',monospace",fontSize:'clamp(14px,2vw,24px)',color:'var(--wh)',textTransform:'uppercase',letterSpacing:'.06em'}}>{slide.content.answer}</div>:null}</>;
@@ -549,7 +604,6 @@ function SlideRenderer({slide,revealed}){
 // LAUNCHER VIEW (Homepage)
 // ═══════════════════════════════════════
 function LauncherView({showName}){
-  const base=window.location.origin+'/app.html';
   return(
     <div className="launcher-view">
       <div>
@@ -557,14 +611,10 @@ function LauncherView({showName}){
         <div className="launcher-title hs" style={{fontSize:'clamp(16px,4vw,32px)',letterSpacing:'.2em',marginTop:8}}>LIVE</div>
       </div>
       <div className="launcher-grid">
-        <a className="launcher-btn" href={base+'?mode=operator'}><span>OPERATOR</span><span className="launcher-btn-sub">HOST CONTROLS</span></a>
-        <a className="launcher-btn" href={base+'?mode=audience'} target="_blank" rel="noopener"><span>AUDIENCE</span><span className="launcher-btn-sub">SCREEN OUTPUT</span></a>
-        <a className="launcher-btn" href={base+'?mode=answers'} target="_blank" rel="noopener"><span>ANSWERS</span><span className="launcher-btn-sub">ANSWER SHEET</span></a>
-        <a className="launcher-btn" href={base+'?mode=vote'} target="_blank" rel="noopener"><span>VOTE</span><span className="launcher-btn-sub">AUDIENCE PHONES</span></a>
-      </div>
-      <div>
-        <ConnectionSignal/>
-        {showName&&<div className="launcher-meta" style={{marginTop:8}}>{showName}</div>}
+        <a className="launcher-btn" href="/operator"><span>OPERATOR</span><span className="launcher-btn-sub">HOST CONTROLS</span></a>
+        <a className="launcher-btn" href="/audience" target="_blank" rel="noopener"><span>AUDIENCE</span><span className="launcher-btn-sub">SCREEN OUTPUT</span></a>
+        <a className="launcher-btn" href="/answers" target="_blank" rel="noopener"><span>ANSWERS</span><span className="launcher-btn-sub">ANSWER SHEET</span></a>
+        <a className="launcher-btn" href="/vote" target="_blank" rel="noopener"><span>VOTE</span><span className="launcher-btn-sub">AUDIENCE PHONES</span></a>
       </div>
     </div>
   );
@@ -739,11 +789,11 @@ function TimerDisplay({onTimerAction,autoAdvanceRef,autoTimerDuration,dispatch})
 }
 
 function QuickAccessButtons(){
-  const base=window.location.origin+'/app.html';
+  const base=window.location.origin;
   const[copied,setCopied]=useState(null);
-  function openTab(mode){window.open(base+'?mode='+mode,'_blank')}
+  function openTab(mode){window.open(base+'/'+mode,'_blank')}
   function copyLink(mode){
-    navigator.clipboard.writeText(base+'?mode='+mode).then(()=>{setCopied(mode);setTimeout(()=>setCopied(null),1500)}).catch(()=>{});
+    navigator.clipboard.writeText(base+'/'+mode).then(()=>{setCopied(mode);setTimeout(()=>setCopied(null),1500)}).catch(()=>{});
   }
   return(
     <div style={{display:'flex',flexDirection:'column',gap:'var(--space-01)'}}>
@@ -988,7 +1038,8 @@ function AnswersView({show}){
 // ═══════════════════════════════════════
 function App(){
   const params=new URLSearchParams(window.location.search);
-  const mode=params.get('mode')||'launcher';
+  const pathMode={'/operator':'operator','/audience':'audience','/vote':'vote','/answers':'answers'}[window.location.pathname];
+  const mode=pathMode||params.get('mode')||'launcher';
   const isLauncher=mode==='launcher';
   const isAudience=mode==='audience';
   const isVote=mode==='vote';
