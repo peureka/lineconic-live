@@ -82,7 +82,19 @@
           "team": "neutral",
           "timer_seconds": 30,
           "host_notes": null,
-          "points": null
+          "points": null,
+          "alternates": [
+            {
+              "id": "s005-alt1",
+              "type": "source_q",
+              "content": { "primary": "THAT'S WHAT SHE SAID", "secondary": "", "answer": "The Office" }
+            },
+            {
+              "id": "s005-alt2",
+              "type": "source_q",
+              "content": { "primary": "WINTER IS COMING", "secondary": "", "answer": "Game of Thrones" }
+            }
+          ]
         },
         {
           "id": "s006",
@@ -110,7 +122,19 @@
           "team": "neutral",
           "timer_seconds": 30,
           "host_notes": null,
-          "points": null
+          "points": null,
+          "alternates": [
+            {
+              "id": "s007-alt1",
+              "type": "source_q",
+              "content": { "primary": "HERE'S LOOKING AT YOU, KID", "secondary": "", "answer": "Casablanca" }
+            },
+            {
+              "id": "s007-alt2",
+              "type": "source_q",
+              "content": { "primary": "TO INFINITY AND BEYOND", "secondary": "", "answer": "Toy Story" }
+            }
+          ]
         },
         {
           "id": "s008",
@@ -390,7 +414,19 @@
           "team": "neutral",
           "timer_seconds": 30,
           "host_notes": null,
-          "points": null
+          "points": null,
+          "alternates": [
+            {
+              "id": "s027-alt1",
+              "type": "acronym_q",
+              "content": { "primary": "Y.C.H.W.U.", "secondary": "", "answer": "YOU CAN'T HANDLE WITH US", "source": "A Few Good Men" }
+            },
+            {
+              "id": "s027-alt2",
+              "type": "acronym_q",
+              "content": { "primary": "I.S.D.P.", "secondary": "", "answer": "I SEE DEAD PEOPLE", "source": "The Sixth Sense" }
+            }
+          ]
         },
         {
           "id": "s028",
@@ -420,7 +456,14 @@
           "team": "neutral",
           "timer_seconds": 30,
           "host_notes": null,
-          "points": null
+          "points": null,
+          "alternates": [
+            {
+              "id": "s029-alt1",
+              "type": "acronym_q",
+              "content": { "primary": "I.B.B.", "secondary": "", "answer": "I'LL BE BACK", "source": "The Terminator" }
+            }
+          ]
         },
         {
           "id": "s030",
@@ -2172,7 +2215,19 @@
           "team": "neutral",
           "timer_seconds": 30,
           "host_notes": null,
-          "points": null
+          "points": null,
+          "alternates": [
+            {
+              "id": "s154-alt1",
+              "type": "hotseat_prompt",
+              "content": { "primary": "GANGNAM STYLE", "secondary": "", "source": "PSY" }
+            },
+            {
+              "id": "s154-alt2",
+              "type": "hotseat_prompt",
+              "content": { "primary": "LET IT GO", "secondary": "", "source": "Frozen" }
+            }
+          ]
         },
         {
           "id": "s155",
@@ -2200,7 +2255,14 @@
           "team": "neutral",
           "timer_seconds": 30,
           "host_notes": null,
-          "points": null
+          "points": null,
+          "alternates": [
+            {
+              "id": "s156-alt1",
+              "type": "hotseat_prompt",
+              "content": { "primary": "MAY THE FORCE BE WITH YOU", "secondary": "", "source": "Star Wars" }
+            }
+          ]
         },
         {
           "id": "s157",
@@ -2273,5 +2335,6 @@
       ]
     }
   ],
-  "created": 1771525184945
+  "created": 1771525184945,
+  "version": 2
 }
