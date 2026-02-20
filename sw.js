@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lineconic-v1';
+const CACHE_NAME = 'lineconic-v2';
 const PRECACHE = [
   '/app',
   '/app.html',
@@ -23,8 +23,10 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
-  // Skip caching for Firebase Realtime Database requests
+  // Skip caching for Firebase API requests
   if (url.hostname.includes('firebasedatabase.app')) return;
+  if (url.hostname.includes('identitytoolkit.googleapis.com')) return;
+  if (url.hostname.includes('securetoken.googleapis.com')) return;
 
   e.respondWith(
     caches.match(e.request).then(cached => {
