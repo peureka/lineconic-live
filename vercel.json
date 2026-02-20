@@ -2,6 +2,7 @@
   "cleanUrls": true,
   "rewrites": [
     { "source": "/", "destination": "/app" },
+    { "source": "/builder", "destination": "/builder" },
     { "source": "/vote", "destination": "/app" },
     { "source": "/audience", "destination": "/app" },
     { "source": "/answers", "destination": "/app" },

@@ -14,6 +14,7 @@
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="https://unpkg.com/sortablejs@1.15.6/Sortable.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════
@@ -247,6 +248,100 @@ html:has(body.answers-mode),body.answers-mode{overflow:auto!important;height:aut
 .login-input::placeholder{color:var(--text-disabled);letter-spacing:.08em;text-transform:uppercase}
 .login-input:-webkit-autofill{-webkit-box-shadow:0 0 0 30px var(--surface-02) inset!important;-webkit-text-fill-color:var(--text-primary)!important}
 
+/* Red Flag Queue */
+.rf-panel{background:var(--surface-02);border:1px solid var(--border-subtle);padding:var(--space-02) var(--space-03)}
+.rf-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.rf-title{font-family:'Space Mono',monospace;font-size:var(--type-meta);color:var(--signal);text-transform:uppercase;letter-spacing:.08em}
+.rf-count{font-family:'Space Mono',monospace;font-size:var(--type-meta);color:var(--text-disabled)}
+.rf-body{margin-top:var(--space-02)}
+.rf-textarea{width:100%;min-height:120px;background:var(--surface-01);border:1px solid var(--border-subtle);color:var(--text-primary);font-family:'Space Mono',monospace;font-size:11px;padding:var(--space-02);resize:vertical;outline:none;box-sizing:border-box}
+.rf-textarea:focus{border-color:var(--signal);box-shadow:0 0 8px rgba(255,0,127,.2)}
+.rf-btns{display:flex;gap:var(--space-02);margin-top:var(--space-02)}
+.rf-btn{flex:1;padding:6px;border:1px solid var(--border-subtle);background:transparent;color:var(--text-secondary);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.rf-btn:hover{background:var(--surface-03)}
+.rf-btn.save{border-color:var(--signal);color:var(--signal)}
+
+/* ═══ SETLIST EDITOR ═══ */
+.setlist-overlay{position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:500;display:flex;flex-direction:column;overflow:hidden}
+.setlist-header{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:var(--space-03) var(--space-04);border-bottom:1px solid var(--border-subtle)}
+.setlist-title{font-family:'Anton',sans-serif;font-size:var(--type-title);color:var(--text-primary);text-transform:uppercase}
+.setlist-close{background:transparent;border:1px solid var(--border-subtle);color:var(--text-secondary);font-family:'Space Mono',monospace;font-size:10px;padding:6px 16px;cursor:pointer;text-transform:uppercase;letter-spacing:.08em}
+.setlist-close:hover{background:var(--surface-03)}
+.setlist-body{flex:1;overflow-y:auto;padding:var(--space-04)}
+.setlist-section{margin-bottom:var(--space-04)}
+.setlist-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-02);padding-bottom:var(--space-01);border-bottom:1px solid var(--border-subtle)}
+.setlist-section-name{font-family:'Space Mono',monospace;font-size:var(--type-meta);color:var(--signal);text-transform:uppercase;letter-spacing:.12em}
+.setlist-section-count{font-family:'Space Mono',monospace;font-size:var(--type-meta);color:var(--text-disabled)}
+.setlist-slide{display:flex;align-items:center;gap:var(--space-02);padding:var(--space-02) var(--space-03);border:1px solid var(--border-subtle);background:var(--surface-01);margin-bottom:2px;cursor:grab;user-select:none;min-height:36px}
+.setlist-slide:active{cursor:grabbing}
+.setlist-slide.sortable-ghost{opacity:.3;border-color:var(--signal)}
+.setlist-slide.sortable-chosen{border-color:var(--border-active);box-shadow:var(--glow-white)}
+.setlist-slide-grip{color:var(--text-disabled);font-size:14px;flex-shrink:0;width:20px;text-align:center}
+.setlist-slide-type{font-family:'Space Mono',monospace;font-size:9px;color:var(--text-disabled);text-transform:uppercase;letter-spacing:.08em;min-width:80px;flex-shrink:0}
+.setlist-slide-text{font-family:'Space Mono',monospace;font-size:11px;color:var(--text-primary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.setlist-slide-answer{font-family:'Space Mono',monospace;font-size:9px;color:var(--text-secondary);flex-shrink:0;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.setlist-slide-actions{display:flex;gap:4px;flex-shrink:0}
+.setlist-btn{background:transparent;border:1px solid var(--border-subtle);color:var(--text-secondary);font-family:'Space Mono',monospace;font-size:9px;padding:3px 8px;cursor:pointer;text-transform:uppercase;letter-spacing:.06em}
+.setlist-btn:hover{background:var(--surface-03)}
+.setlist-btn.accent{border-color:var(--signal);color:var(--signal)}
+.setlist-btn.accent:hover{background:rgba(255,0,127,.1)}
+.setlist-alt-popup{position:absolute;right:0;top:100%;background:var(--surface-02);border:1px solid var(--border-subtle);z-index:10;min-width:200px;max-width:320px;box-shadow:0 4px 16px rgba(0,0,0,.8)}
+.setlist-alt-item{padding:var(--space-02) var(--space-03);cursor:pointer;font-family:'Space Mono',monospace;font-size:10px;color:var(--text-secondary);border-bottom:1px solid var(--border-subtle)}
+.setlist-alt-item:hover{background:var(--surface-03);color:var(--text-primary)}
+.setlist-alt-item:last-child{border-bottom:none}
+.setlist-footer{flex-shrink:0;display:flex;align-items:center;gap:var(--space-03);padding:var(--space-03) var(--space-04);border-top:1px solid var(--border-subtle);background:var(--surface-01);flex-wrap:wrap}
+.setlist-input{background:var(--surface-02);border:1px solid var(--border-subtle);color:var(--text-primary);font-family:'Space Mono',monospace;font-size:11px;padding:6px 12px;outline:none;min-width:180px}
+.setlist-input:focus{border-color:var(--signal)}
+.setlist-import-area{padding:var(--space-03) var(--space-04);border-top:1px solid var(--border-subtle);background:var(--surface-02)}
+.setlist-import-textarea{width:100%;min-height:80px;background:var(--surface-01);border:1px solid var(--border-subtle);color:var(--text-primary);font-family:'Space Mono',monospace;font-size:10px;padding:var(--space-02);resize:vertical;outline:none;box-sizing:border-box}
+.setlist-import-textarea:focus{border-color:var(--signal)}
+.setlist-import-error{font-family:'Space Mono',monospace;font-size:10px;color:var(--signal);margin-top:var(--space-02)}
+.setlist-load-list{position:absolute;bottom:100%;left:0;background:var(--surface-02);border:1px solid var(--border-subtle);z-index:10;min-width:250px;max-height:200px;overflow-y:auto;box-shadow:0 -4px 16px rgba(0,0,0,.8)}
+.setlist-load-item{display:flex;align-items:center;justify-content:space-between;padding:var(--space-02) var(--space-03);cursor:pointer;font-family:'Space Mono',monospace;font-size:10px;color:var(--text-secondary);border-bottom:1px solid var(--border-subtle)}
+.setlist-load-item:hover{background:var(--surface-03);color:var(--text-primary)}
+.setlist-load-del{color:var(--text-disabled);cursor:pointer;padding:2px 6px;font-size:12px}
+.setlist-load-del:hover{color:var(--signal)}
+.setlist-lock-badge{font-family:'Space Mono',monospace;font-size:10px;color:var(--signal);text-transform:uppercase;letter-spacing:.1em;border:1px solid var(--signal);padding:4px 12px;box-shadow:var(--glow-signal)}
+.setlist-live-btn{background:transparent;border:1px solid var(--signal);color:var(--signal);font-family:'Space Mono',monospace;font-size:10px;padding:6px 16px;cursor:pointer;text-transform:uppercase;letter-spacing:.08em;margin-left:auto}
+.setlist-live-btn:hover{background:rgba(255,0,127,.1)}
+
+/* ═══ MOBILE OPERATOR REMOTE ═══ */
+@media(max-width:768px),(max-height:500px){
+  .mob-shell{position:fixed;inset:0;background:var(--void);display:flex;flex-direction:column;overflow:hidden;font-family:'Space Mono',monospace}
+  .mob-top{flex-shrink:0;height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 var(--space-03);border-bottom:1px solid var(--border-subtle);background:var(--surface-01)}
+  .mob-top-section{font-size:10px;color:var(--signal);letter-spacing:.12em;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:50%}
+  .mob-top-counter{font-size:10px;color:var(--text-secondary);letter-spacing:.08em}
+  .mob-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:var(--space-03)}
+  .mob-card{background:var(--surface-01);border:1px solid var(--border-active);padding:var(--space-03);margin-bottom:var(--space-03)}
+  .mob-card-type{font-size:10px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:var(--space-02)}
+  .mob-card-title{font-family:'Anton',sans-serif;font-size:clamp(24px,6vw,36px);color:var(--text-primary);text-transform:uppercase;text-align:center;line-height:1.1}
+  .mob-card-answer{font-size:var(--type-label);color:var(--text-secondary);text-align:center;margin-top:var(--space-02)}
+  .mob-card-notes{font-size:10px;color:var(--text-secondary);margin-top:var(--space-02);padding-top:var(--space-02);border-top:1px solid var(--border-subtle)}
+  .mob-reveal{display:inline-block;font-size:10px;letter-spacing:.1em;padding:4px 10px;text-transform:uppercase;cursor:pointer;margin-top:var(--space-02)}
+  .mob-reveal.hidden{background:var(--surface-03);color:var(--text-secondary)}
+  .mob-reveal.revealed{background:var(--signal);color:var(--void);box-shadow:var(--glow-signal)}
+  .mob-next{background:var(--surface-02);padding:var(--space-03);opacity:.6;margin-bottom:var(--space-03)}
+  .mob-next-label{font-size:10px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+  .mob-next-text{font-family:'Anton',sans-serif;font-size:var(--type-label);color:var(--text-secondary);text-transform:uppercase}
+  .mob-section-chips{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:var(--space-02);margin-bottom:var(--space-03);scrollbar-width:none}
+  .mob-section-chips::-webkit-scrollbar{display:none}
+  .mob-chip{flex-shrink:0;padding:6px 12px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--border-subtle);background:transparent;color:var(--text-secondary);cursor:pointer;white-space:nowrap}
+  .mob-chip.active{border-color:var(--light);color:var(--text-primary);box-shadow:inset 0 0 8px rgba(255,255,255,.1)}
+  .mob-scores{display:flex;gap:var(--space-02);margin-bottom:var(--space-03)}
+  .mob-score-team{flex:1;background:var(--surface-02);padding:var(--space-02);text-align:center}
+  .mob-score-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+  .mob-score-val{font-family:'Space Mono',monospace;font-size:var(--type-title);font-weight:700}
+  .mob-score-btns{display:flex;gap:4px;justify-content:center;margin-top:6px}
+  .mob-score-btn{width:40px;height:40px;border:1px solid var(--border-subtle);background:transparent;color:var(--text-primary);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .mob-score-btn:active{background:var(--surface-03)}
+  .mob-bottom{flex-shrink:0;height:60px;display:flex;border-top:1px solid var(--border-subtle);background:var(--surface-01)}
+  .mob-nav-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;background:transparent;border:none;color:var(--text-primary);font-family:'Space Mono',monospace;font-size:var(--type-label);letter-spacing:.08em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .mob-nav-btn:active{background:var(--surface-03)}
+  .mob-nav-btn.primary{background:var(--signal);color:var(--void);font-weight:700}
+  .mob-nav-divider{width:1px;background:var(--border-subtle)}
+  .mob-signout{font-size:10px;color:var(--text-disabled);letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid var(--border-subtle);padding:4px 12px;cursor:pointer;margin-top:var(--space-03)}
+}
+
 /* Audience View wrapper */
 .audience-view{position:fixed;inset:0;background:var(--void)}
 .audience-view .slide-wrapper{position:absolute;inset:0}
@@ -472,16 +567,54 @@ function drawQR(canvas){
 // ═══════════════════════════════════════
 // STATE (inlined from lib/state.js)
 // ═══════════════════════════════════════
-const initialState={show:null,currentSlide:0,scores:[0,0],revealState:{},showScoreboard:false,showShortcuts:false,showHostPanel:false,muted:true,receipts:0};
-function flattenSlides(show){if(!show)return[];return show.sections.flatMap(s=>s.slides)}
-function slideToSection(show,flatIndex){let count=0;for(let i=0;i<show.sections.length;i++){count+=show.sections[i].slides.length;if(flatIndex<count)return i}return show.sections.length-1}
-function getSectionStartIndex(show,sectionIndex){let count=0;for(let i=0;i<sectionIndex;i++){count+=show.sections[i].slides.length}return count}
+const initialState={show:null,currentSlide:0,scores:[0,0],revealState:{},showScoreboard:false,showShortcuts:false,showHostPanel:false,muted:true,receipts:0,redFlags:[],liveMode:false,showSetlistEditor:false};
+function flattenSlides(show,redFlags){
+  if(!show)return[];
+  var flat=show.sections.flatMap(function(s){return s.slides});
+  if(!redFlags||!redFlags.length)return flat;
+  var fi=flat.findIndex(function(s){return s.type==='fishbowl'});
+  if(fi<0)return flat;
+  var rfSlides=redFlags.map(function(text,i){return{id:'rf-'+i,type:'red_flag',content:{primary:text,secondary:(i+1)+' / '+redFlags.length},reveal_state:'hidden',team:'neutral',timer_seconds:null,host_notes:null,points:null}});
+  var result=flat.slice();
+  result.splice(fi+1,0,...rfSlides);
+  return result;
+}
+function redFlagSectionOffset(show,redFlags){
+  if(!show||!redFlags||!redFlags.length)return{sectionIdx:-1,offset:0};
+  var count=0;
+  for(var i=0;i<show.sections.length;i++){
+    for(var j=0;j<show.sections[i].slides.length;j++){
+      if(show.sections[i].slides[j].type==='fishbowl')return{sectionIdx:i,offset:redFlags.length};
+      count++;
+    }
+  }
+  return{sectionIdx:-1,offset:0};
+}
+function slideToSection(show,flatIndex,redFlags){
+  var rfo=redFlagSectionOffset(show,redFlags);
+  var count=0;
+  for(var i=0;i<show.sections.length;i++){
+    count+=show.sections[i].slides.length;
+    if(i===rfo.sectionIdx)count+=rfo.offset;
+    if(flatIndex<count)return i;
+  }
+  return show.sections.length-1;
+}
+function getSectionStartIndex(show,sectionIndex,redFlags){
+  var rfo=redFlagSectionOffset(show,redFlags);
+  var count=0;
+  for(var i=0;i<sectionIndex;i++){
+    count+=show.sections[i].slides.length;
+    if(i===rfo.sectionIdx)count+=rfo.offset;
+  }
+  return count;
+}
 function reducer(state,action){
-  const flat=state.show?flattenSlides(state.show):[];const maxSlide=Math.max(0,flat.length-1);
+  const flat=state.show?flattenSlides(state.show,state.redFlags):[];const maxSlide=Math.max(0,flat.length-1);
   switch(action.type){
     case'NEXT_SLIDE':return{...state,currentSlide:Math.min(state.currentSlide+1,maxSlide)};
     case'PREV_SLIDE':return{...state,currentSlide:Math.max(state.currentSlide-1,0)};
-    case'JUMP_SECTION':{const idx=getSectionStartIndex(state.show,action.payload);return{...state,currentSlide:Math.min(idx,maxSlide)}}
+    case'JUMP_SECTION':{const idx=getSectionStartIndex(state.show,action.payload,state.redFlags);return{...state,currentSlide:Math.min(idx,maxSlide)}}
     case'GO_TO_SLIDE':return{...state,currentSlide:Math.max(0,Math.min(action.payload,maxSlide))};
     case'SCORE_CYAN':{const[cy,pk]=state.scores;return{...state,scores:[Math.max(0,cy+action.payload),pk]}}
     case'SCORE_PINK':{const[cy,pk]=state.scores;return{...state,scores:[cy,Math.max(0,pk+action.payload)]}}
@@ -489,13 +622,19 @@ function reducer(state,action){
     case'TOGGLE_SCOREBOARD':return{...state,showScoreboard:!state.showScoreboard};
     case'TOGGLE_SHORTCUTS':return{...state,showShortcuts:!state.showShortcuts};
     case'TOGGLE_MUTE':return{...state,muted:!state.muted};
-    case'CLOSE_OVERLAYS':return{...state,showShortcuts:false,showHostPanel:false};
+    case'CLOSE_OVERLAYS':return{...state,showShortcuts:false,showHostPanel:false,showSetlistEditor:false};
     case'INCREMENT_RECEIPTS':return{...state,receipts:state.receipts+1};
     case'SET_SCORES':return{...state,scores:action.payload};
     case'SET_REVEAL_STATE':return{...state,revealState:action.payload};
     case'SET_SCOREBOARD':return{...state,showScoreboard:action.payload};
     case'SET_MUTED':return{...state,muted:action.payload};
     case'SET_SHOW':return{...state,show:action.payload,currentSlide:0};
+    case'SET_RED_FLAGS':{var newFlags=action.payload.slice(0,20);if(action.fromSync)return{...state,redFlags:newFlags};var oldFlat=flattenSlides(state.show,state.redFlags);var newFlat=flattenSlides(state.show,newFlags);var curSlide=oldFlat[state.currentSlide];var ci=state.currentSlide;if(curSlide){var ni=newFlat.findIndex(function(s){return s.id===curSlide.id});if(ni>=0)ci=ni}return{...state,redFlags:newFlags,currentSlide:ci}}
+    case'TOGGLE_SETLIST_EDITOR':if(state.liveMode)return state;return{...state,showSetlistEditor:!state.showSetlistEditor};
+    case'SET_LIVE_MODE':return{...state,liveMode:true,showSetlistEditor:false};
+    case'REORDER_SLIDES':{if(state.liveMode)return state;var rsi=action.payload.sectionIndex;var ns=state.show.sections.map(function(sec,i){return i!==rsi?sec:{...sec,slides:action.payload.newOrder}});return{...state,show:{...state.show,sections:ns}}}
+    case'SWAP_SLIDE':{if(state.liveMode)return state;var swSi=action.payload.sectionIndex;var swSli=action.payload.slideIndex;var repl=action.payload.newSlide;var swSecs=state.show.sections.map(function(sec,i){if(i!==swSi)return sec;var swSlides=sec.slides.map(function(slide,j){if(j!==swSli)return slide;var alts=(repl.alternates||[]).filter(function(a){return a.id!==slide.id});var orig={id:slide.id,type:slide.type,content:slide.content};if(slide.alternates)orig.alternates=slide.alternates;alts.push(orig);return{...repl,alternates:alts}});return{...sec,slides:swSlides}});return{...state,show:{...state.show,sections:swSecs}}}
+    case'IMPORT_SHOW':return{...state,show:action.payload,currentSlide:0,liveMode:false,showSetlistEditor:false};
     default:return state;
   }
 }
@@ -519,6 +658,9 @@ function AttractSlide({slide}){
 }
 function FishbowlSlide({slide}){
   return <><div className="nb nb-pk"></div><div className="D hp" style={{fontSize:'clamp(28px,6vw,64px)',marginBottom:16,padding:'0 8%'}}>{slide.content.primary}</div><div className="M hs" style={{fontSize:'clamp(12px,2.5vw,22px)',padding:'0 8%'}}>{slide.content.secondary||''}</div></>;
+}
+function RedFlagSlide({slide}){
+  return <><div className="nb nb-pk"></div><div className="D hp" style={{fontSize:'clamp(28px,6vw,64px)',color:'var(--signal)',textShadow:'var(--glow-signal)',marginBottom:16,padding:'0 8%'}}>{slide.content.primary}</div><div className="M hs" style={{fontSize:'clamp(12px,2.5vw,22px)',color:'var(--text-secondary)',padding:'0 8%'}}>{slide.content.secondary||''}</div></>;
 }
 function RoundTitleSlide({slide}){
   return <><div className="D hw" style={{fontSize:'clamp(50px,10vw,150px)',marginBottom:10}}>{slide.content.primary||''}</div>{slide.content.secondary?<div className="D hw" style={{fontSize:aSz(slide.content.secondary),...nwStyle()}}>{slide.content.secondary}</div>:null}</>;
@@ -589,7 +731,7 @@ function AnswerSheetSlide({slide}){
 // SLIDE RENDERER DISPATCHER
 // ═══════════════════════════════════════
 const RENDERERS={
-  attract:AttractSlide,fishbowl:FishbowlSlide,round_title:RoundTitleSlide,tier_title:TierTitleSlide,
+  attract:AttractSlide,fishbowl:FishbowlSlide,red_flag:RedFlagSlide,round_title:RoundTitleSlide,tier_title:TierTitleSlide,
   bonus_marker:BonusMarkerSlide,source_q:SourceQSlide,source_a:SourceASlide,acronym_q:AcronymQSlide,
   acronym_a:AcronymASlide,fluency_line:FluencyLineSlide,fluency_source:FluencySourceSlide,
   score:ScoreSlide,intermission:IntermissionSlide,doa_vote:DoaVoteSlide,warning:WarningSlide,
@@ -621,6 +763,7 @@ function LauncherView({showName}){
         <a className="launcher-btn" href="/audience" target="_blank" rel="noopener"><span>AUDIENCE</span><span className="launcher-btn-sub">SCREEN OUTPUT</span></a>
         <a className="launcher-btn" href="/answers" target="_blank" rel="noopener"><span>ANSWERS</span><span className="launcher-btn-sub">ANSWER SHEET</span></a>
         <a className="launcher-btn" href="/vote" target="_blank" rel="noopener"><span>VOTE</span><span className="launcher-btn-sub">AUDIENCE PHONES</span></a>
+        <a className="launcher-btn" href="/builder" style={{gridColumn:'1 / -1'}}><span>BUILDER</span><span className="launcher-btn-sub">DECK GENERATOR</span></a>
       </div>
     </div>
   );
@@ -630,7 +773,7 @@ function LauncherView({showName}){
 // AUDIENCE VIEW (The Monolith)
 // ═══════════════════════════════════════
 function AudienceView({state,dispatch,slideRef:externalSlideRef,rewardTier}){
-  const flat=useMemo(()=>flattenSlides(state.show),[state.show]);
+  const flat=useMemo(()=>flattenSlides(state.show,state.redFlags),[state.show,state.redFlags]);
   const slide=flat[state.currentSlide];
   const prevSlideRef=useRef(null);
   const localSlideRef=useRef(null);
@@ -681,15 +824,16 @@ function AudienceView({state,dispatch,slideRef:externalSlideRef,rewardTier}){
 // ═══════════════════════════════════════
 // OPERATOR VIEW COMPONENTS
 // ═══════════════════════════════════════
-function SectionNav({show,currentSlide,dispatch}){
-  const sectionIdx=slideToSection(show,currentSlide);
+function SectionNav({show,currentSlide,dispatch,redFlags}){
+  const sectionIdx=slideToSection(show,currentSlide,redFlags);
+  const rfo=redFlagSectionOffset(show,redFlags);
   return (
     <div className="section-nav">
       <div style={{padding:'var(--space-03)',color:'var(--signal)',fontFamily:"'Space Mono',monospace",fontSize:11,letterSpacing:'.15em',borderBottom:'1px solid var(--border-subtle)',marginBottom:'var(--space-02)'}}>SECTIONS</div>
       {show.sections.map((sec,i)=>(
         <div key={sec.id} className={'section-nav-item'+(i===sectionIdx?' active':'')} onClick={()=>dispatch({type:'JUMP_SECTION',payload:i})}>
           <span style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',flex:1,marginRight:8}}>{sec.name}</span>
-          <span className="section-nav-count">{sec.slides.length}</span>
+          <span className="section-nav-count">{sec.slides.length+(i===rfo.sectionIdx?rfo.offset:0)}</span>
         </div>
       ))}
     </div>
@@ -844,7 +988,7 @@ function ShortcutOverlay({onClose}){
     ['Q / W','CYAN SCORE +/-'],['P / O','PINK SCORE +/-'],['1 \u2013 9','JUMP TO SECTION'],
     ['T','START TIMER'],['A','AUTO-TIMER'],['D','AUTO-ADVANCE'],
     ['C','ADD RECEIPT'],['G','REWARD TIER'],
-    ['S','TOGGLE SCOREBOARD'],['M','MUTE / UNMUTE'],['F','FULLSCREEN'],
+    ['L','SETLIST EDITOR'],['S','TOGGLE SCOREBOARD'],['M','MUTE / UNMUTE'],['F','FULLSCREEN'],
     ['?','THIS MENU'],['ESC','CLOSE'],
   ];
   return (
@@ -891,23 +1035,354 @@ function AutoToggles({autoTimer,autoAdvance,setAutoTimer,setAutoAdvance,muted,on
   );
 }
 
+function RedFlagForm({redFlags,dispatch}){
+  const[expanded,setExpanded]=useState(false);
+  const[text,setText]=useState(redFlags.join('\n'));
+  // Sync textarea when redFlags change externally (e.g. loaded from localStorage)
+  useEffect(function(){setText(redFlags.join('\n'))},[redFlags.length]);
+  function handleSave(){
+    var flags=text.split('\n').map(function(l){return l.trim()}).filter(Boolean).slice(0,20);
+    dispatch({type:'SET_RED_FLAGS',payload:flags});
+    try{localStorage.setItem('lineconic_redflags',JSON.stringify(flags))}catch(e){}
+  }
+  function handleClear(){
+    setText('');
+    dispatch({type:'SET_RED_FLAGS',payload:[]});
+    try{localStorage.removeItem('lineconic_redflags')}catch(e){}
+  }
+  return(
+    <div className="rf-panel">
+      <div className="rf-header" onClick={function(){setExpanded(!expanded)}}>
+        <span className="rf-title">RED FLAGS</span>
+        <span className="rf-count">{redFlags.length}/20 {expanded?'▾':'▸'}</span>
+      </div>
+      {expanded&&<div className="rf-body">
+        <textarea className="rf-textarea" value={text} onChange={function(e){setText(e.target.value)}} placeholder="One red flag per line...&#10;e.g. Still uses Internet Explorer&#10;Claps when the plane lands" maxLength={2000}/>
+        <div className="rf-btns">
+          <button className="rf-btn save" onClick={handleSave}>SAVE</button>
+          <button className="rf-btn" onClick={handleClear}>CLEAR</button>
+        </div>
+      </div>}
+    </div>
+  );
+}
+
+
+
+function MobileOperatorLayout({state,dispatch,flat,slide,nextSlide,onTimerAction,autoTimer,autoAdvance,setAutoTimer,setAutoAdvance,autoAdvanceRef,autoTimerDuration}){
+  const sectionIdx=slideToSection(state.show,state.currentSlide,state.redFlags);
+  const revealed=(state.revealState[slide.id]||'hidden')==='revealed';
+  const chipsRef=useRef(null);
+
+  // Auto-scroll active chip into view
+  useEffect(function(){
+    if(!chipsRef.current)return;
+    var active=chipsRef.current.querySelector('.mob-chip.active');
+    if(active)active.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+  },[sectionIdx]);
+
+  function navPrev(){stopTimerSystem();if(onTimerAction)onTimerAction('stop');dispatch({type:'PREV_SLIDE'})}
+  function navNext(){stopTimerSystem();if(onTimerAction)onTimerAction('stop');dispatch({type:'NEXT_SLIDE'})}
+
+  return(
+    <div className="mob-shell">
+      {/* Top bar */}
+      <div className="mob-top">
+        <div className="mob-top-section">{state.show.sections[sectionIdx]?state.show.sections[sectionIdx].name:''}</div>
+        <div className="mob-top-counter">{state.currentSlide+1}/{flat.length}</div>
+      </div>
+
+      {/* Scrollable body */}
+      <div className="mob-scroll">
+        {/* Section chips */}
+        <div className="mob-section-chips" ref={chipsRef}>
+          {state.show.sections.map(function(sec,i){
+            return <button key={sec.id} className={'mob-chip'+(i===sectionIdx?' active':'')} onClick={function(){dispatch({type:'JUMP_SECTION',payload:i})}}>{sec.name}</button>;
+          })}
+        </div>
+
+        {/* Current slide */}
+        <div className="mob-card">
+          <div className="mob-card-type">{slide.type}</div>
+          <div className="mob-card-title">{slide.content.primary||''}</div>
+          {slide.content.answer&&<div className="mob-card-answer">{slide.content.answer}</div>}
+          {slide.content.source&&<div style={{fontSize:10,color:'var(--text-disabled)',textAlign:'center',marginTop:4}}>{slide.content.source}</div>}
+          {slide.content.secondary&&<div style={{fontSize:10,color:'var(--text-disabled)',textAlign:'center',marginTop:4}}>{slide.content.secondary}</div>}
+          <div style={{textAlign:'center'}}>
+            <span className={'mob-reveal '+(revealed?'revealed':'hidden')} onClick={function(){dispatch({type:'TOGGLE_REVEAL'})}}>{revealed?'REVEALED':'HIDDEN'}</span>
+          </div>
+          {slide.host_notes&&<div className="mob-card-notes">// {slide.host_notes}</div>}
+        </div>
+
+        {/* Next slide preview */}
+        <div className="mob-next">
+          <div className="mob-next-label">NEXT</div>
+          {nextSlide
+            ?<div><div style={{fontSize:10,color:'var(--text-secondary)',textTransform:'uppercase',letterSpacing:'.08em'}}>{nextSlide.type}</div><div className="mob-next-text">{nextSlide.content.primary||''}</div></div>
+            :<div style={{fontSize:10,color:'var(--text-disabled)'}}>END OF SHOW</div>
+          }
+        </div>
+
+        {/* Scores */}
+        <div className="mob-scores">
+          <div className="mob-score-team">
+            <div className="mob-score-label" style={{color:'var(--text-secondary)'}}>CYAN</div>
+            <div className="mob-score-val" style={{color:'var(--cyan)',textShadow:'var(--glow-cyan)'}}>{state.scores[0]}</div>
+            <div className="mob-score-btns">
+              <button className="mob-score-btn" onClick={function(){dispatch({type:'SCORE_CYAN',payload:-1})}}>-</button>
+              <button className="mob-score-btn" onClick={function(){dispatch({type:'SCORE_CYAN',payload:1})}}>+</button>
+            </div>
+          </div>
+          <div className="mob-score-team">
+            <div className="mob-score-label" style={{color:'var(--text-secondary)'}}>PINK</div>
+            <div className="mob-score-val" style={{color:'var(--signal)',textShadow:'var(--glow-signal)'}}>{state.scores[1]}</div>
+            <div className="mob-score-btns">
+              <button className="mob-score-btn" onClick={function(){dispatch({type:'SCORE_PINK',payload:-1})}}>-</button>
+              <button className="mob-score-btn" onClick={function(){dispatch({type:'SCORE_PINK',payload:1})}}>+</button>
+            </div>
+          </div>
+        </div>
+
+        {/* Timer */}
+        <TimerDisplay onTimerAction={onTimerAction} autoAdvanceRef={autoAdvanceRef} autoTimerDuration={autoTimerDuration} dispatch={dispatch}/>
+
+        {/* Controls */}
+        <div style={{marginTop:'var(--space-03)'}}>
+          <AutoToggles autoTimer={autoTimer} autoAdvance={autoAdvance} setAutoTimer={setAutoTimer} setAutoAdvance={setAutoAdvance} muted={state.muted} onToggleMute={function(){dispatch({type:'TOGGLE_MUTE'})}}/>
+        </div>
+
+        {/* Setlist editor button */}
+        <div style={{marginTop:'var(--space-03)'}}>
+          <button className="setlist-btn" onClick={function(){dispatch({type:'TOGGLE_SETLIST_EDITOR'})}} style={{width:'100%',padding:'10px 12px',fontSize:11}}>{state.liveMode?'LIVE \uD83D\uDD34':'SETLIST EDITOR'}</button>
+        </div>
+
+        {/* Red flag form */}
+        <div style={{marginTop:'var(--space-03)'}}>
+          <RedFlagForm redFlags={state.redFlags} dispatch={dispatch}/>
+        </div>
+
+        {/* Connection + Sign out */}
+        <div style={{marginTop:'var(--space-03)',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+          <ConnectionSignal/>
+          <button className="mob-signout" onClick={function(){if(fbauth)fbauth.signOut()}}>SIGN OUT</button>
+        </div>
+      </div>
+
+      {/* Bottom nav */}
+      <div className="mob-bottom">
+        <button className="mob-nav-btn" onClick={navPrev}>&larr; PREV</button>
+        <div className="mob-nav-divider"></div>
+        <button className="mob-nav-btn primary" onClick={navNext}>NEXT &rarr;</button>
+      </div>
+      {state.showSetlistEditor&&<SetlistEditor show={state.show} dispatch={dispatch} liveMode={state.liveMode}/>}
+    </div>
+  );
+}
+
+function SetlistEditor({show,dispatch,liveMode}){
+  const sectionRefs=useRef([]);
+  const sortableInstances=useRef([]);
+  const[swapOpen,setSwapOpen]=useState(null); // {si,sli}
+  const[saveName,setSaveName]=useState('');
+  const[showLoad,setShowLoad]=useState(false);
+  const[showImport,setShowImport]=useState(false);
+  const[importText,setImportText]=useState('');
+  const[importErr,setImportErr]=useState('');
+  const[savedList,setSavedList]=useState(function(){try{return JSON.parse(localStorage.getItem('lineconic_setlists'))||[]}catch(e){return[]}});
+  const fileRef=useRef(null);
+
+  // Attach SortableJS to each section
+  useEffect(function(){
+    if(liveMode)return;
+    sortableInstances.current.forEach(function(s){if(s)try{s.destroy()}catch(e){}});
+    sortableInstances.current=[];
+    sectionRefs.current.forEach(function(el,si){
+      if(!el)return;
+      var inst=new Sortable(el,{
+        animation:0,
+        ghostClass:'sortable-ghost',
+        chosenClass:'sortable-chosen',
+        handle:'.setlist-slide-grip',
+        onEnd:function(evt){
+          var sec=show.sections[si];
+          var slides=sec.slides.slice();
+          var moved=slides.splice(evt.oldIndex,1)[0];
+          slides.splice(evt.newIndex,0,moved);
+          dispatch({type:'REORDER_SLIDES',payload:{sectionIndex:si,newOrder:slides}});
+        }
+      });
+      sortableInstances.current.push(inst);
+    });
+    return function(){sortableInstances.current.forEach(function(s){if(s)try{s.destroy()}catch(e){}});sortableInstances.current=[]};
+  },[show.sections,liveMode]);
+
+  function handleSwap(si,sli,alt){
+    dispatch({type:'SWAP_SLIDE',payload:{sectionIndex:si,slideIndex:sli,newSlide:alt}});
+    setSwapOpen(null);
+  }
+
+  function handleSave(){
+    if(!saveName.trim())return;
+    var entry={name:saveName.trim(),savedAt:Date.now(),showId:show.id,sections:show.sections};
+    var list=savedList.concat([entry]);
+    localStorage.setItem('lineconic_setlists',JSON.stringify(list));
+    setSavedList(list);
+    setSaveName('');
+  }
+
+  function handleLoad(entry){
+    var restored={id:entry.showId||show.id,name:show.name,sections:entry.sections,created:show.created};
+    dispatch({type:'IMPORT_SHOW',payload:restored});
+    setShowLoad(false);
+  }
+
+  function handleDeleteSave(idx){
+    var list=savedList.filter(function(_,i){return i!==idx});
+    localStorage.setItem('lineconic_setlists',JSON.stringify(list));
+    setSavedList(list);
+  }
+
+  function parseImport(raw){
+    setImportErr('');
+    try{
+      var obj=JSON.parse(raw);
+      if(!obj.sections||!Array.isArray(obj.sections)){setImportErr('MISSING SECTIONS ARRAY');return}
+      if(!obj.id&&!obj.name){setImportErr('MISSING ID OR NAME');return}
+      dispatch({type:'IMPORT_SHOW',payload:obj});
+      localStorage.setItem('lineconic_show',JSON.stringify(obj));
+      setShowImport(false);setImportText('');
+    }catch(e){setImportErr('INVALID JSON: '+e.message)}
+  }
+
+  function handleFile(e){
+    var f=e.target.files[0];if(!f)return;
+    var reader=new FileReader();
+    reader.onload=function(ev){parseImport(ev.target.result)};
+    reader.readAsText(f);
+  }
+
+  function handleGoLive(){dispatch({type:'SET_LIVE_MODE'})}
+
+  function slideLabel(s){
+    var p=s.content&&s.content.primary||'';
+    if(p.length>60)p=p.slice(0,57)+'...';
+    return p;
+  }
+
+  return(
+    <div className="setlist-overlay" onClick={function(e){if(e.target===e.currentTarget)dispatch({type:'TOGGLE_SETLIST_EDITOR'})}}>
+      <div className="setlist-header">
+        <div className="setlist-title">SETLIST EDITOR</div>
+        <div style={{display:'flex',alignItems:'center',gap:'var(--space-03)'}}>
+          {liveMode&&<div className="setlist-lock-badge">LOCKED — LIVE</div>}
+          <button className="setlist-close" onClick={function(){dispatch({type:'TOGGLE_SETLIST_EDITOR'})}}>CLOSE</button>
+        </div>
+      </div>
+      <div className={'setlist-body'+(liveMode?' setlist-locked':'')}>
+        {show.sections.map(function(sec,si){
+          return(
+            <div className="setlist-section" key={sec.id||si}>
+              <div className="setlist-section-head">
+                <span className="setlist-section-name">{sec.name}</span>
+                <span className="setlist-section-count">{sec.slides.length}</span>
+              </div>
+              <div ref={function(el){sectionRefs.current[si]=el}}>
+                {sec.slides.map(function(slide,sli){
+                  var hasAlts=slide.alternates&&slide.alternates.length>0;
+                  var isSwapOpen=swapOpen&&swapOpen.si===si&&swapOpen.sli===sli;
+                  return(
+                    <div className="setlist-slide" key={slide.id||si+'-'+sli} data-id={slide.id}>
+                      <div className="setlist-slide-grip">&#x2807;</div>
+                      <div className="setlist-slide-type">{slide.type.replace(/_/g,' ')}</div>
+                      <div className="setlist-slide-text">{slideLabel(slide)}</div>
+                      {slide.content&&slide.content.answer&&<div className="setlist-slide-answer">{slide.content.answer}</div>}
+                      <div className="setlist-slide-actions">
+                        {hasAlts&&<div style={{position:'relative'}}>
+                          <button className={'setlist-btn'+(isSwapOpen?' accent':'')} onClick={function(){setSwapOpen(isSwapOpen?null:{si:si,sli:sli})}}>SWAP</button>
+                          {isSwapOpen&&<div className="setlist-alt-popup">
+                            {slide.alternates.map(function(alt,ai){
+                              return <div className="setlist-alt-item" key={alt.id||ai} onClick={function(){handleSwap(si,sli,alt)}}>
+                                <span style={{flex:1}}>{alt.content&&alt.content.primary||alt.id}</span>
+                                {alt.content&&alt.content.answer&&<span style={{color:'var(--text-disabled)',fontSize:9}}>{alt.content.answer}</span>}
+                              </div>;
+                            })}
+                          </div>}
+                        </div>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="setlist-footer">
+        <input className="setlist-input" placeholder="Setlist name..." value={saveName} onChange={function(e){setSaveName(e.target.value)}} onKeyDown={function(e){if(e.key==='Enter')handleSave()}}/>
+        <button className="setlist-btn accent" onClick={handleSave} disabled={!saveName.trim()}>SAVE</button>
+        <div style={{position:'relative'}}>
+          <button className="setlist-btn" onClick={function(){setShowLoad(!showLoad);setShowImport(false)}}>LOAD{savedList.length?' ('+savedList.length+')':''}</button>
+          {showLoad&&<div className="setlist-load-list">
+            {savedList.length===0&&<div style={{padding:8,color:'var(--text-disabled)',fontSize:10}}>NO SAVED SETLISTS</div>}
+            {savedList.map(function(entry,i){
+              return <div className="setlist-load-item" key={i}>
+                <span onClick={function(){handleLoad(entry)}} style={{flex:1,cursor:'pointer'}}>{entry.name}</span>
+                <span style={{color:'var(--text-disabled)',fontSize:9}}>{new Date(entry.savedAt).toLocaleDateString()}</span>
+                <button className="setlist-load-del" onClick={function(e){e.stopPropagation();handleDeleteSave(i)}}>&times;</button>
+              </div>;
+            })}
+          </div>}
+        </div>
+        <div style={{position:'relative'}}>
+          <button className="setlist-btn" onClick={function(){setShowImport(!showImport);setShowLoad(false)}}>IMPORT</button>
+          {showImport&&<div className="setlist-alt-popup" style={{width:320,right:0,bottom:'100%',marginBottom:8}}>
+            <div style={{padding:'8px 12px',borderBottom:'1px solid var(--border-subtle)'}}>
+              <button className="setlist-btn" onClick={function(){fileRef.current&&fileRef.current.click()}} style={{width:'100%',marginBottom:8}}>CHOOSE FILE</button>
+              <input ref={fileRef} type="file" accept=".json" style={{display:'none'}} onChange={handleFile}/>
+              <textarea className="setlist-import-textarea" placeholder="Or paste JSON here..." value={importText} onChange={function(e){setImportText(e.target.value);setImportErr('')}} rows={4}/>
+              <button className="setlist-btn accent" onClick={function(){parseImport(importText)}} style={{width:'100%',marginTop:4}} disabled={!importText.trim()}>IMPORT JSON</button>
+              {importErr&&<div className="setlist-import-error">{importErr}</div>}
+            </div>
+          </div>}
+        </div>
+        <div style={{marginLeft:'auto'}}>
+          {!liveMode&&<button className="setlist-live-btn" onClick={handleGoLive}>GO LIVE</button>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function OperatorView({state,dispatch,onTimerAction,autoTimer,autoAdvance,setAutoTimer,setAutoAdvance,autoAdvanceRef,autoTimerDuration}){
-  const flat=useMemo(()=>flattenSlides(state.show),[state.show]);
+  // Mobile detection
+  const[isMobile,setIsMobile]=useState(function(){return window.matchMedia('(max-width:768px),(max-height:500px)').matches});
+  useEffect(function(){
+    var mq=window.matchMedia('(max-width:768px),(max-height:500px)');
+    var handler=function(e){setIsMobile(e.matches)};
+    mq.addEventListener('change',handler);
+    return function(){mq.removeEventListener('change',handler)};
+  },[]);
+
+  const flat=useMemo(()=>flattenSlides(state.show,state.redFlags),[state.show,state.redFlags]);
   const slide=flat[state.currentSlide];
   const nextSlide=flat[state.currentSlide+1]||null;
 
   if(!slide)return <div className="operator-grid"><div style={{color:'var(--text-secondary)',padding:'var(--space-04)'}}>LOADING...</div></div>;
 
+  if(isMobile)return <MobileOperatorLayout state={state} dispatch={dispatch} flat={flat} slide={slide} nextSlide={nextSlide} onTimerAction={onTimerAction} autoTimer={autoTimer} autoAdvance={autoAdvance} setAutoTimer={setAutoTimer} setAutoAdvance={setAutoAdvance} autoAdvanceRef={autoAdvanceRef} autoTimerDuration={autoTimerDuration}/>;
+
   return (
     <div className="operator-grid">
-      <SectionNav show={state.show} currentSlide={state.currentSlide} dispatch={dispatch}/>
+      <SectionNav show={state.show} currentSlide={state.currentSlide} dispatch={dispatch} redFlags={state.redFlags}/>
       <div className="operator-main">
         <CurrentSlideCard slide={slide} slideIndex={state.currentSlide} totalSlides={flat.length} revealState={state.revealState} dispatch={dispatch}/>
         <NextSlideCard slide={nextSlide}/>
       </div>
       <div className="operator-right">
         <ConnectionSignal/>
+        <button className="setlist-btn" onClick={function(){dispatch({type:'TOGGLE_SETLIST_EDITOR'})}} style={{width:'100%',padding:'8px 12px',fontSize:11,marginBottom:'var(--space-02)'}}>{state.liveMode?'LIVE \uD83D\uDD34':'SETLIST [L]'}</button>
         <QuickAccessButtons/>
+        <RedFlagForm redFlags={state.redFlags} dispatch={dispatch}/>
         <AutoToggles autoTimer={autoTimer} autoAdvance={autoAdvance} setAutoTimer={setAutoTimer} setAutoAdvance={setAutoAdvance} muted={state.muted} onToggleMute={()=>dispatch({type:'TOGGLE_MUTE'})}/>
         <ScoreDisplay scores={state.scores} dispatch={dispatch}/>
         <TimerDisplay onTimerAction={onTimerAction} autoAdvanceRef={autoAdvanceRef} autoTimerDuration={autoTimerDuration} dispatch={dispatch}/>
@@ -932,6 +1407,7 @@ function OperatorView({state,dispatch,onTimerAction,autoTimer,autoAdvance,setAut
         <div data-testid="slide-counter" style={{fontFamily:"'Space Mono',monospace",fontSize:'var(--type-meta)',color:'var(--text-secondary)'}}>{state.currentSlide+1}/{flat.length}</div>
       </div>
       {state.showShortcuts&&<ShortcutOverlay onClose={()=>dispatch({type:'CLOSE_OVERLAYS'})}/>}
+      {state.showSetlistEditor&&<SetlistEditor show={state.show} dispatch={dispatch} liveMode={state.liveMode}/>}
     </div>
   );
 }
@@ -1245,10 +1721,10 @@ function App(){
   // Load show data
   useEffect(()=>{
     if(state.show)return;
-    // Try localStorage first
+    // Try localStorage first (bust cache if version is stale)
     try{
       const cached=localStorage.getItem('lineconic_show');
-      if(cached){dispatch({type:'SET_SHOW',payload:JSON.parse(cached)});return}
+      if(cached){var cShow=JSON.parse(cached);if(cShow.version&&cShow.version>=2){dispatch({type:'SET_SHOW',payload:cShow});try{const s=JSON.parse(localStorage.getItem('lineconic_state'));if(s&&s.currentSlide){dispatch({type:'GO_TO_SLIDE',payload:s.currentSlide})}}catch(e2){}return}}
     }catch(e){}
     // Fetch from ros-v1.json
     fetch('/ros-v1.json').then(r=>r.json()).then(show=>{
@@ -1268,6 +1744,16 @@ function App(){
     localStorage.setItem('lineconic_state',JSON.stringify(toSave));
   },[state.currentSlide,state.scores,state.revealState,state.showScoreboard,state.muted,state.receipts]);
 
+  // Persist show edits (reorder/swap/import) to localStorage
+  useEffect(function(){
+    if(state.show)localStorage.setItem('lineconic_show',JSON.stringify(state.show));
+  },[state.show]);
+
+  // Load red flags from localStorage on mount
+  useEffect(function(){
+    try{var saved=JSON.parse(localStorage.getItem('lineconic_redflags'));if(Array.isArray(saved)&&saved.length)dispatch({type:'SET_RED_FLAGS',payload:saved})}catch(e){}
+  },[]);
+
 // ═══ SYNC: Operator → Firebase + BroadcastChannel ═══
 const bcRef=useRef(null);
 const syncSkipRef=useRef(false);
@@ -1279,10 +1765,10 @@ useEffect(()=>{
 
 useEffect(()=>{
   if(mode!=='operator'||!state.show||syncSkipRef.current)return;
-  const sync={slide:state.currentSlide,scores:state.scores,revealState:state.revealState,scoreboard:state.showScoreboard,muted:state.muted,rewardTier:rewardTier};
+  const sync={slide:state.currentSlide,scores:state.scores,revealState:state.revealState,scoreboard:state.showScoreboard,muted:state.muted,rewardTier:rewardTier,redFlags:state.redFlags};
   if(fbdb){fbdb.ref('live/'+state.show.id+'/state').set(sync).catch(()=>{})}
   if(bcRef.current){bcRef.current.postMessage({type:'sync',...sync})}
-},[state.currentSlide,state.scores,state.revealState,state.showScoreboard,state.muted,rewardTier]);
+},[state.currentSlide,state.scores,state.revealState,state.showScoreboard,state.muted,rewardTier,state.redFlags]);
 
 useEffect(()=>{
   if(mode==='operator'||!state.show)return;
@@ -1293,6 +1779,7 @@ useEffect(()=>{
     const handler=snap=>{
       const d=snap.val();if(!d)return;
       syncSkipRef.current=true;
+      if(d.redFlags)dispatch({type:'SET_RED_FLAGS',payload:d.redFlags,fromSync:true});
       if(d.slide!==undefined)dispatch({type:'GO_TO_SLIDE',payload:d.slide});
       if(d.scores)dispatch({type:'SET_SCORES',payload:d.scores});
       if(d.revealState)dispatch({type:'SET_REVEAL_STATE',payload:d.revealState});
@@ -1307,6 +1794,7 @@ useEffect(()=>{
   const bcHandler=ev=>{
     const d=ev.data;if(d.type!=='sync')return;
     syncSkipRef.current=true;
+    if(d.redFlags)dispatch({type:'SET_RED_FLAGS',payload:d.redFlags,fromSync:true});
     if(d.slide!==undefined)dispatch({type:'GO_TO_SLIDE',payload:d.slide});
     if(d.scores)dispatch({type:'SET_SCORES',payload:d.scores});
     if(d.revealState)dispatch({type:'SET_REVEAL_STATE',payload:d.revealState});
@@ -1366,7 +1854,7 @@ useEffect(()=>{
 // ═══ AUTO-TIMER: start timer on question slides ═══
 useEffect(()=>{
   if(mode!=='operator'||!autoTimerRef.current||!state.show)return;
-  const flat=flattenSlides(state.show);
+  const flat=flattenSlides(state.show,state.redFlags);
   const slide=flat[state.currentSlide];
   if(!slide)return;
   const isQ=slide.type==='source_q'||slide.type==='acronym_q'||slide.type==='hotseat_prompt';
@@ -1386,13 +1874,13 @@ useEffect(()=>{
   // Keyboard handler
   useEffect(()=>{
     function handleKey(ev){
-      if(ev.target.tagName==='INPUT')return;
+      if(ev.target.tagName==='INPUT'||ev.target.tagName==='TEXTAREA')return;
       const s=stateRef.current;
       switch(ev.key){
         case'ArrowRight':case' ':case'PageDown':ev.preventDefault();stopTimerSystem();broadcastTimerAction('stop');dispatch({type:'NEXT_SLIDE'});break;
         case'ArrowLeft':case'PageUp':ev.preventDefault();stopTimerSystem();broadcastTimerAction('stop');dispatch({type:'PREV_SLIDE'});break;
         case'Home':stopTimerSystem();broadcastTimerAction('stop');dispatch({type:'GO_TO_SLIDE',payload:0});break;
-        case'End':{const flat=flattenSlides(s.show);stopTimerSystem();broadcastTimerAction('stop');dispatch({type:'GO_TO_SLIDE',payload:flat.length-1});break}
+        case'End':{const flat=flattenSlides(s.show,s.redFlags);stopTimerSystem();broadcastTimerAction('stop');dispatch({type:'GO_TO_SLIDE',payload:flat.length-1});break}
         case'r':case'R':dispatch({type:'TOGGLE_REVEAL'});break;
         case's':case'S':dispatch({type:'TOGGLE_SCOREBOARD'});break;
         case't':case'T':{const dur=autoTimerDuration.current||30;const onEnd=autoAdvanceRef.current?function(){dispatch({type:'NEXT_SLIDE'})}:null;startTimerSystem(dur,null,onEnd);broadcastTimerAction('start',dur);break}
@@ -1405,7 +1893,8 @@ useEffect(()=>{
         case'd':case'D':setAutoAdvance(function(v){return!v});break;
         case'c':case'C':dispatch({type:'INCREMENT_RECEIPTS'});break;
         case'g':case'G':setRewardTier(function(v){const cycle=[null,'cancel','grind','flop'];const i=cycle.indexOf(v);return cycle[(i+1)%cycle.length]});break;
-        case'v':case'V':{const flat=flattenSlides(s.show);const slide=flat[s.currentSlide];if(slide&&slide.type==='doa_vote'&&fbdb&&s.show){fbdb.ref('live/'+s.show.id+'/topic').set(slide.content.primary||null)}break}
+        case'v':case'V':{const flat=flattenSlides(s.show,s.redFlags);const slide=flat[s.currentSlide];if(slide&&slide.type==='doa_vote'&&fbdb&&s.show){fbdb.ref('live/'+s.show.id+'/topic').set(slide.content.primary||null)}break}
+        case'l':case'L':if(!s.liveMode)dispatch({type:'TOGGLE_SETLIST_EDITOR'});break;
         case'f':case'F':if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();break;
         case'?':dispatch({type:'TOGGLE_SHORTCUTS'});break;
         case'Escape':dispatch({type:'CLOSE_OVERLAYS'});break;
