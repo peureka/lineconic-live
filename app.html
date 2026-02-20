@@ -554,7 +554,7 @@ function ScoreSlide({slide}){
 function IntermissionSlide({slide}){
   const qrRef=useRef(null);
   useEffect(()=>{if(qrRef.current)drawQR(qrRef.current)},[]);
-  return <><div className="D hw" style={{fontSize:'clamp(40px,7vw,100px)',marginBottom:20}}>{slide.content.primary||''}</div><div className="M hs" style={{fontSize:'clamp(14px,2vw,24px)',marginBottom:30}}>{slide.content.secondary||''}</div><canvas ref={qrRef} width={400} height={400} style={{imageRendering:'pixelated',width:'clamp(200px,28vw,320px)',height:'clamp(200px,28vw,320px)',border:'5px solid rgba(255,255,255,.3)'}}></canvas><div className="M" style={{color:'rgba(255,255,255,.5)',fontSize:'clamp(16px,2.5vw,28px)',marginTop:16,letterSpacing:'.1em'}}>LINECONIC.LIVE/VOTE</div></>;
+  return <><div className="D hw" style={{fontSize:'clamp(40px,7vw,100px)',marginBottom:20}}>{slide.content.primary||''}</div><div className="M hs" style={{fontSize:'clamp(14px,2vw,24px)',marginBottom:30}}>{slide.content.secondary||''}</div><canvas ref={qrRef} width={400} height={400} style={{imageRendering:'pixelated',width:'clamp(200px,28vw,320px)',height:'clamp(200px,28vw,320px)',border:'5px solid rgba(255,255,255,.3)'}}></canvas><a href="https://lineconic.live/vote" target="_blank" rel="noopener" className="M" style={{color:'rgba(255,255,255,.5)',fontSize:'clamp(16px,2.5vw,28px)',marginTop:16,letterSpacing:'.1em',textDecoration:'none'}}>LINECONIC.LIVE/VOTE</a></>;
 }
 function DoaVoteSlide({slide}){
   const total=votes.dead+votes.alive;const dp=total>0?Math.round(votes.dead/total*100):50;const ap=total>0?100-dp:50;
