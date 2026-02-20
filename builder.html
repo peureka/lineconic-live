@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LINECONIC — DECK BUILDER</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -74,6 +77,19 @@ body{background:var(--void);color:var(--text-primary);font-family:'Space Mono',m
 @keyframes fadeout{0%,70%{opacity:1}100%{opacity:0}}
 .B-adv-toggle{font-size:10px;color:var(--text-disabled);cursor:pointer;text-transform:uppercase;letter-spacing:.08em;margin-bottom:var(--space-02)}
 .B-adv-toggle:hover{color:var(--text-secondary)}
+.B-login{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:var(--space-03)}
+.B-login .logo{font-family:'Anton',sans-serif;font-size:3rem;color:var(--signal)}
+.B-login .subtitle{font-size:10px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.12em;margin-bottom:var(--space-03)}
+.B-login form{display:flex;flex-direction:column;gap:var(--space-02);width:280px}
+.B-login input{background:var(--surface-02);border:1px solid var(--border-subtle);color:var(--text-primary);font-family:'Space Mono',monospace;font-size:11px;padding:10px 14px;outline:none;width:100%}
+.B-login input:focus{border-color:var(--signal)}
+.B-login input::placeholder{color:var(--text-disabled);text-transform:uppercase;letter-spacing:.08em}
+.B-login .err{font-size:10px;color:var(--signal);text-transform:uppercase;letter-spacing:.06em}
+.B-login button{width:100%;padding:12px;font-family:'Anton',sans-serif;font-size:1rem;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border:none;color:var(--void);background:var(--signal);margin-top:var(--space-02)}
+.B-login button:hover{box-shadow:var(--glow-signal)}
+.B-login button:disabled{opacity:.4;cursor:not-allowed}
+.B-signout{font-size:9px;color:var(--text-disabled);text-decoration:none;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--border-subtle);padding:3px 10px;cursor:pointer;background:transparent;font-family:'Space Mono',monospace}
+.B-signout:hover{color:var(--text-secondary);background:var(--surface-03)}
 @media(max-width:768px){
   .B{grid-template-columns:1fr;grid-template-rows:auto auto 1fr}
   .B-form{max-height:50vh;border-right:none;border-bottom:1px solid var(--border-subtle)}
@@ -83,6 +99,22 @@ body{background:var(--void);color:var(--text-primary);font-family:'Space Mono',m
 <body>
 <div id="root"></div>
 <script type="text/babel">
+// ═══ FIREBASE INIT ═══
+var fbdb=null,fbauth=null;
+try{
+  firebase.initializeApp({
+    apiKey:"AIzaSyC8ECLUReNM4JSkhRRuwTELmGTLWNVSrIE",
+    authDomain:"lineconic-live.firebaseapp.com",
+    databaseURL:"https://lineconic-live-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId:"lineconic-live",
+    storageBucket:"lineconic-live.firebasestorage.app",
+    messagingSenderId:"890189018310",
+    appId:"1:890189018310:web:7cc55ce3f3833b14c6d3c7"
+  });
+  fbdb=firebase.database();
+  fbauth=firebase.auth();
+}catch(e){console.warn('Firebase offline',e)}
+
 var{useState,useEffect,useMemo,useRef,useCallback}=React;
 
 // ═══ TEMPLATES ═══
@@ -373,8 +405,53 @@ function shuffleDoaPool(count){
   return result.map(function(t){return t.topic+':'+t.verdict}).join('\n');
 }
 
+// ═══ AUTH GATE ═══
+function LoginView({onLogin}){
+  var[email,setEmail]=useState('');
+  var[pass,setPass]=useState('');
+  var[err,setErr]=useState('');
+  var[busy,setBusy]=useState(false);
+  function submit(e){
+    e.preventDefault();setErr('');setBusy(true);
+    if(!fbauth){setErr('FIREBASE OFFLINE');setBusy(false);return}
+    fbauth.signInWithEmailAndPassword(email,pass).then(function(cred){onLogin(cred.user)}).catch(function(e){
+      var msg='LOGIN FAILED';
+      if(e.code==='auth/invalid-email')msg='INVALID EMAIL';
+      else if(e.code==='auth/user-not-found')msg='USER NOT FOUND';
+      else if(e.code==='auth/wrong-password'||e.code==='auth/invalid-credential')msg='WRONG PASSWORD';
+      else if(e.code==='auth/too-many-requests')msg='TOO MANY ATTEMPTS';
+      setErr(msg);setBusy(false);
+    });
+  }
+  return(
+    <div className="B-login">
+      <div className="logo">L</div>
+      <div className="subtitle">DECK BUILDER — SIGN IN</div>
+      <form onSubmit={submit}>
+        <input type="email" placeholder="email" value={email} onChange={function(e){setEmail(e.target.value)}} autoFocus/>
+        <input type="password" placeholder="password" value={pass} onChange={function(e){setPass(e.target.value)}}/>
+        {err&&<div className="err">{err}</div>}
+        <button type="submit" disabled={busy}>{busy?'SIGNING IN...':'SIGN IN'}</button>
+      </form>
+    </div>
+  );
+}
+
+function AppRoot(){
+  var[authUser,setAuthUser]=useState(null);
+  var[authLoading,setAuthLoading]=useState(true);
+  useEffect(function(){
+    if(!fbauth){setAuthLoading(false);return}
+    var unsub=fbauth.onAuthStateChanged(function(user){setAuthUser(user);setAuthLoading(false)});
+    return function(){unsub()};
+  },[]);
+  if(authLoading)return <div className="B-empty"><div className="icon">L</div><div className="msg">AUTHENTICATING...</div></div>;
+  if(!authUser)return <LoginView onLogin={setAuthUser}/>;
+  return <BuilderApp authUser={authUser}/>;
+}
+
 // ═══ COMPONENTS ═══
-function BuilderApp(){
+function BuilderApp({authUser}){
   var[library,setLibrary]=useState(null);
   var[loading,setLoading]=useState(true);
   var[error,setError]=useState(null);
@@ -390,6 +467,7 @@ function BuilderApp(){
   var[doaTopics,setDoaTopics]=useState(function(){return shuffleDoaPool(10)});
   var[ros,setRos]=useState(null);
   var[toast,setToast]=useState(null);
+  var[pushing,setPushing]=useState(false);
 
   useEffect(function(){
     fetch('/card-library.json').then(function(r){return r.json()}).then(function(data){
@@ -443,10 +521,21 @@ function BuilderApp(){
 
   function doPush(){
     if(!ros)return;
-    try{
-      localStorage.setItem('lineconic_show',JSON.stringify(ros));
-      showToast('PUSHED TO OPERATOR');
-    }catch(e){showToast('PUSH FAILED')}
+    // localStorage for same-browser
+    try{localStorage.setItem('lineconic_show',JSON.stringify(ros))}catch(e){}
+    // Firebase for cross-device
+    if(!fbdb){showToast('FIREBASE OFFLINE — LOCAL ONLY');return}
+    setPushing(true);
+    fbdb.ref('shows/'+ros.id).set(ros).then(function(){
+      // Set as active show so operator picks it up
+      return fbdb.ref('active_show').set(ros.id);
+    }).then(function(){
+      setPushing(false);
+      showToast('PUSHED TO FIREBASE');
+    }).catch(function(e){
+      setPushing(false);
+      showToast('PUSH FAILED: '+e.message);
+    });
   }
 
   function doCopy(){
@@ -466,7 +555,10 @@ function BuilderApp(){
           <a className="B-logo" href="/">L</a>
           <div className="B-title">DECK BUILDER</div>
         </div>
-        <a className="B-back" href="/">BACK TO LAUNCHER</a>
+        <div style={{display:'flex',alignItems:'center',gap:'var(--space-02)'}}>
+          <button className="B-signout" onClick={function(){if(fbauth)fbauth.signOut()}}>SIGN OUT</button>
+          <a className="B-back" href="/">LAUNCHER</a>
+        </div>
       </div>
 
       <div className="B-form">
@@ -570,7 +662,7 @@ function BuilderApp(){
 
       <div className="B-preview">
         {!ros?<div className="B-empty"><div className="icon">L</div><div className="msg">CONFIGURE AND GENERATE<br/>TO PREVIEW YOUR DECK</div></div>
-        :<PreviewPanel ros={ros} onExport={doExport} onPush={doPush} onCopy={doCopy}/>}
+        :<PreviewPanel ros={ros} onExport={doExport} onPush={doPush} onCopy={doCopy} pushing={pushing}/>}
       </div>
 
       {toast&&<div className="B-toast" key={toast+Date.now()}>{toast}</div>}
@@ -578,7 +670,7 @@ function BuilderApp(){
   );
 }
 
-function PreviewPanel({ros,onExport,onPush,onCopy}){
+function PreviewPanel({ros,onExport,onPush,onCopy,pushing}){
   var[expanded,setExpanded]=useState({});
   function toggle(id){setExpanded(function(p){var n={...p};n[id]=!n[id];return n})}
 
@@ -627,14 +719,14 @@ function PreviewPanel({ros,onExport,onPush,onCopy}){
 
       <div className="B-export">
         <button onClick={onExport}>DOWNLOAD JSON</button>
-        <button className="push" onClick={onPush}>PUSH TO OPERATOR</button>
+        <button className="push" onClick={onPush} disabled={pushing}>{pushing?'PUSHING...':'PUSH TO FIREBASE'}</button>
         <button onClick={onCopy}>COPY TO CLIPBOARD</button>
       </div>
     </div>
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<BuilderApp/>);
+ReactDOM.createRoot(document.getElementById('root')).render(<AppRoot/>);
 </script>
 </body>
 </html>
