@@ -9,6 +9,7 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -242,6 +243,10 @@ html:has(body.answers-mode),body.answers-mode{overflow:auto!important;height:aut
 .launcher-btn-sub{font-size:10px;color:var(--text-disabled);letter-spacing:.05em}
 .launcher-meta{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-disabled);letter-spacing:.08em;text-transform:uppercase;text-align:center}
 
+/* Login */
+.login-input::placeholder{color:var(--text-disabled);letter-spacing:.08em;text-transform:uppercase}
+.login-input:-webkit-autofill{-webkit-box-shadow:0 0 0 30px var(--surface-02) inset!important;-webkit-text-fill-color:var(--text-primary)!important}
+
 /* Audience View wrapper */
 .audience-view{position:fixed;inset:0;background:var(--void)}
 .audience-view .slide-wrapper{position:absolute;inset:0}
@@ -328,7 +333,7 @@ html:has(body.answers-mode),body.answers-mode{overflow:auto!important;height:aut
 // ═══════════════════════════════════════
 // FIREBASE INIT
 // ═══════════════════════════════════════
-let fb=null,fbdb=null;
+let fb=null,fbdb=null,fbauth=null;
 try{
   fb=firebase.initializeApp({
     apiKey:"AIzaSyC8ECLUReNM4JSkhRRuwTELmGTLWNVSrIE",
@@ -340,6 +345,7 @@ try{
     appId:"1:890189018310:web:7cc55ce3f3833b14c6d3c7"
   });
   fbdb=firebase.database();
+  fbauth=firebase.auth();
 }catch(e){console.warn('Firebase offline',e)}
 
 // ═══════════════════════════════════════
@@ -898,7 +904,21 @@ function OperatorView({state,dispatch,onTimerAction,autoTimer,autoAdvance,setAut
         <AutoToggles autoTimer={autoTimer} autoAdvance={autoAdvance} setAutoTimer={setAutoTimer} setAutoAdvance={setAutoAdvance}/>
         <ScoreDisplay scores={state.scores} dispatch={dispatch}/>
         <TimerDisplay onTimerAction={onTimerAction} autoAdvanceRef={autoAdvanceRef} autoTimerDuration={autoTimerDuration} dispatch={dispatch}/>
-        <div style={{fontFamily:"'Space Mono',monospace",fontSize:'var(--type-meta)',color:'var(--text-disabled)',marginTop:'auto',textAlign:'center'}}>PRESS ? FOR SHORTCUTS</div>
+        <div style={{marginTop:'auto',display:'flex',flexDirection:'column',gap:'var(--space-02)',alignItems:'center',width:'100%'}}>
+          <div style={{fontFamily:"'Space Mono',monospace",fontSize:'var(--type-meta)',color:'var(--text-disabled)',textAlign:'center'}}>PRESS ? FOR SHORTCUTS</div>
+          <button onClick={function(){if(fbauth)fbauth.signOut()}} style={{
+            background:'transparent',
+            border:'1px solid var(--border-subtle)',
+            color:'var(--text-disabled)',
+            fontFamily:"'Space Mono',monospace",
+            fontSize:10,
+            letterSpacing:'.06em',
+            textTransform:'uppercase',
+            padding:'4px 12px',
+            cursor:'pointer',
+            width:'100%'
+          }}>SIGN OUT</button>
+        </div>
       </div>
       <div className="operator-bottom">
         <button className="receipt-counter" onClick={()=>dispatch({type:'INCREMENT_RECEIPTS'})} style={{cursor:'pointer',background:'transparent',border:'1px solid var(--border-subtle)'}}>RECEIPTS: {state.receipts} +</button>
@@ -1034,6 +1054,144 @@ function AnswersView({show}){
 }
 
 // ═══════════════════════════════════════
+// AUTH VIEWS
+// ═══════════════════════════════════════
+function AuthLoadingView(){
+  return(
+    <div style={{
+      position:'fixed',inset:0,
+      background:'var(--void)',
+      display:'flex',alignItems:'center',justifyContent:'center',
+      fontFamily:"'Space Mono','Consolas',monospace",
+      fontSize:'var(--type-label)',
+      color:'var(--text-secondary)',
+      letterSpacing:'.1em',
+      textTransform:'uppercase'
+    }}>
+      AUTHENTICATING...
+    </div>
+  );
+}
+
+function LoginView({onLogin}){
+  const[email,setEmail]=useState('');
+  const[password,setPassword]=useState('');
+  const[error,setError]=useState(null);
+  const[loading,setLoading]=useState(false);
+
+  function handleSubmit(e){
+    e.preventDefault();
+    if(!fbauth||loading)return;
+    setError(null);
+    setLoading(true);
+    fbauth.signInWithEmailAndPassword(email,password)
+      .then(function(cred){onLogin(cred.user)})
+      .catch(function(err){
+        setLoading(false);
+        switch(err.code){
+          case'auth/invalid-email':setError('INVALID EMAIL FORMAT');break;
+          case'auth/user-not-found':setError('ACCESS DENIED');break;
+          case'auth/wrong-password':setError('WRONG PASSWORD');break;
+          case'auth/invalid-credential':setError('INVALID CREDENTIALS');break;
+          case'auth/too-many-requests':setError('TOO MANY ATTEMPTS. TRY LATER.');break;
+          default:setError('AUTH FAILED: '+err.code);
+        }
+      });
+  }
+
+  return(
+    <div style={{
+      position:'fixed',inset:0,
+      background:'var(--void)',
+      display:'flex',flexDirection:'column',
+      alignItems:'center',justifyContent:'center',
+      gap:'var(--space-05)',
+      fontFamily:"'Space Mono','Consolas',monospace"
+    }}>
+      <div>
+        <div className="D hp" style={{fontSize:'clamp(32px,8vw,64px)',marginBottom:8,textAlign:'center'}}>LINECONIC</div>
+        <div className="D hs" style={{fontSize:'clamp(12px,3vw,20px)',letterSpacing:'.2em',textAlign:'center'}}>OPERATOR LOGIN</div>
+      </div>
+      <form onSubmit={handleSubmit} style={{
+        display:'flex',flexDirection:'column',
+        gap:'var(--space-03)',
+        width:'100%',maxWidth:360,
+        padding:'0 var(--space-04)'
+      }}>
+        <input
+          type="email"
+          className="login-input"
+          value={email}
+          onChange={function(e){setEmail(e.target.value)}}
+          placeholder="EMAIL"
+          autoComplete="email"
+          required
+          style={{
+            background:'var(--surface-02)',
+            border:'1px solid var(--border-subtle)',
+            color:'var(--text-primary)',
+            fontFamily:"'Space Mono',monospace",
+            fontSize:'var(--type-label)',
+            letterSpacing:'.05em',
+            padding:'12px 16px',
+            outline:'none',
+            width:'100%',
+            textTransform:'none'
+          }}
+          onFocus={function(e){e.target.style.borderColor='var(--signal)';e.target.style.boxShadow='0 0 12px rgba(255,0,127,.3)'}}
+          onBlur={function(e){e.target.style.borderColor='var(--border-subtle)';e.target.style.boxShadow='none'}}
+        />
+        <input
+          type="password"
+          className="login-input"
+          value={password}
+          onChange={function(e){setPassword(e.target.value)}}
+          placeholder="PASSWORD"
+          autoComplete="current-password"
+          required
+          style={{
+            background:'var(--surface-02)',
+            border:'1px solid var(--border-subtle)',
+            color:'var(--text-primary)',
+            fontFamily:"'Space Mono',monospace",
+            fontSize:'var(--type-label)',
+            letterSpacing:'.05em',
+            padding:'12px 16px',
+            outline:'none',
+            width:'100%'
+          }}
+          onFocus={function(e){e.target.style.borderColor='var(--signal)';e.target.style.boxShadow='0 0 12px rgba(255,0,127,.3)'}}
+          onBlur={function(e){e.target.style.borderColor='var(--border-subtle)';e.target.style.boxShadow='none'}}
+        />
+        <button type="submit" disabled={loading} style={{
+          background:loading?'var(--surface-03)':'var(--signal)',
+          border:'none',
+          color:loading?'var(--text-disabled)':'var(--void)',
+          fontFamily:"'Space Mono',monospace",
+          fontSize:'var(--type-label)',
+          fontWeight:700,
+          letterSpacing:'.1em',
+          textTransform:'uppercase',
+          padding:'14px 24px',
+          cursor:loading?'wait':'pointer',
+          boxShadow:loading?'none':'var(--glow-signal)',
+          transition:'all .15s'
+        }}>
+          {loading?'SIGNING IN...':'SIGN IN'}
+        </button>
+        {error&&<div style={{
+          color:'var(--signal)',
+          fontSize:'var(--type-meta)',
+          letterSpacing:'.06em',
+          textAlign:'center',
+          textShadow:'0 0 8px rgba(255,0,127,.5)'
+        }}>{error}</div>}
+      </form>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════
 // APP (root component)
 // ═══════════════════════════════════════
 function App(){
@@ -1044,6 +1202,20 @@ function App(){
   const isAudience=mode==='audience';
   const isVote=mode==='vote';
   const isAnswers=mode==='answers';
+
+  // Auth state for protected routes
+  const needsAuth=mode==='operator'||mode==='answers';
+  const[authUser,setAuthUser]=useState(null);
+  const[authLoading,setAuthLoading]=useState(needsAuth);
+
+  useEffect(function(){
+    if(!needsAuth||!fbauth){setAuthLoading(false);return}
+    var unsub=fbauth.onAuthStateChanged(function(user){
+      setAuthUser(user);
+      setAuthLoading(false);
+    });
+    return function(){unsub()};
+  },[]);
 
   // Load saved state from localStorage
   const savedState=useMemo(()=>{
@@ -1238,13 +1410,21 @@ useEffect(()=>{
     return()=>window.removeEventListener('keydown',handleKey);
   },[]);
 
+  // Public routes — no auth needed
   if(isLauncher)return <LauncherView showName={state.show?state.show.name||state.show.id:null}/>;
-
-  if(!state.show)return <div style={{background:'#000',color:'var(--signal)',width:'100vw',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Space Mono',monospace"}}>LOADING SHOW DATA...</div>;
-
   if(isVote)return <VoteView showId={state.show?.id}/>;
+  if(isAudience){
+    if(!state.show)return <div style={{background:'#000',color:'var(--signal)',width:'100vw',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Space Mono',monospace"}}>LOADING SHOW DATA...</div>;
+    return <AudienceView state={state} dispatch={dispatch} slideRef={audienceSlideRef} rewardTier={rewardTier}/>;
+  }
+
+  // Auth gate — protected routes (operator, answers)
+  if(authLoading)return <AuthLoadingView/>;
+  if(needsAuth&&!authUser)return <LoginView onLogin={setAuthUser}/>;
+
+  // Protected routes — user is authenticated
+  if(!state.show)return <div style={{background:'#000',color:'var(--signal)',width:'100vw',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Space Mono',monospace"}}>LOADING SHOW DATA...</div>;
   if(isAnswers)return <AnswersView show={state.show}/>;
-  if(isAudience)return <AudienceView state={state} dispatch={dispatch} slideRef={audienceSlideRef} rewardTier={rewardTier}/>;
   return <OperatorView state={state} dispatch={dispatch} onTimerAction={broadcastTimerAction} autoTimer={autoTimer} autoAdvance={autoAdvance} setAutoTimer={setAutoTimer} setAutoAdvance={setAutoAdvance} autoAdvanceRef={autoAdvanceRef} autoTimerDuration={autoTimerDuration}/>;
 }
 
