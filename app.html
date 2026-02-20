@@ -1719,23 +1719,41 @@ function App(){
   const[rewardTier,setRewardTier]=useState(null);
 
   // Load show data
+  // Priority: localStorage (same session) → Firebase active_show (cross-device) → ros-v1.json (default)
   useEffect(()=>{
     if(state.show)return;
-    // Try localStorage first (bust cache if version is stale)
+    function restoreSlidePos(){try{const s=JSON.parse(localStorage.getItem('lineconic_state'));if(s&&s.currentSlide){dispatch({type:'GO_TO_SLIDE',payload:s.currentSlide})}}catch(e){}}
+    function loadShow(show){localStorage.setItem('lineconic_show',JSON.stringify(show));dispatch({type:'SET_SHOW',payload:show});restoreSlidePos()}
+    // 1. Try localStorage first (bust cache if version is stale)
     try{
       const cached=localStorage.getItem('lineconic_show');
-      if(cached){var cShow=JSON.parse(cached);if(cShow.version&&cShow.version>=2){dispatch({type:'SET_SHOW',payload:cShow});try{const s=JSON.parse(localStorage.getItem('lineconic_state'));if(s&&s.currentSlide){dispatch({type:'GO_TO_SLIDE',payload:s.currentSlide})}}catch(e2){}return}}
+      if(cached){var cShow=JSON.parse(cached);if(cShow.version&&cShow.version>=2){dispatch({type:'SET_SHOW',payload:cShow});restoreSlidePos();return}}
     }catch(e){}
-    // Fetch from ros-v1.json
-    fetch('/ros-v1.json').then(r=>r.json()).then(show=>{
-      localStorage.setItem('lineconic_show',JSON.stringify(show));
-      dispatch({type:'SET_SHOW',payload:show});
-      // Restore slide position
-      try{const s=JSON.parse(localStorage.getItem('lineconic_state'));if(s&&s.currentSlide){dispatch({type:'GO_TO_SLIDE',payload:s.currentSlide})}}catch(e){}
-    }).catch(()=>{
-      // Try Firebase
-      if(fbdb){fbdb.ref('shows').limitToFirst(1).once('value',snap=>{const v=snap.val();if(v){const key=Object.keys(v)[0];const show=v[key];localStorage.setItem('lineconic_show',JSON.stringify(show));dispatch({type:'SET_SHOW',payload:show})}})}
-    });
+    // 2. Try Firebase active_show (set by builder PUSH TO FIREBASE)
+    if(fbdb){
+      fbdb.ref('active_show').once('value',snap=>{
+        const activeId=snap.val();
+        if(activeId){
+          fbdb.ref('shows/'+activeId).once('value',showSnap=>{
+            const show=showSnap.val();
+            if(show&&show.sections){loadShow(show);return}
+            // Active show ID exists but data missing — fall through
+            fallbackToStatic();
+          });
+        }else{
+          fallbackToStatic();
+        }
+      });
+    }else{
+      fallbackToStatic();
+    }
+    function fallbackToStatic(){
+      // 3. Fetch from ros-v1.json
+      fetch('/ros-v1.json').then(r=>r.json()).then(show=>{loadShow(show)}).catch(()=>{
+        // 4. Last resort: any show in Firebase
+        if(fbdb){fbdb.ref('shows').limitToFirst(1).once('value',snap=>{const v=snap.val();if(v){const key=Object.keys(v)[0];loadShow(v[key])}})}
+      });
+    }
   },[]);
 
   // Persist state to localStorage on change
