@@ -311,9 +311,10 @@ function buildDeck(library,templateId,config){
   });
 
   var dateStr=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}).toUpperCase();
+  var deckName=(config.showName||'THE LAUNCH').toUpperCase();
   return{
     id:'deck-'+Date.now(),
-    name:'THE LAUNCH \u2014 '+dateStr,
+    name:deckName+' \u2014 '+dateStr,
     templateId:templateId,
     sections:sections,
     created:Date.now(),
@@ -466,6 +467,7 @@ function BuilderApp({authUser}){
   var[diversity,setDiversity]=useState(true);
   var[excludedIds,setExcludedIds]=useState('');
   var[showAdvanced,setShowAdvanced]=useState(false);
+  var[showName,setShowName]=useState('THE LAUNCH');
   var[doaTopics,setDoaTopics]=useState(function(){return shuffleDoaPool(10)});
   var[ros,setRos]=useState(null);
   var[toast,setToast]=useState(null);
@@ -506,7 +508,8 @@ function BuilderApp({authUser}){
       difficulty:difficulty,budget:budget,minScore:minScore,
       excludedTags:excludedTags,curve:curve,diversity:diversity,
       excludedIds:excludedIds.trim()?excludedIds.trim().split(/[\n,]+/).map(function(s){return s.trim()}).filter(Boolean):[],
-      doaTopics:parseDoaTopics(doaTopics)
+      doaTopics:parseDoaTopics(doaTopics),
+      showName:showName.trim()||'THE LAUNCH'
     };
     var result=buildDeck(library,templateId,config);
     setRos(result);
@@ -565,6 +568,13 @@ function BuilderApp({authUser}){
       </div>
 
       <div className="B-form">
+        {/* Show Name */}
+        <div className="B-sec">
+          <div className="B-sec-head">SHOW NAME</div>
+          <input style={{width:'100%',background:'var(--surface-02)',border:'1px solid var(--border-subtle)',color:'var(--text-primary)',fontFamily:"'Anton',sans-serif",fontSize:'1.1rem',padding:'10px 14px',outline:'none',textTransform:'uppercase',letterSpacing:'.04em',boxSizing:'border-box'}} value={showName} onChange={function(e){setShowName(e.target.value)}} placeholder="THE LAUNCH"/>
+          <div style={{fontSize:9,color:'var(--text-disabled)',marginTop:4,letterSpacing:'.06em'}}>{(showName.trim()||'THE LAUNCH').toUpperCase()} — {new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}).toUpperCase()}</div>
+        </div>
+
         {/* Template */}
         <div className="B-sec">
           <div className="B-sec-head">SHOW FORMAT</div>
