@@ -54,7 +54,7 @@
 *{margin:0;padding:0;box-sizing:border-box;border-radius:0 !important}
 html,body{width:100vw;height:100vh;overflow:hidden;background:var(--void);font-family:'Space Mono','Consolas',monospace;-webkit-font-smoothing:antialiased}
 body.audience-mode{cursor:none}
-body.answers-mode,body.answers-mode html{overflow:auto!important;height:auto!important}
+html:has(body.answers-mode),body.answers-mode{overflow:auto!important;height:auto!important}
 
 /* ═══════════════════════════════════════
    SLIDE BASE (from TEMPLATE.html)
