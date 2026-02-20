@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LINECONIC — DECK BUILDER</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --void:#000000;--light:#FFFFFF;--signal:#FF007F;--cyan:#00FFFF;--gold:#FFD700;
+  --surface-01:#0A0A0A;--surface-02:#111111;--surface-03:#1A1A1A;
+  --border-subtle:#2A2A2A;--border-active:#FFFFFF;
+  --text-primary:#FFFFFF;--text-secondary:#666666;--text-disabled:#333333;
+  --glow-white:0 0 12px rgba(255,255,255,0.6);--glow-signal:0 0 20px rgba(255,0,127,0.7);
+  --glow-cyan:0 0 20px rgba(0,255,255,0.7);
+  --space-01:4px;--space-02:8px;--space-03:16px;--space-04:24px;--space-05:32px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--void);color:var(--text-primary);font-family:'Space Mono',monospace;overflow:hidden}
+.B{display:grid;grid-template-columns:420px 1fr;grid-template-rows:auto 1fr;height:100vh;overflow:hidden}
+.B-head{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:var(--space-03) var(--space-04);border-bottom:1px solid var(--border-subtle);background:var(--surface-01)}
+.B-logo{font-family:'Anton',sans-serif;font-size:1.5rem;color:var(--signal);text-transform:uppercase;letter-spacing:.04em;text-decoration:none}
+.B-title{font-family:'Anton',sans-serif;font-size:1.5rem;color:var(--text-primary);text-transform:uppercase;letter-spacing:.04em}
+.B-back{font-size:10px;color:var(--text-secondary);text-decoration:none;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--border-subtle);padding:4px 12px}
+.B-back:hover{background:var(--surface-03)}
+.B-form{overflow-y:auto;padding:var(--space-04);border-right:1px solid var(--border-subtle)}
+.B-preview{overflow-y:auto;padding:var(--space-04);background:var(--surface-01)}
+.B-sec{margin-bottom:var(--space-04)}
+.B-sec-head{font-size:10px;color:var(--signal);text-transform:uppercase;letter-spacing:.12em;margin-bottom:var(--space-02);padding-bottom:var(--space-01);border-bottom:1px solid var(--border-subtle)}
+.B-label{font-size:10px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:var(--space-01)}
+.B-row{display:flex;gap:var(--space-02);margin-bottom:var(--space-02);flex-wrap:wrap}
+.B-preset{background:transparent;border:1px solid var(--border-subtle);color:var(--text-secondary);font-family:'Space Mono',monospace;font-size:10px;padding:6px 14px;cursor:pointer;text-transform:uppercase;letter-spacing:.06em}
+.B-preset:hover{background:var(--surface-03)}
+.B-preset.on{border-color:var(--signal);color:var(--signal)}
+.B-input{background:var(--surface-02);border:1px solid var(--border-subtle);color:var(--text-primary);font-family:'Space Mono',monospace;font-size:11px;padding:6px 10px;width:60px;text-align:center;outline:none}
+.B-input:focus{border-color:var(--signal)}
+.B-input.wide{width:100%}
+.B-range{width:100%;accent-color:var(--signal);margin:var(--space-01) 0}
+.B-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border:1px solid var(--border-subtle);font-size:9px;color:var(--text-secondary);cursor:pointer;text-transform:uppercase;letter-spacing:.06em;margin:0 4px 4px 0}
+.B-tag.on{border-color:var(--cyan);color:var(--cyan)}
+.B-tag .cnt{color:var(--text-disabled);font-size:8px}
+.B-gen{width:100%;padding:14px;font-family:'Anton',sans-serif;font-size:1.2rem;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border:none;color:var(--void);background:var(--signal);margin-top:var(--space-03)}
+.B-gen:hover{box-shadow:var(--glow-signal)}
+.B-gen:disabled{opacity:.3;cursor:not-allowed}
+.B-gen.regen{background:transparent;border:2px solid var(--signal);color:var(--signal);font-size:1rem}
+.B-stat{font-size:10px;color:var(--text-secondary);letter-spacing:.06em;text-transform:uppercase;margin-bottom:var(--space-03);padding:var(--space-02) var(--space-03);border:1px solid var(--border-subtle);background:var(--surface-02)}
+.B-stat b{color:var(--text-primary)}
+.B-stat .pk{color:var(--signal)}.B-stat .cy{color:var(--cyan)}.B-stat .gd{color:var(--gold)}
+.B-p-sec{margin-bottom:var(--space-03)}
+.B-p-sec-head{font-size:10px;color:var(--signal);text-transform:uppercase;letter-spacing:.12em;margin-bottom:var(--space-01);padding-bottom:var(--space-01);border-bottom:1px solid var(--border-subtle);cursor:pointer;display:flex;justify-content:space-between}
+.B-p-sec-head .ct{color:var(--text-disabled)}
+.B-p-slide{display:flex;align-items:center;gap:var(--space-02);padding:3px var(--space-02);font-size:10px;border-bottom:1px solid rgba(42,42,42,.4)}
+.B-p-slide .num{color:var(--text-disabled);min-width:24px;text-align:right}
+.B-p-slide .tp{color:var(--text-disabled);min-width:70px;text-transform:uppercase;font-size:9px;letter-spacing:.04em}
+.B-p-slide .ln{color:var(--text-primary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.B-p-slide .sc{color:var(--gold);min-width:28px;text-align:right}
+.B-p-slide .df{min-width:12px}
+.B-p-slide .df.d1{color:#4f4}
+.B-p-slide .df.d2{color:var(--gold)}
+.B-p-slide .df.d3{color:var(--signal)}
+.B-p-slide.struct{opacity:.35}
+.B-export{display:flex;gap:var(--space-02);margin-top:var(--space-03);flex-wrap:wrap}
+.B-export button{background:transparent;border:1px solid var(--border-subtle);color:var(--text-secondary);font-family:'Space Mono',monospace;font-size:10px;padding:8px 16px;cursor:pointer;text-transform:uppercase;letter-spacing:.06em;flex:1}
+.B-export button:hover{background:var(--surface-03);color:var(--text-primary)}
+.B-export button.push{border-color:var(--cyan);color:var(--cyan)}
+.B-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text-disabled);text-align:center;gap:var(--space-03)}
+.B-empty .icon{font-size:4rem;color:var(--signal);opacity:.2}
+.B-empty .msg{font-size:11px;text-transform:uppercase;letter-spacing:.1em}
+.B-toast{position:fixed;bottom:24px;right:24px;padding:10px 20px;background:var(--surface-03);border:1px solid var(--signal);color:var(--signal);font-size:10px;text-transform:uppercase;letter-spacing:.08em;z-index:999;animation:fadeout 2s forwards}
+@keyframes fadeout{0%,70%{opacity:1}100%{opacity:0}}
+.B-adv-toggle{font-size:10px;color:var(--text-disabled);cursor:pointer;text-transform:uppercase;letter-spacing:.08em;margin-bottom:var(--space-02)}
+.B-adv-toggle:hover{color:var(--text-secondary)}
+@media(max-width:768px){
+  .B{grid-template-columns:1fr;grid-template-rows:auto auto 1fr}
+  .B-form{max-height:50vh;border-right:none;border-bottom:1px solid var(--border-subtle)}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+var{useState,useEffect,useMemo,useRef,useCallback}=React;
+
+// ═══ TEMPLATES ═══
+var TIER_RULES='Q1-Q4: 1 POINT | Q5 BONUS: 3 POINTS | Q6-Q9: 1 POINT | Q10 BONUS: 5 POINTS | Q11-Q14: 1 POINT | Q15 BONUS: 10 POINTS';
+var BONUS_AT={5:3,10:5,15:10};
+
+var TEMPLATES={
+  'the-split-standard':{
+    id:'the-split-standard',name:'THE SPLIT \u2014 STANDARD',duration:'90 min',
+    sections:[
+      {id:'pre-show',name:'PRE-SHOW',fixed:[{type:'attract',content:{primary:'L',secondary:''}}]},
+      {id:'warm-up',name:'WARM-UP',fixed:[{type:'fishbowl',content:{primary:'WRITE YOUR RED FLAG.',secondary:'DROP IT IN THE BOWL. WE WILL USE IT AGAINST YOU.'}}]},
+      {id:'round-1',name:'ROUND 1: GUESS THE SOURCE',
+        fixed:[{type:'round_title',content:{primary:'ROUND 1',secondary:'GUESS THE SOURCE'}},{type:'tier_title',content:{primary:'WE SHOW THE LINE. YOU WRITE WHERE IT\'S FROM.',secondary:TIER_RULES}}],
+        slots:{mode:'source_q',count:15,timer:30,bonusAt:BONUS_AT},
+        closing:[{type:'score',content:{primary:'ROUND 1 COMPLETE',secondary:'SWAP SCORECARDS. MARK THEM.'}},{type:'crate_drop',content:{primary:'',secondary:''}}]},
+      {id:'round-2',name:'ROUND 2: SCREEN',
+        fixed:[{type:'round_title',content:{primary:'ROUND 2',secondary:'GUESS THE LINECONIC: SCREEN'}},{type:'tier_title',content:{primary:'WE SHOW THE ACRONYM. YOU DECODE THE LINE. CINEMA & TV ONLY.',secondary:TIER_RULES}}],
+        slots:{mode:'acronym_q',count:15,timer:30,bonusAt:BONUS_AT},
+        closing:[{type:'score',content:{primary:'ROUND 2 COMPLETE',secondary:'SWAP SCORECARDS. MARK THEM.'}},{type:'crate_drop',content:{primary:'',secondary:''}}]},
+      {id:'fluency',name:'FLUENCY CHECK',
+        fixed:[{type:'round_title',content:{primary:'FLUENCY CHECK',secondary:'WE SHOW THE LINE. YOU SHOUT THE SOURCE. NO WRITING. NO SCORING.'}}],
+        slots:{mode:'fluency_pair',count:10,timer:null},
+        closing:[{type:'transition_beat',content:{primary:'',secondary:''}}]},
+      {id:'intermission',name:'INTERMISSION',fixed:[{type:'intermission',content:{primary:'INTERMISSION.',secondary:'10 MINUTES. GET A DRINK.'}},{type:'warning',content:{primary:'60 SECONDS.',secondary:''}},{type:'blackout',content:{primary:'',secondary:''}}]},
+      {id:'doa',name:'DEAD OR ALIVE',
+        fixed:[{type:'round_title',content:{primary:'DEAD OR ALIVE',secondary:'CULTURALLY RELEVANT OR CULTURALLY EXPIRED. YOU DECIDE.'}}],
+        slots:{mode:'doa_triplet',count:10,timer:null},
+        closing:[{type:'transition_beat',content:{primary:'',secondary:''}}]},
+      {id:'round-3',name:'ROUND 3: LYRICS',
+        fixed:[{type:'round_title',content:{primary:'ROUND 3',secondary:'GUESS THE LINECONIC: LYRICS'}},{type:'tier_title',content:{primary:'WE SHOW THE ACRONYM. YOU DECODE THE LINE. MUSIC ONLY.',secondary:TIER_RULES}}],
+        slots:{mode:'acronym_q',count:15,timer:30,bonusAt:BONUS_AT},
+        closing:[{type:'score',content:{primary:'ROUND 3 COMPLETE',secondary:'SWAP SCORECARDS. MARK THEM.'}},{type:'crate_drop',content:{primary:'',secondary:''}}]},
+      {id:'round-4',name:'ROUND 4: EVERYTHING',
+        fixed:[{type:'round_title',content:{primary:'ROUND 4',secondary:'GUESS THE LINECONIC: EVERYTHING'}},{type:'tier_title',content:{primary:'SCREEN + LYRICS. NO RESTRICTIONS. HARDEST REFERENCES.',secondary:TIER_RULES}}],
+        slots:{mode:'acronym_q',count:15,timer:30,bonusAt:BONUS_AT},
+        closing:[{type:'score',content:{primary:'ROUND 4 COMPLETE',secondary:'FINAL SCORES.SWAP AND TALLY.'}}]},
+      {id:'verdict',name:'THE VERDICT',fixed:[
+        {type:'verdict',content:{primary:'THE VERDICT.',secondary:''}},
+        {type:'sentence',content:{primary:'THE SENTENCE.',secondary:'LOSING TABLE. IN UNISON.|\'YOU CAN\'T SIT WITH US\': MEAN GIRLS.'}},
+        {type:'receipt_rain',content:{primary:'MAKE IT RAIN.',secondary:''}},
+        {type:'last_line',content:{primary:'NOBODY PUTS BABY IN A CORNER.',secondary:''}},
+        {type:'endcard',content:{primary:'L',secondary:'STOP BEING UNCULTURED.'}}
+      ]},
+      {id:'hot-seat',name:'BONUS: HOT SEAT',
+        fixed:[{type:'round_title',content:{primary:'BONUS ROUND',secondary:'THE HOT SEAT'}},{type:'hotseat_rules',content:{primary:'ROOM SPLITS. WINNING TABLE SENDS A CHAMPION.',secondary:'BACK TO SCREEN. YOUR HALF SCREAMS CLUES.|OTHER HALF STAYS QUIET.|30 SECONDS PER ROUND.'}}],
+        slots:{mode:'hotseat_prompt',count:6,timer:30},
+        closing:[{type:'score',content:{primary:'HOT SEAT COMPLETE.',secondary:''}},{type:'endcard',content:{primary:'L',secondary:'YOU\'VE BEEN LINECONIC.'}}]}
+    ]
+  }
+};
+
+// ═══ CARD ADAPTER — converts library card to slide by round mode ═══
+var slideCounter=0;
+function makeSlideId(){return 'g'+(++slideCounter)}
+function cardToSlide(card,mode,opts){
+  var id=makeSlideId();
+  var base={id:id,reveal_state:'hidden',team:'neutral',host_notes:null,points:opts&&opts.points||null,timer_seconds:opts&&opts.timer||null};
+  switch(mode){
+    case'source_q':return{...base,type:'source_q',content:{primary:card.content.answer.toUpperCase(),secondary:'',answer:card.source}};
+    case'acronym_q':return{...base,type:'acronym_q',content:{primary:card.code,secondary:'',answer:card.content.answer.toUpperCase(),source:card.source}};
+    case'hotseat_prompt':return{...base,type:'hotseat_prompt',content:{primary:card.content.answer.toUpperCase(),secondary:'',source:card.source}};
+    default:return{...base,type:mode,content:{primary:card.content.answer.toUpperCase(),secondary:'',answer:card.source}};
+  }
+}
+function cardToFluencyPair(card){
+  return[
+    {id:makeSlideId(),type:'fluency_line',content:{primary:card.content.answer.toUpperCase(),secondary:''},reveal_state:'hidden',team:'neutral',timer_seconds:null,host_notes:null,points:null},
+    {id:makeSlideId(),type:'fluency_source',content:{primary:card.source.toUpperCase(),secondary:''},reveal_state:'hidden',team:'neutral',timer_seconds:null,host_notes:null,points:null}
+  ];
+}
+function buildDoaTriplet(topic,verdict){
+  return[
+    {id:makeSlideId(),type:'doa_ref',content:{primary:topic,secondary:''},reveal_state:'hidden',team:'neutral',timer_seconds:null,host_notes:null,points:null},
+    {id:makeSlideId(),type:'doa_vote',content:{primary:topic,secondary:''},reveal_state:'hidden',team:'neutral',timer_seconds:null,host_notes:null,points:null},
+    {id:makeSlideId(),type:verdict==='dead'?'doa_verdict_dead':'doa_verdict_alive',content:{primary:verdict==='dead'?'DEAD':'ALIVE',secondary:''},reveal_state:'hidden',team:'neutral',timer_seconds:null,host_notes:null,points:null}
+  ];
+}
+
+// ═══ SELECTION ALGORITHM ═══
+function weightedRandom(items){
+  var total=items.reduce(function(s,x){return s+Math.max(x.weight,1)},0);
+  var r=Math.random()*total;var acc=0;
+  for(var i=0;i<items.length;i++){acc+=Math.max(items[i].weight,1);if(r<=acc)return items[i]}
+  return items[items.length-1];
+}
+
+function getDifficultyCurve(pos,total,curve){
+  var ratio=pos/total;
+  if(curve==='ramp_up'){if(ratio<.33)return 1;if(ratio<.66)return 2;return 3}
+  if(curve==='ramp_down'){if(ratio<.33)return 3;if(ratio<.66)return 2;return 1}
+  return[1,2,3][pos%3];
+}
+
+function buildDeck(library,templateId,config){
+  slideCounter=0;
+  var tmpl=TEMPLATES[templateId];
+  if(!tmpl)return null;
+  // Filter pool
+  var pool=library.filter(function(c){
+    if(c.scores.lineconic_score<config.minScore)return false;
+    if(config.excludedTags.length){for(var i=0;i<c.themes.length;i++){if(config.excludedTags.indexOf(c.themes[i])>=0)return false}}
+    if(config.excludedIds&&config.excludedIds.length&&config.excludedIds.indexOf(c.id)>=0)return false;
+    return true;
+  });
+
+  // Compute total fillable slots (exclude DOA — it uses its own pool)
+  var totalSlots=0;
+  tmpl.sections.forEach(function(s){if(s.slots&&s.slots.mode!=='doa_triplet')totalSlots+=s.slots.count});
+  var diffQ={1:Math.floor(totalSlots*config.difficulty[0]/100),2:Math.floor(totalSlots*config.difficulty[1]/100),3:0};
+  diffQ[3]=totalSlots-diffQ[1]-diffQ[2];if(diffQ[3]<0)diffQ[3]=0;
+  var budgetQ={};
+  var budgetMap={'Evergreen Canon':config.budget[0],'Deep Cuts':config.budget[1],'Seasonal':config.budget[2]};
+  Object.keys(budgetMap).forEach(function(k){budgetQ[k]=Math.floor(totalSlots*budgetMap[k]/100)});
+
+  var usedIds={};var tagCounts={};
+  var sections=[];
+
+  tmpl.sections.forEach(function(sec){
+    var slides=[];
+    // Fixed slides
+    if(sec.fixed)sec.fixed.forEach(function(f){
+      slides.push({id:makeSlideId(),type:f.type,content:{...f.content},reveal_state:'hidden',team:'neutral',timer_seconds:null,host_notes:null,points:null});
+    });
+
+    // Fill slots
+    if(sec.slots){
+      var mode=sec.slots.mode;
+      var count=sec.slots.count;
+      var timer=sec.slots.timer||null;
+      var bonusAt=sec.slots.bonusAt||{};
+
+      // ═══ DOA SPECIAL PATH — uses its own topic pool, not card library ═══
+      if(mode==='doa_triplet'){
+        var doaList=config.doaTopics||[];
+        var doaUseCount=Math.min(count,doaList.length);
+        for(var dp=0;dp<doaUseCount;dp++){
+          var triplet=buildDoaTriplet(doaList[dp].topic,doaList[dp].verdict);
+          slides.push(triplet[0]);slides.push(triplet[1]);slides.push(triplet[2]);
+        }
+      }else{
+        // ═══ CARD LIBRARY PATH — all other round types ═══
+        var selected=[];
+        for(var pos=0;pos<count;pos++){
+          var eligible=pool.filter(function(c){return!usedIds[c.id]});
+          if(eligible.length===0)break;
+
+          var targetDiff=getDifficultyCurve(pos,count,config.curve);
+          var scored=eligible.map(function(c){
+            var w=c.scores.lineconic_score*10;
+            if(c.difficulty===targetDiff)w+=30;
+            if(diffQ[c.difficulty]!==undefined&&diffQ[c.difficulty]<=0)w-=40;
+            if(budgetQ[c.category]!==undefined&&budgetQ[c.category]<=0)w-=40;
+            if(config.diversity){
+              var maxTag=0;
+              c.themes.forEach(function(t){var u=tagCounts[t]||0;if(u>maxTag)maxTag=u});
+              w-=maxTag*5;
+            }
+            return{card:c,weight:Math.max(w,1)};
+          });
+
+          var pick=weightedRandom(scored);
+          var card=pick.card;
+          usedIds[card.id]=true;
+          if(diffQ[card.difficulty]!==undefined)diffQ[card.difficulty]--;
+          if(budgetQ[card.category]!==undefined)budgetQ[card.category]--;
+          card.themes.forEach(function(t){tagCounts[t]=(tagCounts[t]||0)+1});
+          selected.push(card);
+
+          // Insert bonus marker before bonus positions
+          var qNum=pos+1;
+          if(bonusAt[qNum]){
+            slides.push({id:makeSlideId(),type:'bonus_marker',content:{primary:'BONUS: '+bonusAt[qNum]+' POINTS',secondary:''},reveal_state:'hidden',team:'neutral',timer_seconds:null,host_notes:null,points:null});
+          }
+
+          // Convert card to slide(s)
+          if(mode==='fluency_pair'){
+            var pair=cardToFluencyPair(card);
+            slides.push(pair[0]);slides.push(pair[1]);
+          }else{
+            var pts=bonusAt[qNum]||null;
+            slides.push(cardToSlide(card,mode,{timer:timer,points:pts}));
+          }
+        }
+      }
+    }
+
+    // Closing slides
+    if(sec.closing)sec.closing.forEach(function(f){
+      slides.push({id:makeSlideId(),type:f.type,content:{...f.content},reveal_state:'hidden',team:'neutral',timer_seconds:null,host_notes:null,points:null});
+    });
+
+    sections.push({id:sec.id,name:sec.name,slides:slides});
+  });
+
+  return{
+    id:'deck-'+Date.now(),
+    name:'DECK BUILD \u2014 '+new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}).toUpperCase(),
+    sections:sections,
+    created:Date.now(),
+    version:2
+  };
+}
+
+// ═══ ALL 25 THEME TAGS ═══
+var ALL_TAGS=['Hype Moment','Comedy Staples','Dramatic Delivery','90s Nostalgia','00s Nostalgia','Main Character Energy','10s Nostalgia','Reality TV','Millennial Cringe','Rom-Com','Action Sequences','Sci-Fi/Fantasy','Internet Native','Music Drops','Friendship Chaos','Black Culture','Horror Adjacent','Crying Scene','Villain Arc','UK Culture','Gen Z Brain Rot','Vine Era','Corporate Satire','TikTok Native','Toxic Romance'];
+
+// ═══ DOA TOPIC POOL — cultural phenomena, NOT quotes ═══
+var DOA_POOL=[
+  {topic:'SKINNY JEANS',verdict:'dead'},
+  {topic:'ROM COMS',verdict:'alive'},
+  {topic:'LAUGH TRACKS',verdict:'dead'},
+  {topic:'NEPO BABIES',verdict:'alive'},
+  {topic:'MARVEL PHASE 5',verdict:'dead'},
+  {topic:'REALITY TV',verdict:'alive'},
+  {topic:'METHOD ACTING',verdict:'dead'},
+  {topic:'THE OFFICE REBOOT',verdict:'dead'},
+  {topic:'A24',verdict:'alive'},
+  {topic:'MOVIE THEATRES',verdict:'alive'},
+  {topic:'CRYPTO',verdict:'dead'},
+  {topic:'VINYL RECORDS',verdict:'alive'},
+  {topic:'FAST FASHION',verdict:'dead'},
+  {topic:'PODCASTS',verdict:'alive'},
+  {topic:'NFTs',verdict:'dead'},
+  {topic:'SOURDOUGH',verdict:'dead'},
+  {topic:'K-POP',verdict:'alive'},
+  {topic:'CABLE TV',verdict:'dead'},
+  {topic:'THRIFT SHOPPING',verdict:'alive'},
+  {topic:'GENDER REVEALS',verdict:'dead'},
+  {topic:'TRUE CRIME DOCS',verdict:'alive'},
+  {topic:'DVD COLLECTIONS',verdict:'dead'},
+  {topic:'BRUNCH CULTURE',verdict:'alive'},
+  {topic:'FANNY PACKS',verdict:'alive'},
+  {topic:'SITUATIONSHIPS',verdict:'alive'},
+  {topic:'CROCS',verdict:'alive'},
+  {topic:'QUIET QUITTING',verdict:'alive'},
+  {topic:'PHONE CASES',verdict:'alive'},
+  {topic:'CANCEL CULTURE',verdict:'dead'},
+  {topic:'ASTROLOGY',verdict:'alive'},
+  {topic:'MEAL PREP',verdict:'alive'},
+  {topic:'HANDSHAKES',verdict:'dead'},
+  {topic:'HOUSE PLANTS',verdict:'alive'},
+  {topic:'VOICEMAIL',verdict:'dead'},
+  {topic:'KARAOKE',verdict:'alive'},
+  {topic:'PRINT MEDIA',verdict:'dead'},
+  {topic:'TINY HOMES',verdict:'dead'},
+  {topic:'STREET FOOD',verdict:'alive'},
+  {topic:'BEIGE INTERIORS',verdict:'dead'},
+  {topic:'HOT YOGA',verdict:'alive'}
+];
+
+// ═══ DOA HELPERS ═══
+function parseDoaTopics(text){
+  if(!text||!text.trim())return[];
+  return text.trim().split('\n').map(function(line,i){
+    line=line.trim();if(!line)return null;
+    var idx=line.lastIndexOf(':');
+    var topic,verdict;
+    if(idx>0){
+      topic=line.substring(0,idx).trim().toUpperCase();
+      verdict=line.substring(idx+1).trim().toLowerCase();
+    }else{
+      topic=line.toUpperCase();verdict='';
+    }
+    if(verdict!=='dead'&&verdict!=='alive')verdict=i%2===0?'alive':'dead';
+    return{topic:topic,verdict:verdict};
+  }).filter(Boolean);
+}
+
+function shuffleDoaPool(count){
+  var shuffled=DOA_POOL.slice().sort(function(){return Math.random()-0.5});
+  var picked=shuffled.slice(0,count);
+  // Enforce ~50/50 balance
+  var deadTarget=Math.floor(count/2);
+  var aliveTarget=count-deadTarget;
+  var deads=[];var alives=[];
+  picked.forEach(function(t){if(t.verdict==='dead')deads.push(t);else alives.push(t)});
+  while(deads.length>deadTarget&&alives.length<aliveTarget){alives.push({topic:deads.pop().topic,verdict:'alive'})}
+  while(alives.length>aliveTarget&&deads.length<deadTarget){deads.push({topic:alives.pop().topic,verdict:'dead'})}
+  // Interleave for dramatic variety
+  var result=[];var di=0,ai=0;
+  for(var i=0;i<count;i++){
+    if(i%2===0&&ai<alives.length)result.push(alives[ai++]);
+    else if(di<deads.length)result.push(deads[di++]);
+    else if(ai<alives.length)result.push(alives[ai++]);
+    else if(di<deads.length)result.push(deads[di++]);
+  }
+  return result.map(function(t){return t.topic+':'+t.verdict}).join('\n');
+}
+
+// ═══ COMPONENTS ═══
+function BuilderApp(){
+  var[library,setLibrary]=useState(null);
+  var[loading,setLoading]=useState(true);
+  var[error,setError]=useState(null);
+  var[templateId,setTemplateId]=useState('the-split-standard');
+  var[difficulty,setDifficulty]=useState([30,50,20]);
+  var[budget,setBudget]=useState([55,35,10]);
+  var[minScore,setMinScore]=useState(5.0);
+  var[excludedTags,setExcludedTags]=useState([]);
+  var[curve,setCurve]=useState('ramp_up');
+  var[diversity,setDiversity]=useState(true);
+  var[excludedIds,setExcludedIds]=useState('');
+  var[showAdvanced,setShowAdvanced]=useState(false);
+  var[doaTopics,setDoaTopics]=useState(function(){return shuffleDoaPool(10)});
+  var[ros,setRos]=useState(null);
+  var[toast,setToast]=useState(null);
+
+  useEffect(function(){
+    fetch('/card-library.json').then(function(r){return r.json()}).then(function(data){
+      setLibrary(data.cards||data);setLoading(false);
+    }).catch(function(e){setError('FAILED TO LOAD CARD LIBRARY');setLoading(false)});
+  },[]);
+
+  var eligible=useMemo(function(){
+    if(!library)return 0;
+    return library.filter(function(c){
+      if(c.scores.lineconic_score<minScore)return false;
+      for(var i=0;i<c.themes.length;i++){if(excludedTags.indexOf(c.themes[i])>=0)return false}
+      return true;
+    }).length;
+  },[library,minScore,excludedTags]);
+
+  var tagCounts=useMemo(function(){
+    if(!library)return{};
+    var counts={};
+    library.forEach(function(c){c.themes.forEach(function(t){counts[t]=(counts[t]||0)+1})});
+    return counts;
+  },[library]);
+
+  function toggleTag(tag){
+    setExcludedTags(function(prev){return prev.indexOf(tag)>=0?prev.filter(function(t){return t!==tag}):prev.concat([tag])});
+  }
+
+  function setDiffPreset(e,m,h){setDifficulty([e,m,h])}
+  function setBudgetPreset(e,d,s){setBudget([e,d,s])}
+
+  function generate(){
+    if(!library)return;
+    var config={
+      difficulty:difficulty,budget:budget,minScore:minScore,
+      excludedTags:excludedTags,curve:curve,diversity:diversity,
+      excludedIds:excludedIds.trim()?excludedIds.trim().split(/[\n,]+/).map(function(s){return s.trim()}).filter(Boolean):[],
+      doaTopics:parseDoaTopics(doaTopics)
+    };
+    var result=buildDeck(library,templateId,config);
+    setRos(result);
+  }
+
+  function doExport(){
+    if(!ros)return;
+    var blob=new Blob([JSON.stringify(ros,null,2)],{type:'application/json'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');a.href=url;a.download=ros.id+'.json';a.click();
+    URL.revokeObjectURL(url);
+    showToast('JSON DOWNLOADED');
+  }
+
+  function doPush(){
+    if(!ros)return;
+    try{
+      localStorage.setItem('lineconic_show',JSON.stringify(ros));
+      showToast('PUSHED TO OPERATOR');
+    }catch(e){showToast('PUSH FAILED')}
+  }
+
+  function doCopy(){
+    if(!ros)return;
+    navigator.clipboard.writeText(JSON.stringify(ros,null,2)).then(function(){showToast('COPIED TO CLIPBOARD')}).catch(function(){showToast('COPY FAILED')});
+  }
+
+  function showToast(msg){setToast(msg);setTimeout(function(){setToast(null)},2200)}
+
+  if(loading)return <div className="B-empty"><div className="icon">L</div><div className="msg">LOADING CARD LIBRARY...</div></div>;
+  if(error)return <div className="B-empty"><div className="icon">!</div><div className="msg">{error}</div></div>;
+
+  return(
+    <div className="B">
+      <div className="B-head">
+        <div style={{display:'flex',alignItems:'center',gap:'var(--space-03)'}}>
+          <a className="B-logo" href="/">L</a>
+          <div className="B-title">DECK BUILDER</div>
+        </div>
+        <a className="B-back" href="/">BACK TO LAUNCHER</a>
+      </div>
+
+      <div className="B-form">
+        {/* Template */}
+        <div className="B-sec">
+          <div className="B-sec-head">SHOW FORMAT</div>
+          <div className="B-row">
+            {Object.keys(TEMPLATES).map(function(k){var t=TEMPLATES[k];return <button key={k} className={'B-preset'+(templateId===k?' on':'')} onClick={function(){setTemplateId(k)}}>{t.name} ({t.duration})</button>})}
+          </div>
+        </div>
+
+        {/* Difficulty */}
+        <div className="B-sec">
+          <div className="B-sec-head">DIFFICULTY MIX</div>
+          <div className="B-row">
+            <button className={'B-preset'+(difficulty[0]===60?' on':'')} onClick={function(){setDiffPreset(60,30,10)}}>EASY CROWD</button>
+            <button className={'B-preset'+(difficulty[0]===30?' on':'')} onClick={function(){setDiffPreset(30,50,20)}}>BALANCED</button>
+            <button className={'B-preset'+(difficulty[0]===15?' on':'')} onClick={function(){setDiffPreset(15,35,50)}}>HARD CROWD</button>
+          </div>
+          <div className="B-row" style={{alignItems:'center'}}>
+            <div className="B-label">EASY</div><input className="B-input" type="number" min="0" max="100" value={difficulty[0]} onChange={function(e){var v=parseInt(e.target.value)||0;setDifficulty([v,difficulty[1],100-v-difficulty[1]])}}/>
+            <div className="B-label">MED</div><input className="B-input" type="number" min="0" max="100" value={difficulty[1]} onChange={function(e){var v=parseInt(e.target.value)||0;setDifficulty([difficulty[0],v,100-difficulty[0]-v])}}/>
+            <div className="B-label">HARD</div><input className="B-input" type="number" min="0" max="100" value={difficulty[2]} readOnly style={{opacity:.5}}/>
+          </div>
+        </div>
+
+        {/* Budget */}
+        <div className="B-sec">
+          <div className="B-sec-head">BUDGET MIX</div>
+          <div className="B-row">
+            <button className={'B-preset'+(budget[0]===70?' on':'')} onClick={function(){setBudgetPreset(70,25,5)}}>CROWD SAFE</button>
+            <button className={'B-preset'+(budget[0]===55?' on':'')} onClick={function(){setBudgetPreset(55,35,10)}}>BALANCED</button>
+            <button className={'B-preset'+(budget[0]===30?' on':'')} onClick={function(){setBudgetPreset(30,55,15)}}>DEEP DIVE</button>
+          </div>
+          <div className="B-row" style={{alignItems:'center'}}>
+            <div className="B-label">EVERGREEN</div><input className="B-input" type="number" min="0" max="100" value={budget[0]} onChange={function(e){var v=parseInt(e.target.value)||0;setBudget([v,budget[1],100-v-budget[1]])}}/>
+            <div className="B-label">DEEP</div><input className="B-input" type="number" min="0" max="100" value={budget[1]} onChange={function(e){var v=parseInt(e.target.value)||0;setBudget([budget[0],v,100-budget[0]-v])}}/>
+            <div className="B-label">SEASONAL</div><input className="B-input" type="number" min="0" max="100" value={budget[2]} readOnly style={{opacity:.5}}/>
+          </div>
+        </div>
+
+        {/* Quality Floor */}
+        <div className="B-sec">
+          <div className="B-sec-head">QUALITY FLOOR</div>
+          <div className="B-label">MIN LINECONIC SCORE: <b style={{color:'var(--gold)'}}>{minScore.toFixed(1)}</b></div>
+          <input className="B-range" type="range" min="3.8" max="8.5" step="0.1" value={minScore} onChange={function(e){setMinScore(parseFloat(e.target.value))}}/>
+          <div className="B-label" style={{color:'var(--cyan)'}}>{eligible} / {library?library.length:0} CARDS ELIGIBLE</div>
+        </div>
+
+        {/* Themes */}
+        <div className="B-sec">
+          <div className="B-sec-head">THEME CONTROLS</div>
+          <div className="B-row" style={{marginBottom:'var(--space-02)'}}>
+            <button className="B-preset" onClick={function(){setExcludedTags([])}}>ALL ON</button>
+            <button className="B-preset" onClick={function(){setExcludedTags(ALL_TAGS.slice())}}>ALL OFF</button>
+            <button className="B-preset" onClick={function(){setExcludedTags(['TikTok Native','Gen Z Brain Rot','Vine Era'])}}>CROWD PLEASER</button>
+          </div>
+          <div>
+            {ALL_TAGS.map(function(tag){
+              var isOn=excludedTags.indexOf(tag)<0;
+              return <span key={tag} className={'B-tag'+(isOn?' on':'')} onClick={function(){toggleTag(tag)}}>
+                {tag} <span className="cnt">{tagCounts[tag]||0}</span>
+              </span>;
+            })}
+          </div>
+        </div>
+
+        {/* Dead or Alive */}
+        <div className="B-sec">
+          <div className="B-sec-head">DEAD OR ALIVE</div>
+          <div className="B-row" style={{alignItems:'center',justifyContent:'space-between'}}>
+            <div className="B-label">{parseDoaTopics(doaTopics).length} TOPICS</div>
+            <button className="B-preset" onClick={function(){setDoaTopics(shuffleDoaPool(10))}}>RANDOMIZE</button>
+          </div>
+          <textarea className="B-input wide" rows="12" value={doaTopics} onChange={function(e){setDoaTopics(e.target.value)}} placeholder={"SKINNY JEANS:dead\nROM COMS:alive\nLAUGH TRACKS:dead\n(one per line, TOPIC:verdict)"} style={{resize:'vertical',textAlign:'left',fontFamily:'Space Mono,monospace',fontSize:10,lineHeight:'1.6'}}/>
+          <div className="B-label" style={{marginTop:'var(--space-01)',color:'var(--text-disabled)'}}>FORMAT: TOPIC:dead OR TOPIC:alive — ONE PER LINE</div>
+        </div>
+
+        {/* Advanced */}
+        <div className="B-sec">
+          <div className="B-adv-toggle" onClick={function(){setShowAdvanced(!showAdvanced)}}>{showAdvanced?'\u25BC':'\u25B6'} ADVANCED</div>
+          {showAdvanced&&<div>
+            <div className="B-label" style={{marginBottom:'var(--space-01)'}}>DIFFICULTY CURVE</div>
+            <div className="B-row">
+              <button className={'B-preset'+(curve==='ramp_up'?' on':'')} onClick={function(){setCurve('ramp_up')}}>RAMP UP</button>
+              <button className={'B-preset'+(curve==='flat'?' on':'')} onClick={function(){setCurve('flat')}}>FLAT</button>
+              <button className={'B-preset'+(curve==='ramp_down'?' on':'')} onClick={function(){setCurve('ramp_down')}}>RAMP DOWN</button>
+            </div>
+            <div className="B-row" style={{alignItems:'center',marginTop:'var(--space-02)'}}>
+              <div className="B-label">THEME DIVERSITY</div>
+              <button className={'B-preset'+(diversity?' on':'')} onClick={function(){setDiversity(!diversity)}}>{diversity?'ON':'OFF'}</button>
+            </div>
+            <div className="B-label" style={{marginTop:'var(--space-02)'}}>EXCLUDE CARD IDS (ONE PER LINE)</div>
+            <textarea className="B-input wide" rows="3" value={excludedIds} onChange={function(e){setExcludedIds(e.target.value)}} placeholder="card-id-1&#10;card-id-2" style={{resize:'vertical',textAlign:'left',fontFamily:'Space Mono,monospace',fontSize:10}}/>
+          </div>}
+        </div>
+
+        <button className="B-gen" onClick={generate} disabled={!library||eligible<10}>GENERATE DECK</button>
+        {ros&&<button className="B-gen regen" onClick={generate}>REGENERATE</button>}
+      </div>
+
+      <div className="B-preview">
+        {!ros?<div className="B-empty"><div className="icon">L</div><div className="msg">CONFIGURE AND GENERATE<br/>TO PREVIEW YOUR DECK</div></div>
+        :<PreviewPanel ros={ros} onExport={doExport} onPush={doPush} onCopy={doCopy}/>}
+      </div>
+
+      {toast&&<div className="B-toast" key={toast+Date.now()}>{toast}</div>}
+    </div>
+  );
+}
+
+function PreviewPanel({ros,onExport,onPush,onCopy}){
+  var[expanded,setExpanded]=useState({});
+  function toggle(id){setExpanded(function(p){var n={...p};n[id]=!n[id];return n})}
+
+  // Stats
+  var totalSlides=0;var questions=0;var diffs={1:0,2:0,3:0};var cats={};var themes={};
+  ros.sections.forEach(function(sec){
+    totalSlides+=sec.slides.length;
+    sec.slides.forEach(function(sl){
+      if(sl._card){
+        questions++;
+        diffs[sl._card.difficulty]=(diffs[sl._card.difficulty]||0)+1;
+        cats[sl._card.category]=(cats[sl._card.category]||0)+1;
+        sl._card.themes.forEach(function(t){themes[t]=(themes[t]||0)+1});
+      }
+    });
+  });
+
+  return(
+    <div>
+      <div className="B-stat">
+        <b>{totalSlides}</b> SLIDES &nbsp; <b>{ros.sections.length}</b> SECTIONS &nbsp; <span className="pk">{ros.name}</span>
+      </div>
+
+      {ros.sections.map(function(sec){
+        var isOpen=expanded[sec.id]!==false;
+        return(
+          <div className="B-p-sec" key={sec.id}>
+            <div className="B-p-sec-head" onClick={function(){toggle(sec.id)}}>
+              <span>{sec.name}</span>
+              <span className="ct">{sec.slides.length} {isOpen?'\u25BC':'\u25B6'}</span>
+            </div>
+            {isOpen&&sec.slides.map(function(sl,i){
+              var isQ=['source_q','acronym_q','hotseat_prompt','fluency_line','doa_vote','doa_ref'].indexOf(sl.type)>=0;
+              return(
+                <div className={'B-p-slide'+(isQ?'':' struct')} key={sl.id||i}>
+                  <span className="num">{i+1}</span>
+                  <span className="tp">{sl.type.replace(/_/g,' ')}</span>
+                  <span className="ln">{sl.content.primary||''}</span>
+                  {sl.content.answer&&<span style={{color:'var(--text-disabled)',fontSize:9,minWidth:80,textAlign:'right'}}>{sl.content.answer}</span>}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })}
+
+      <div className="B-export">
+        <button onClick={onExport}>DOWNLOAD JSON</button>
+        <button className="push" onClick={onPush}>PUSH TO OPERATOR</button>
+        <button onClick={onCopy}>COPY TO CLIPBOARD</button>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<BuilderApp/>);
+</script>
+</body>
+</html>
