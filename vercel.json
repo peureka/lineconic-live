@@ -1,10 +1,10 @@
 {
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/", "destination": "/app.html" },
-    { "source": "/vote", "destination": "/app.html" },
-    { "source": "/audience", "destination": "/app.html" },
-    { "source": "/answers", "destination": "/app.html" },
-    { "source": "/operator", "destination": "/app.html" }
+    { "source": "/", "destination": "/app" },
+    { "source": "/vote", "destination": "/app" },
+    { "source": "/audience", "destination": "/app" },
+    { "source": "/answers", "destination": "/app" },
+    { "source": "/operator", "destination": "/app" }
   ]
 }
