@@ -118,22 +118,26 @@ try{
 var{useState,useEffect,useMemo,useRef,useCallback}=React;
 
 // ═══ TEMPLATES ═══
-var TIER_RULES='Q1-Q4: 1 POINT | Q5 BONUS: 3 POINTS | Q6-Q9: 1 POINT | Q10 BONUS: 5 POINTS | Q11-Q14: 1 POINT | Q15 BONUS: 10 POINTS';
-var BONUS_AT={5:3,10:5,15:10};
+var TIER_15='Q1-Q4: 1 PT | Q5 BONUS: 3 PT | Q6-Q9: 1 PT | Q10 BONUS: 5 PT | Q11-Q14: 1 PT | Q15 BONUS: 10 PT';
+var TIER_10='Q1-Q3: 1 PT | Q4 BONUS: 3 PT | Q5-Q6: 1 PT | Q7 BONUS: 5 PT | Q8-Q9: 1 PT | Q10 BONUS: 10 PT';
+var TIER_8='Q1-Q2: 1 PT | Q3 BONUS: 3 PT | Q4-Q5: 1 PT | Q6 BONUS: 5 PT | Q7: 1 PT | Q8 BONUS: 10 PT';
+var BONUS_15={5:3,10:5,15:10};
+var BONUS_10={4:3,7:5,10:10};
+var BONUS_8={3:3,6:5,8:10};
 
 var TEMPLATES={
-  'the-split-standard':{
-    id:'the-split-standard',name:'THE SPLIT \u2014 STANDARD',duration:'90 min',
+  'the-standard-90':{
+    id:'the-standard-90',name:'THE STANDARD',duration:'90 min',
     sections:[
       {id:'pre-show',name:'PRE-SHOW',fixed:[{type:'attract',content:{primary:'L',secondary:''}}]},
       {id:'warm-up',name:'WARM-UP',fixed:[{type:'fishbowl',content:{primary:'WRITE YOUR RED FLAG.',secondary:'DROP IT IN THE BOWL. WE WILL USE IT AGAINST YOU.'}}]},
       {id:'round-1',name:'ROUND 1: GUESS THE SOURCE',
-        fixed:[{type:'round_title',content:{primary:'ROUND 1',secondary:'GUESS THE SOURCE'}},{type:'tier_title',content:{primary:'WE SHOW THE LINE. YOU WRITE WHERE IT\'S FROM.',secondary:TIER_RULES}}],
-        slots:{mode:'source_q',count:15,timer:30,bonusAt:BONUS_AT},
+        fixed:[{type:'round_title',content:{primary:'ROUND 1',secondary:'GUESS THE SOURCE'}},{type:'tier_title',content:{primary:'WE SHOW THE LINE. YOU WRITE WHERE IT\'S FROM.',secondary:TIER_15}}],
+        slots:{mode:'source_q',count:15,timer:30,bonusAt:BONUS_15},
         closing:[{type:'score',content:{primary:'ROUND 1 COMPLETE',secondary:'SWAP SCORECARDS. MARK THEM.'}},{type:'crate_drop',content:{primary:'',secondary:''}}]},
       {id:'round-2',name:'ROUND 2: SCREEN',
-        fixed:[{type:'round_title',content:{primary:'ROUND 2',secondary:'GUESS THE LINECONIC: SCREEN'}},{type:'tier_title',content:{primary:'WE SHOW THE ACRONYM. YOU DECODE THE LINE. CINEMA & TV ONLY.',secondary:TIER_RULES}}],
-        slots:{mode:'acronym_q',count:15,timer:30,bonusAt:BONUS_AT},
+        fixed:[{type:'round_title',content:{primary:'ROUND 2',secondary:'GUESS THE LINECONIC: SCREEN'}},{type:'tier_title',content:{primary:'WE SHOW THE ACRONYM. YOU DECODE THE LINE. CINEMA & TV ONLY.',secondary:TIER_15}}],
+        slots:{mode:'acronym_q',count:15,timer:30,bonusAt:BONUS_15,mediaFilter:['movie','tv']},
         closing:[{type:'score',content:{primary:'ROUND 2 COMPLETE',secondary:'SWAP SCORECARDS. MARK THEM.'}},{type:'crate_drop',content:{primary:'',secondary:''}}]},
       {id:'fluency',name:'FLUENCY CHECK',
         fixed:[{type:'round_title',content:{primary:'FLUENCY CHECK',secondary:'WE SHOW THE LINE. YOU SHOUT THE SOURCE. NO WRITING. NO SCORING.'}}],
@@ -145,13 +149,13 @@ var TEMPLATES={
         slots:{mode:'doa_triplet',count:10,timer:null},
         closing:[{type:'transition_beat',content:{primary:'',secondary:''}}]},
       {id:'round-3',name:'ROUND 3: LYRICS',
-        fixed:[{type:'round_title',content:{primary:'ROUND 3',secondary:'GUESS THE LINECONIC: LYRICS'}},{type:'tier_title',content:{primary:'WE SHOW THE ACRONYM. YOU DECODE THE LINE. MUSIC ONLY.',secondary:TIER_RULES}}],
-        slots:{mode:'acronym_q',count:15,timer:30,bonusAt:BONUS_AT},
+        fixed:[{type:'round_title',content:{primary:'ROUND 3',secondary:'GUESS THE LINECONIC: LYRICS'}},{type:'tier_title',content:{primary:'WE SHOW THE ACRONYM. YOU DECODE THE LINE. MUSIC ONLY.',secondary:TIER_15}}],
+        slots:{mode:'acronym_q',count:15,timer:30,bonusAt:BONUS_15,mediaFilter:['music']},
         closing:[{type:'score',content:{primary:'ROUND 3 COMPLETE',secondary:'SWAP SCORECARDS. MARK THEM.'}},{type:'crate_drop',content:{primary:'',secondary:''}}]},
       {id:'round-4',name:'ROUND 4: EVERYTHING',
-        fixed:[{type:'round_title',content:{primary:'ROUND 4',secondary:'GUESS THE LINECONIC: EVERYTHING'}},{type:'tier_title',content:{primary:'SCREEN + LYRICS. NO RESTRICTIONS. HARDEST REFERENCES.',secondary:TIER_RULES}}],
-        slots:{mode:'acronym_q',count:15,timer:30,bonusAt:BONUS_AT},
-        closing:[{type:'score',content:{primary:'ROUND 4 COMPLETE',secondary:'FINAL SCORES.SWAP AND TALLY.'}}]},
+        fixed:[{type:'round_title',content:{primary:'ROUND 4',secondary:'GUESS THE LINECONIC: EVERYTHING'}},{type:'tier_title',content:{primary:'SCREEN + LYRICS. NO RESTRICTIONS. HARDEST REFERENCES.',secondary:TIER_15}}],
+        slots:{mode:'acronym_q',count:15,timer:30,bonusAt:BONUS_15},
+        closing:[{type:'score',content:{primary:'ROUND 4 COMPLETE',secondary:'FINAL SCORES. SWAP AND TALLY.'}}]},
       {id:'verdict',name:'THE VERDICT',fixed:[
         {type:'verdict',content:{primary:'THE VERDICT.',secondary:''}},
         {type:'sentence',content:{primary:'THE SENTENCE.',secondary:'LOSING TABLE. IN UNISON.|\'YOU CAN\'T SIT WITH US\': MEAN GIRLS.'}},
@@ -163,6 +167,55 @@ var TEMPLATES={
         fixed:[{type:'round_title',content:{primary:'BONUS ROUND',secondary:'THE HOT SEAT'}},{type:'hotseat_rules',content:{primary:'ROOM SPLITS. WINNING TABLE SENDS A CHAMPION.',secondary:'BACK TO SCREEN. YOUR HALF SCREAMS CLUES.|OTHER HALF STAYS QUIET.|30 SECONDS PER ROUND.'}}],
         slots:{mode:'hotseat_prompt',count:6,timer:30},
         closing:[{type:'score',content:{primary:'HOT SEAT COMPLETE.',secondary:''}},{type:'endcard',content:{primary:'L',secondary:'YOU\'VE BEEN LINECONIC.'}}]}
+    ]
+  },
+  'the-standard-60':{
+    id:'the-standard-60',name:'THE STANDARD',duration:'60 min',
+    sections:[
+      {id:'pre-show',name:'PRE-SHOW',fixed:[{type:'attract',content:{primary:'L',secondary:''}}]},
+      {id:'warm-up',name:'WARM-UP',fixed:[{type:'fishbowl',content:{primary:'WRITE YOUR RED FLAG.',secondary:'DROP IT IN THE BOWL. WE WILL USE IT AGAINST YOU.'}}]},
+      {id:'round-1',name:'ROUND 1: GUESS THE SOURCE',
+        fixed:[{type:'round_title',content:{primary:'ROUND 1',secondary:'GUESS THE SOURCE'}},{type:'tier_title',content:{primary:'WE SHOW THE LINE. YOU WRITE WHERE IT\'S FROM.',secondary:TIER_10}}],
+        slots:{mode:'source_q',count:10,timer:30,bonusAt:BONUS_10},
+        closing:[{type:'score',content:{primary:'ROUND 1 COMPLETE',secondary:'SWAP SCORECARDS. MARK THEM.'}},{type:'crate_drop',content:{primary:'',secondary:''}}]},
+      {id:'doa',name:'DEAD OR ALIVE',
+        fixed:[{type:'round_title',content:{primary:'DEAD OR ALIVE',secondary:'CULTURALLY RELEVANT OR CULTURALLY EXPIRED. YOU DECIDE.'}}],
+        slots:{mode:'doa_triplet',count:8,timer:null},
+        closing:[{type:'transition_beat',content:{primary:'',secondary:''}}]},
+      {id:'round-2',name:'ROUND 2: SCREEN',
+        fixed:[{type:'round_title',content:{primary:'ROUND 2',secondary:'GUESS THE LINECONIC: SCREEN'}},{type:'tier_title',content:{primary:'WE SHOW THE ACRONYM. YOU DECODE THE LINE. CINEMA & TV ONLY.',secondary:TIER_10}}],
+        slots:{mode:'acronym_q',count:10,timer:30,bonusAt:BONUS_10,mediaFilter:['movie','tv']},
+        closing:[{type:'score',content:{primary:'ROUND 2 COMPLETE',secondary:'SWAP SCORECARDS. MARK THEM.'}},{type:'crate_drop',content:{primary:'',secondary:''}}]},
+      {id:'round-3',name:'ROUND 3: EVERYTHING',
+        fixed:[{type:'round_title',content:{primary:'ROUND 3',secondary:'GUESS THE LINECONIC: EVERYTHING'}},{type:'tier_title',content:{primary:'SCREEN + LYRICS. NO RESTRICTIONS.',secondary:TIER_10}}],
+        slots:{mode:'acronym_q',count:10,timer:30,bonusAt:BONUS_10},
+        closing:[{type:'score',content:{primary:'ROUND 3 COMPLETE',secondary:'FINAL SCORES. SWAP AND TALLY.'}}]},
+      {id:'verdict',name:'THE VERDICT',fixed:[
+        {type:'verdict',content:{primary:'THE VERDICT.',secondary:''}},
+        {type:'sentence',content:{primary:'THE SENTENCE.',secondary:'LOSING TABLE. IN UNISON.|\'YOU CAN\'T SIT WITH US\': MEAN GIRLS.'}},
+        {type:'receipt_rain',content:{primary:'MAKE IT RAIN.',secondary:''}},
+        {type:'last_line',content:{primary:'NOBODY PUTS BABY IN A CORNER.',secondary:''}},
+        {type:'endcard',content:{primary:'L',secondary:'STOP BEING UNCULTURED.'}}
+      ]}
+    ]
+  },
+  'the-standard-30':{
+    id:'the-standard-30',name:'THE STANDARD',duration:'30 min',
+    sections:[
+      {id:'pre-show',name:'PRE-SHOW',fixed:[{type:'attract',content:{primary:'L',secondary:''}}]},
+      {id:'warm-up',name:'WARM-UP',fixed:[{type:'fishbowl',content:{primary:'WRITE YOUR RED FLAG.',secondary:'DROP IT IN THE BOWL. WE WILL USE IT AGAINST YOU.'}}]},
+      {id:'round-1',name:'ROUND 1: GUESS THE SOURCE',
+        fixed:[{type:'round_title',content:{primary:'ROUND 1',secondary:'GUESS THE SOURCE'}},{type:'tier_title',content:{primary:'WE SHOW THE LINE. YOU WRITE WHERE IT\'S FROM.',secondary:TIER_8}}],
+        slots:{mode:'source_q',count:8,timer:30,bonusAt:BONUS_8},
+        closing:[{type:'score',content:{primary:'ROUND 1 COMPLETE',secondary:'SWAP SCORECARDS. MARK THEM.'}}]},
+      {id:'round-2',name:'ROUND 2: EVERYTHING',
+        fixed:[{type:'round_title',content:{primary:'ROUND 2',secondary:'GUESS THE LINECONIC: EVERYTHING'}},{type:'tier_title',content:{primary:'SCREEN + LYRICS. NO RESTRICTIONS.',secondary:TIER_8}}],
+        slots:{mode:'acronym_q',count:8,timer:30,bonusAt:BONUS_8},
+        closing:[{type:'score',content:{primary:'ROUND 2 COMPLETE',secondary:'FINAL SCORES. SWAP AND TALLY.'}}]},
+      {id:'verdict',name:'THE VERDICT',fixed:[
+        {type:'verdict',content:{primary:'THE VERDICT.',secondary:''}},
+        {type:'endcard',content:{primary:'L',secondary:'STOP BEING UNCULTURED.'}}
+      ]}
     ]
   }
 };
@@ -218,6 +271,8 @@ function buildDeck(library,templateId,config){
     if(c.scores.lineconic_score<config.minScore)return false;
     if(config.excludedTags.length){for(var i=0;i<c.themes.length;i++){if(config.excludedTags.indexOf(c.themes[i])>=0)return false}}
     if(config.excludedIds&&config.excludedIds.length&&config.excludedIds.indexOf(c.id)>=0)return false;
+    // Show-level media type filter
+    if(config.mediaFilter&&config.mediaFilter.length>0&&config.mediaFilter.indexOf(c.media_type)<0)return false;
     return true;
   });
 
@@ -258,8 +313,14 @@ function buildDeck(library,templateId,config){
       }else{
         // ═══ CARD LIBRARY PATH — all other round types ═══
         var selected=[];
+        // Section-level media filter (only when no show-level filter active)
+        var sectionMedia=(!config.mediaFilter||config.mediaFilter.length===0)?sec.slots.mediaFilter||null:null;
         for(var pos=0;pos<count;pos++){
-          var eligible=pool.filter(function(c){return!usedIds[c.id]});
+          var eligible=pool.filter(function(c){
+            if(usedIds[c.id])return false;
+            if(sectionMedia&&sectionMedia.indexOf(c.media_type)<0)return false;
+            return true;
+          });
           if(eligible.length===0)break;
 
           var targetDiff=getDifficultyCurve(pos,count,config.curve);
@@ -316,9 +377,11 @@ function buildDeck(library,templateId,config){
     id:'deck-'+Date.now(),
     name:deckName+' \u2014 '+dateStr,
     templateId:templateId,
+    duration:tmpl.duration,
+    mediaFilter:config.mediaFilter||[],
     sections:sections,
     created:Date.now(),
-    version:2
+    version:3
   };
 }
 
@@ -458,7 +521,7 @@ function BuilderApp({authUser}){
   var[library,setLibrary]=useState(null);
   var[loading,setLoading]=useState(true);
   var[error,setError]=useState(null);
-  var[templateId,setTemplateId]=useState('the-split-standard');
+  var[templateId,setTemplateId]=useState('the-standard-90');
   var[difficulty,setDifficulty]=useState([30,50,20]);
   var[budget,setBudget]=useState([55,35,10]);
   var[minScore,setMinScore]=useState(5.0);
@@ -468,6 +531,7 @@ function BuilderApp({authUser}){
   var[excludedIds,setExcludedIds]=useState('');
   var[showAdvanced,setShowAdvanced]=useState(false);
   var[showName,setShowName]=useState('THE LAUNCH');
+  var[mediaFilter,setMediaFilter]=useState([]);
   var[doaTopics,setDoaTopics]=useState(function(){return shuffleDoaPool(10)});
   var[ros,setRos]=useState(null);
   var[toast,setToast]=useState(null);
@@ -484,9 +548,23 @@ function BuilderApp({authUser}){
     return library.filter(function(c){
       if(c.scores.lineconic_score<minScore)return false;
       for(var i=0;i<c.themes.length;i++){if(excludedTags.indexOf(c.themes[i])>=0)return false}
+      if(mediaFilter.length>0&&mediaFilter.indexOf(c.media_type)<0)return false;
       return true;
     }).length;
-  },[library,minScore,excludedTags]);
+  },[library,minScore,excludedTags,mediaFilter]);
+
+  var templateNeeds=useMemo(function(){
+    var tmpl=TEMPLATES[templateId];if(!tmpl)return 0;
+    var total=0;
+    tmpl.sections.forEach(function(s){if(s.slots&&s.slots.mode!=='doa_triplet')total+=s.slots.count});
+    return total;
+  },[templateId]);
+
+  var doaCount=useMemo(function(){
+    var tmpl=TEMPLATES[templateId];if(!tmpl)return 10;
+    var doaSec=tmpl.sections.find(function(s){return s.id==='doa'});
+    return doaSec&&doaSec.slots?doaSec.slots.count:0;
+  },[templateId]);
 
   var tagCounts=useMemo(function(){
     if(!library)return{};
@@ -509,7 +587,8 @@ function BuilderApp({authUser}){
       excludedTags:excludedTags,curve:curve,diversity:diversity,
       excludedIds:excludedIds.trim()?excludedIds.trim().split(/[\n,]+/).map(function(s){return s.trim()}).filter(Boolean):[],
       doaTopics:parseDoaTopics(doaTopics),
-      showName:showName.trim()||'THE LAUNCH'
+      showName:showName.trim()||'THE LAUNCH',
+      mediaFilter:mediaFilter
     };
     var result=buildDeck(library,templateId,config);
     setRos(result);
@@ -533,7 +612,7 @@ function BuilderApp({authUser}){
     setPushing(true);
     var updates={};
     updates['shows/'+ros.id]=ros;
-    updates['show_index/'+ros.id]={name:ros.name,created:ros.created,templateId:ros.templateId||null};
+    updates['show_index/'+ros.id]={name:ros.name,created:ros.created,templateId:ros.templateId||null,duration:ros.duration||null,mediaFilter:ros.mediaFilter||[]};
     updates['active_show']=ros.id;
     fbdb.ref().update(updates).then(function(){
       setPushing(false);
@@ -580,6 +659,21 @@ function BuilderApp({authUser}){
           <div className="B-sec-head">SHOW FORMAT</div>
           <div className="B-row">
             {Object.keys(TEMPLATES).map(function(k){var t=TEMPLATES[k];return <button key={k} className={'B-preset'+(templateId===k?' on':'')} onClick={function(){setTemplateId(k)}}>{t.name} ({t.duration})</button>})}
+          </div>
+        </div>
+
+        {/* Content Filter */}
+        <div className="B-sec">
+          <div className="B-sec-head">CONTENT FILTER</div>
+          <div className="B-row" style={{flexWrap:'wrap'}}>
+            {[{label:'ALL',filter:[]},{label:'MOVIES ONLY',filter:['movie']},{label:'TV ONLY',filter:['tv']},{label:'MUSIC ONLY',filter:['music']},{label:'INTERNET ONLY',filter:['internet']},{label:'SCREEN',filter:['movie','tv']}].map(function(opt){
+              var isOn=JSON.stringify(mediaFilter)===JSON.stringify(opt.filter);
+              return <button key={opt.label} className={'B-preset'+(isOn?' on':'')} onClick={function(){setMediaFilter(opt.filter)}}>{opt.label}</button>;
+            })}
+          </div>
+          <div style={{fontSize:9,color:eligible<templateNeeds?'var(--signal)':'var(--text-disabled)',marginTop:4,letterSpacing:'.06em'}}>
+            {eligible} CARDS AVAILABLE{templateNeeds>0?' / '+templateNeeds+' NEEDED':''}
+            {eligible<templateNeeds?' — POOL TOO SMALL. TRY A SHORTER FORMAT.':''}
           </div>
         </div>
 
@@ -639,16 +733,16 @@ function BuilderApp({authUser}){
           </div>
         </div>
 
-        {/* Dead or Alive */}
-        <div className="B-sec">
-          <div className="B-sec-head">DEAD OR ALIVE</div>
+        {/* Dead or Alive — hidden when template has no DOA section */}
+        {doaCount>0&&<div className="B-sec">
+          <div className="B-sec-head">DEAD OR ALIVE ({doaCount} TOPICS)</div>
           <div className="B-row" style={{alignItems:'center',justifyContent:'space-between'}}>
-            <div className="B-label">{parseDoaTopics(doaTopics).length} TOPICS</div>
-            <button className="B-preset" onClick={function(){setDoaTopics(shuffleDoaPool(10))}}>RANDOMIZE</button>
+            <div className="B-label">{parseDoaTopics(doaTopics).length} TOPICS ENTERED</div>
+            <button className="B-preset" onClick={function(){setDoaTopics(shuffleDoaPool(doaCount))}}>RANDOMIZE</button>
           </div>
-          <textarea className="B-input wide" rows="12" value={doaTopics} onChange={function(e){setDoaTopics(e.target.value)}} placeholder={"SKINNY JEANS:dead\nROM COMS:alive\nLAUGH TRACKS:dead\n(one per line, TOPIC:verdict)"} style={{resize:'vertical',textAlign:'left',fontFamily:'Space Mono,monospace',fontSize:10,lineHeight:'1.6'}}/>
+          <textarea className="B-input wide" rows={Math.min(doaCount+2,12)} value={doaTopics} onChange={function(e){setDoaTopics(e.target.value)}} placeholder={"SKINNY JEANS:dead\nROM COMS:alive\nLAUGH TRACKS:dead\n(one per line, TOPIC:verdict)"} style={{resize:'vertical',textAlign:'left',fontFamily:'Space Mono,monospace',fontSize:10,lineHeight:'1.6'}}/>
           <div className="B-label" style={{marginTop:'var(--space-01)',color:'var(--text-disabled)'}}>FORMAT: TOPIC:dead OR TOPIC:alive — ONE PER LINE</div>
-        </div>
+        </div>}
 
         {/* Advanced */}
         <div className="B-sec">
@@ -669,7 +763,7 @@ function BuilderApp({authUser}){
           </div>}
         </div>
 
-        <button className="B-gen" onClick={generate} disabled={!library||eligible<10}>GENERATE DECK</button>
+        <button className="B-gen" onClick={generate} disabled={!library||eligible<templateNeeds}>GENERATE DECK</button>
         {ros&&<button className="B-gen regen" onClick={generate}>REGENERATE</button>}
       </div>
 
