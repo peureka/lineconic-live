@@ -613,8 +613,8 @@ function LauncherView({showName}){
   return(
     <div className="launcher-view">
       <div>
-        <div className="launcher-title hp">LINECONIC</div>
-        <div className="launcher-title hs" style={{fontSize:'clamp(16px,4vw,32px)',letterSpacing:'.2em',marginTop:8}}>LIVE</div>
+        <a href="/" style={{textDecoration:'none'}}><div className="launcher-title hp">LINECONIC</div>
+        <div className="launcher-title hs" style={{fontSize:'clamp(16px,4vw,32px)',letterSpacing:'.2em',marginTop:8}}>LIVE</div></a>
       </div>
       <div className="launcher-grid">
         <a className="launcher-btn" href="/operator"><span>OPERATOR</span><span className="launcher-btn-sub">HOST CONTROLS</span></a>
@@ -1116,7 +1116,7 @@ function LoginView({onLogin}){
       fontFamily:"'Space Mono','Consolas',monospace"
     }}>
       <div>
-        <div className="D hp" style={{fontSize:'clamp(32px,8vw,64px)',marginBottom:8,textAlign:'center'}}>LINECONIC</div>
+        <a href="/" style={{textDecoration:'none'}}><div className="D hp" style={{fontSize:'clamp(32px,8vw,64px)',marginBottom:8,textAlign:'center'}}>LINECONIC</div></a>
         <div className="D hs" style={{fontSize:'clamp(12px,3vw,20px)',letterSpacing:'.2em',textAlign:'center'}}>OPERATOR LOGIN</div>
       </div>
       <form onSubmit={handleSubmit} style={{
