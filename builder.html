@@ -310,9 +310,11 @@ function buildDeck(library,templateId,config){
     sections.push({id:sec.id,name:sec.name,slides:slides});
   });
 
+  var dateStr=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}).toUpperCase();
   return{
     id:'deck-'+Date.now(),
-    name:'DECK BUILD \u2014 '+new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}).toUpperCase(),
+    name:'THE LAUNCH \u2014 '+dateStr,
+    templateId:templateId,
     sections:sections,
     created:Date.now(),
     version:2
@@ -526,10 +528,11 @@ function BuilderApp({authUser}){
     // Firebase for cross-device
     if(!fbdb){showToast('FIREBASE OFFLINE — LOCAL ONLY');return}
     setPushing(true);
-    fbdb.ref('shows/'+ros.id).set(ros).then(function(){
-      // Set as active show so operator picks it up
-      return fbdb.ref('active_show').set(ros.id);
-    }).then(function(){
+    var updates={};
+    updates['shows/'+ros.id]=ros;
+    updates['show_index/'+ros.id]={name:ros.name,created:ros.created,templateId:ros.templateId||null};
+    updates['active_show']=ros.id;
+    fbdb.ref().update(updates).then(function(){
       setPushing(false);
       showToast('PUSHED TO FIREBASE');
     }).catch(function(e){

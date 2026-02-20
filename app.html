@@ -296,11 +296,15 @@ html:has(body.answers-mode),body.answers-mode{overflow:auto!important;height:aut
 .setlist-import-textarea{width:100%;min-height:80px;background:var(--surface-01);border:1px solid var(--border-subtle);color:var(--text-primary);font-family:'Space Mono',monospace;font-size:10px;padding:var(--space-02);resize:vertical;outline:none;box-sizing:border-box}
 .setlist-import-textarea:focus{border-color:var(--signal)}
 .setlist-import-error{font-family:'Space Mono',monospace;font-size:10px;color:var(--signal);margin-top:var(--space-02)}
-.setlist-load-list{position:absolute;bottom:100%;left:0;background:var(--surface-02);border:1px solid var(--border-subtle);z-index:10;min-width:250px;max-height:200px;overflow-y:auto;box-shadow:0 -4px 16px rgba(0,0,0,.8)}
-.setlist-load-item{display:flex;align-items:center;justify-content:space-between;padding:var(--space-02) var(--space-03);cursor:pointer;font-family:'Space Mono',monospace;font-size:10px;color:var(--text-secondary);border-bottom:1px solid var(--border-subtle)}
+.setlist-load-list{position:absolute;bottom:100%;left:0;background:var(--surface-02);border:1px solid var(--border-subtle);z-index:10;min-width:300px;max-height:350px;overflow-y:auto;box-shadow:0 -4px 16px rgba(0,0,0,.8)}
+.setlist-load-item{display:flex;align-items:center;gap:6px;padding:var(--space-02) var(--space-03);cursor:pointer;font-family:'Space Mono',monospace;font-size:10px;color:var(--text-secondary);border-bottom:1px solid var(--border-subtle)}
 .setlist-load-item:hover{background:var(--surface-03);color:var(--text-primary)}
-.setlist-load-del{color:var(--text-disabled);cursor:pointer;padding:2px 6px;font-size:12px}
+.setlist-load-item.active{border-left:2px solid var(--signal)}
+.setlist-load-del{color:var(--text-disabled);cursor:pointer;padding:2px 6px;font-size:12px;background:none;border:none;flex-shrink:0}
 .setlist-load-del:hover{color:var(--signal)}
+.setlist-load-section-head{font-family:'Space Mono',monospace;font-size:8px;color:var(--text-disabled);text-transform:uppercase;letter-spacing:.12em;padding:6px var(--space-03) 4px;border-bottom:1px solid var(--border-subtle);background:var(--surface-01);position:sticky;top:0;z-index:1}
+.setlist-load-badge{font-family:'Space Mono',monospace;font-size:8px;padding:1px 4px;letter-spacing:.06em;flex-shrink:0;border:1px solid var(--cyan);color:var(--cyan)}
+.setlist-load-badge.default{border-color:var(--gold);color:var(--gold)}
 .setlist-lock-badge{font-family:'Space Mono',monospace;font-size:10px;color:var(--signal);text-transform:uppercase;letter-spacing:.1em;border:1px solid var(--signal);padding:4px 12px;box-shadow:var(--glow-signal)}
 .setlist-live-btn{background:transparent;border:1px solid var(--signal);color:var(--signal);font-family:'Space Mono',monospace;font-size:10px;padding:6px 16px;cursor:pointer;text-transform:uppercase;letter-spacing:.08em;margin-left:auto}
 .setlist-live-btn:hover{background:rgba(255,0,127,.1)}
@@ -1189,6 +1193,8 @@ function SetlistEditor({show,dispatch,liveMode}){
   const[importText,setImportText]=useState('');
   const[importErr,setImportErr]=useState('');
   const[savedList,setSavedList]=useState(function(){try{return JSON.parse(localStorage.getItem('lineconic_setlists'))||[]}catch(e){return[]}});
+  const[firebaseShows,setFirebaseShows]=useState([]);
+  const[fbLoading,setFbLoading]=useState(false);
   const fileRef=useRef(null);
 
   // Attach SortableJS to each section
@@ -1216,6 +1222,36 @@ function SetlistEditor({show,dispatch,liveMode}){
     return function(){sortableInstances.current.forEach(function(s){if(s)try{s.destroy()}catch(e){}});sortableInstances.current=[]};
   },[show.sections,liveMode]);
 
+  // Fetch Firebase show index when LOAD dropdown opens
+  useEffect(function(){
+    if(!showLoad||!fbdb)return;
+    setFbLoading(true);
+    fbdb.ref('show_index').orderByChild('created').once('value',function(snap){
+      var list=[];
+      snap.forEach(function(child){list.push({id:child.key,name:child.val().name,created:child.val().created,templateId:child.val().templateId})});
+      list.reverse();
+      setFirebaseShows(list);
+      setFbLoading(false);
+    },function(err){
+      console.warn('show_index fetch failed',err);
+      // Backfill: if show_index doesn't exist, read shows/ directly
+      fbdb.ref('shows').once('value',function(showsSnap){
+        var backfillUpdates={};var backfillList=[];
+        showsSnap.forEach(function(child){
+          var s=child.val();
+          if(s&&s.name){
+            backfillUpdates['show_index/'+child.key]={name:s.name,created:s.created||0,templateId:s.templateId||null};
+            backfillList.push({id:child.key,name:s.name,created:s.created||0,templateId:s.templateId||null});
+          }
+        });
+        if(Object.keys(backfillUpdates).length>0)fbdb.ref().update(backfillUpdates).catch(function(){});
+        backfillList.sort(function(a,b){return(b.created||0)-(a.created||0)});
+        setFirebaseShows(backfillList);
+        setFbLoading(false);
+      });
+    });
+  },[showLoad]);
+
   function handleSwap(si,sli,alt){
     dispatch({type:'SWAP_SLIDE',payload:{sectionIndex:si,slideIndex:sli,newSlide:alt}});
     setSwapOpen(null);
@@ -1240,6 +1276,41 @@ function SetlistEditor({show,dispatch,liveMode}){
     var list=savedList.filter(function(_,i){return i!==idx});
     localStorage.setItem('lineconic_setlists',JSON.stringify(list));
     setSavedList(list);
+  }
+
+  function handleLoadFirebase(showId){
+    if(!fbdb)return;
+    fbdb.ref('shows/'+showId).once('value',function(snap){
+      var showData=snap.val();
+      if(!showData||!showData.sections){alert('SHOW DATA MISSING');return}
+      dispatch({type:'IMPORT_SHOW',payload:showData});
+      try{localStorage.setItem('lineconic_show',JSON.stringify(showData))}catch(e){}
+      fbdb.ref('active_show').set(showId).catch(function(){});
+      setShowLoad(false);
+    });
+  }
+
+  function handleDeleteFirebase(showId){
+    if(!fbdb)return;
+    var isActive=show.id===showId;
+    var msg='DELETE THIS SHOW FROM FIREBASE?';
+    if(isActive)msg+='\n\nWARNING: THIS IS THE CURRENTLY ACTIVE SHOW.';
+    if(!confirm(msg))return;
+    var updates={};
+    updates['shows/'+showId]=null;
+    updates['show_index/'+showId]=null;
+    fbdb.ref().update(updates).then(function(){
+      setFirebaseShows(function(prev){return prev.filter(function(s){return s.id!==showId})});
+    }).catch(function(e){alert('DELETE FAILED: '+e.message)});
+  }
+
+  function handleLoadDefault(){
+    fetch('/ros-v1.json').then(function(r){return r.json()}).then(function(showData){
+      dispatch({type:'IMPORT_SHOW',payload:showData});
+      try{localStorage.setItem('lineconic_show',JSON.stringify(showData))}catch(e){}
+      if(fbdb)fbdb.ref('active_show').set(showData.id).catch(function(){});
+      setShowLoad(false);
+    }).catch(function(){alert('FAILED TO LOAD DEFAULT SHOW')});
   }
 
   function parseImport(raw){
@@ -1321,16 +1392,35 @@ function SetlistEditor({show,dispatch,liveMode}){
         <input className="setlist-input" placeholder="Setlist name..." value={saveName} onChange={function(e){setSaveName(e.target.value)}} onKeyDown={function(e){if(e.key==='Enter')handleSave()}}/>
         <button className="setlist-btn accent" onClick={handleSave} disabled={!saveName.trim()}>SAVE</button>
         <div style={{position:'relative'}}>
-          <button className="setlist-btn" onClick={function(){setShowLoad(!showLoad);setShowImport(false)}}>LOAD{savedList.length?' ('+savedList.length+')':''}</button>
+          <button className="setlist-btn" onClick={function(){setShowLoad(!showLoad);setShowImport(false)}}>LOAD</button>
           {showLoad&&<div className="setlist-load-list">
-            {savedList.length===0&&<div style={{padding:8,color:'var(--text-disabled)',fontSize:10}}>NO SAVED SETLISTS</div>}
-            {savedList.map(function(entry,i){
-              return <div className="setlist-load-item" key={i}>
-                <span onClick={function(){handleLoad(entry)}} style={{flex:1,cursor:'pointer'}}>{entry.name}</span>
-                <span style={{color:'var(--text-disabled)',fontSize:9}}>{new Date(entry.savedAt).toLocaleDateString()}</span>
-                <button className="setlist-load-del" onClick={function(e){e.stopPropagation();handleDeleteSave(i)}}>&times;</button>
+            {savedList.length>0&&<div>
+              <div className="setlist-load-section-head">SAVED SETLISTS</div>
+              {savedList.map(function(entry,i){
+                return <div className="setlist-load-item" key={'local-'+i}>
+                  <span onClick={function(){handleLoad(entry)}} style={{flex:1,cursor:'pointer'}}>{entry.name}</span>
+                  <span style={{color:'var(--text-disabled)',fontSize:9}}>{new Date(entry.savedAt).toLocaleDateString()}</span>
+                  <button className="setlist-load-del" onClick={function(e){e.stopPropagation();handleDeleteSave(i)}}>&times;</button>
+                </div>;
+              })}
+            </div>}
+            <div className="setlist-load-section-head">SHOWS{fbLoading?' ...':''}</div>
+            {!fbdb&&<div style={{padding:8,color:'var(--text-disabled)',fontSize:10}}>FIREBASE OFFLINE</div>}
+            {fbdb&&firebaseShows.length===0&&!fbLoading&&<div style={{padding:8,color:'var(--text-disabled)',fontSize:10}}>NO SHOWS IN FIREBASE</div>}
+            {firebaseShows.map(function(entry){
+              var isActive=show.id===entry.id;
+              return <div className={'setlist-load-item'+(isActive?' active':'')} key={'fb-'+entry.id}>
+                <span onClick={function(){handleLoadFirebase(entry.id)}} style={{flex:1,cursor:'pointer'}}>{entry.name||entry.id}</span>
+                <span className="setlist-load-badge">FB</span>
+                <span style={{color:'var(--text-disabled)',fontSize:9}}>{entry.created?new Date(entry.created).toLocaleDateString():''}</span>
+                <button className="setlist-load-del" onClick={function(e){e.stopPropagation();handleDeleteFirebase(entry.id)}}>&times;</button>
               </div>;
             })}
+            <div className="setlist-load-section-head">DEFAULT</div>
+            <div className="setlist-load-item" key="default">
+              <span onClick={handleLoadDefault} style={{flex:1,cursor:'pointer'}}>THE SPLIT — TABLE FORMAT V3</span>
+              <span className="setlist-load-badge default">DEFAULT</span>
+            </div>
           </div>}
         </div>
         <div style={{position:'relative'}}>
@@ -1749,7 +1839,20 @@ function App(){
     }
     function fallbackToStatic(){
       // 3. Fetch from ros-v1.json
-      fetch('/ros-v1.json').then(r=>r.json()).then(show=>{loadShow(show)}).catch(()=>{
+      fetch('/ros-v1.json').then(r=>r.json()).then(show=>{
+        loadShow(show);
+        // Seed default to Firebase show_index if not already there
+        if(fbdb){
+          fbdb.ref('show_index/'+show.id).once('value',snap=>{
+            if(!snap.val()){
+              var updates={};
+              updates['shows/'+show.id]=show;
+              updates['show_index/'+show.id]={name:show.name,created:show.created||0,templateId:null};
+              fbdb.ref().update(updates).catch(()=>{});
+            }
+          });
+        }
+      }).catch(()=>{
         // 4. Last resort: any show in Firebase
         if(fbdb){fbdb.ref('shows').limitToFirst(1).once('value',snap=>{const v=snap.val();if(v){const key=Object.keys(v)[0];loadShow(v[key])}})}
       });
