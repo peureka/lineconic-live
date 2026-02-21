@@ -1505,7 +1505,7 @@ function OperatorView({state,dispatch,onTimerAction,autoTimer,autoAdvance,setAut
 // ═══════════════════════════════════════
 // VOTE VIEW (audience phone voting)
 // ═══════════════════════════════════════
-function VoteView({showId}){
+function VoteView(){
   const[topic,setTopic]=useState(null);
   const[voteData,setVoteData]=useState({dead:0,alive:0});
   const[voted,setVoted]=useState(null);
@@ -1513,7 +1513,7 @@ function VoteView({showId}){
 
   useEffect(()=>{
     if(!fbdb)return;
-    const topicRef=fbdb.ref('live/'+(showId||'default')+'/topic');
+    const topicRef=fbdb.ref('currentTopic');
     topicRef.on('value',snap=>{
       const t=snap.val();
       setTopic(t);
@@ -1521,7 +1521,7 @@ function VoteView({showId}){
       setVoteData({dead:0,alive:0});
     });
     return()=>topicRef.off();
-  },[showId]);
+  },[]);
 
   useEffect(()=>{
     if(!fbdb||!topic)return;
@@ -2014,7 +2014,7 @@ useEffect(()=>{
         case'd':case'D':setAutoAdvance(function(v){return!v});break;
         case'c':case'C':dispatch({type:'INCREMENT_RECEIPTS'});break;
         case'g':case'G':setRewardTier(function(v){const cycle=[null,'cancel','grind','flop'];const i=cycle.indexOf(v);return cycle[(i+1)%cycle.length]});break;
-        case'v':case'V':{const flat=flattenSlides(s.show,s.redFlags);const slide=flat[s.currentSlide];if(slide&&slide.type==='doa_vote'&&fbdb&&s.show){fbdb.ref('live/'+s.show.id+'/topic').set(slide.content.primary||null)}break}
+        case'v':case'V':{const flat=flattenSlides(s.show,s.redFlags);const slide=flat[s.currentSlide];if(slide&&slide.type==='doa_vote'){pushTopic(slide.content.primary||null)}break}
         case'l':case'L':if(!s.liveMode)dispatch({type:'TOGGLE_SETLIST_EDITOR'});break;
         case'f':case'F':if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();break;
         case'?':dispatch({type:'TOGGLE_SHORTCUTS'});break;
@@ -2029,7 +2029,7 @@ useEffect(()=>{
 
   // Public routes — no auth needed
   if(isLauncher)return <LauncherView showName={state.show?state.show.name||state.show.id:null}/>;
-  if(isVote)return <VoteView showId={state.show?.id}/>;
+  if(isVote)return <VoteView/>;
   if(isAudience){
     if(!state.show)return <div style={{background:'#000',color:'var(--signal)',width:'100vw',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Space Mono',monospace"}}>LOADING SHOW DATA...</div>;
     return <AudienceView state={state} dispatch={dispatch} slideRef={audienceSlideRef} rewardTier={rewardTier}/>;
