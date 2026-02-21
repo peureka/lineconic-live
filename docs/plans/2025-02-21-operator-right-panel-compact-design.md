@@ -10,9 +10,19 @@ The operator right panel (280px wide, full viewport height) overflows at shorter
 
 ## Strategy
 
-Reduce spacing and component sizes across the board — no behavior changes, no collapsing, no layout restructuring. Target: fit comfortably at 650px viewport height.
+Height-responsive: keep current generous sizes as the default, add a `@media(max-height:800px)` breakpoint that applies compact values. No behavior changes, no collapsing, no layout restructuring. Full breathing room on tall screens, compact on laptops.
 
-## Changes
+## Implementation
+
+All changes go inside a single new media query block:
+
+```css
+@media(max-height:800px){ /* compact overrides here */ }
+```
+
+Default styles remain untouched.
+
+## Changes (applied inside the height breakpoint)
 
 ### 1. Panel Container & Gaps
 
