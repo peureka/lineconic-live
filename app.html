@@ -116,8 +116,8 @@ html:has(body.answers-mode),body.answers-mode{overflow:auto!important;height:aut
 /* MISC */
 .srcbar{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.9);padding:14px 40px;font-family:'Space Mono',monospace;font-size:clamp(18px,2.5vw,32px);color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.06em}
 .rule{width:50%;height:1px;background:rgba(255,255,255,.3);margin:12px auto}
-.ans-list{font-family:'Space Mono',monospace;text-align:center;line-height:2;padding:3% 8%;width:100%;overflow-y:auto;max-height:80vh}
-.ans-list div{color:var(--wh);text-shadow:0 0 6px rgba(255,255,255,.3);font-size:clamp(12px,1.8vw,20px)}
+.ans-list{font-family:'Space Mono',monospace;text-align:center;line-height:1.8;padding:2% 8%;width:100%;overflow-y:auto;max-height:70vh}
+.ans-list div{color:var(--wh);text-shadow:0 0 6px rgba(255,255,255,.3);font-size:clamp(16px,2.5vw,28px)}
 .ans-list .bonus{color:var(--gd);text-shadow:0 0 6px rgba(255,215,0,.4)}
 @keyframes pulse{0%,100%{opacity:.8;filter:brightness(1)}50%{opacity:1;filter:brightness(1.3)}}
 @keyframes rain{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
@@ -685,18 +685,20 @@ function drawQR(canvas){
 const initialState={show:null,currentSlide:0,scores:[0,0],revealState:{},showScoreboard:false,showShortcuts:false,showHostPanel:false,muted:true,guests:0,redFlags:[],liveMode:false,showSetlistEditor:false};
 function flattenSlides(show,redFlags){
   if(!show)return[];
-  var qTypes=['source_q','acronym_q','fluency_line'];
   var flat=show.sections.flatMap(function(s){
     var slides=s.slides;
     var answers=[];
     slides.forEach(function(sl){
       if(sl.type==='source_q'&&sl.content.answer)answers.push(sl.content.answer);
       else if(sl.type==='acronym_q'&&sl.content.answer)answers.push(sl.content.answer);
-      else if(sl.type==='fluency_line'&&sl.content.primary)answers.push(sl.content.primary);
     });
     if(answers.length===0)return slides;
     var sheet={id:'as-'+s.name,type:'answer_sheet',content:{primary:s.name+' ANSWERS',secondary:answers.join(' | ')}};
-    return slides.concat(sheet);
+    var result=slides.slice();
+    var scoreIdx=result.findIndex(function(sl){return sl.type==='score'});
+    if(scoreIdx>=0)result.splice(scoreIdx,0,sheet);
+    else result.push(sheet);
+    return result;
   });
   if(!redFlags||!redFlags.length)return flat;
   var fi=flat.findIndex(function(s){return s.type==='fishbowl'});
@@ -708,7 +710,7 @@ function flattenSlides(show,redFlags){
 }
 function sectionHasAnswerSheet(sec){
   var types=sec.slides.map(function(s){return s.type});
-  return types.includes('source_q')||types.includes('acronym_q')||types.includes('fluency_line');
+  return types.includes('source_q')||types.includes('acronym_q');
 }
 function redFlagSectionOffset(show,redFlags){
   if(!show||!redFlags||!redFlags.length)return{sectionIdx:-1,offset:0};
