@@ -181,7 +181,9 @@ html:has(body.answers-mode),body.answers-mode{overflow:auto!important;height:aut
 .reveal-badge.revealed{background:var(--signal);color:var(--void);box-shadow:var(--glow-signal)}
 
 /* Right Panel */
-.operator-right{grid-column:3;grid-row:1/3;background:var(--surface-01);border-left:1px solid var(--border-subtle);padding:var(--space-03);display:flex;flex-direction:column;gap:var(--space-03);overflow-y:auto}
+.operator-right{grid-column:3;grid-row:1/3;background:var(--surface-01);border-left:1px solid var(--border-subtle);padding:var(--space-03);display:flex;flex-direction:column;gap:var(--space-03);overflow-y:auto;overflow-x:hidden}
+.op-section-label{font-family:'Space Mono',monospace;font-size:var(--type-meta);color:var(--text-secondary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:var(--space-02)}
+.setlist-btn{margin-bottom:var(--space-02)}
 
 /* Score Display */
 .score-panel{display:flex;gap:var(--space-03)}
@@ -236,10 +238,10 @@ html:has(body.answers-mode),body.answers-mode{overflow:auto!important;height:aut
 .receipt-counter{font-family:'Space Mono',monospace;font-size:var(--type-meta);color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em}
 
 /* Launcher View — Role-Based Split */
-.launcher-view{position:fixed;inset:0;background:var(--void);display:flex;flex-direction:row;align-items:stretch}
-.launcher-host{flex:0 0 55%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-05);padding:var(--space-06);border-right:1px solid var(--border-subtle)}
-.launcher-audience{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-05);padding:var(--space-06)}
-.launcher-title{font-family:'Anton','Impact',sans-serif;text-transform:uppercase;font-size:clamp(48px,12vw,120px);letter-spacing:.06em;line-height:1;text-align:center}
+.launcher-view{position:fixed;inset:0;background:var(--void);display:flex;flex-direction:row;align-items:stretch;overflow:hidden}
+.launcher-host{flex:0 0 55%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-05);padding:var(--space-06);border-right:1px solid var(--border-subtle);overflow:hidden}
+.launcher-audience{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-05);padding:var(--space-06);overflow:hidden}
+.launcher-title{font-family:'Anton','Impact',sans-serif;text-transform:uppercase;font-size:clamp(48px,5vw,80px);letter-spacing:.06em;line-height:1;text-align:center}
 /* Status Card */
 .launcher-status{border:1px solid var(--border-subtle);padding:var(--space-04);width:100%;max-width:360px}
 .launcher-status-name{font-family:'Anton',sans-serif;font-size:clamp(18px,2.5vw,28px);color:var(--text-primary);text-transform:uppercase;letter-spacing:.04em;line-height:1.2;margin-bottom:var(--space-02)}
@@ -442,7 +444,7 @@ html:has(body.answers-mode),body.answers-mode{overflow:auto!important;height:aut
 /* ═══════════════════════════════════════
    OPERATOR RIGHT PANEL — COMPACT (short viewports)
    ═══════════════════════════════════════ */
-@media(max-height:800px){
+@media(max-height:900px){
   /* Panel container */
   .operator-right{gap:var(--space-02);padding:var(--space-02)}
   /* Scoreboard */
@@ -459,6 +461,11 @@ html:has(body.answers-mode),body.answers-mode{overflow:auto!important;height:aut
   .timer-btn{height:28px}
   /* Quick access row gaps */
   .quick-btn-row{gap:var(--space-01)}
+  /* Auto toggles */
+  .auto-toggle{padding:4px 10px}
+  /* Section labels + setlist button margin */
+  .op-section-label{margin-bottom:var(--space-01)}
+  .setlist-btn{margin-bottom:var(--space-01)}
 }
 
 /* ═══════════════════════════════════════
@@ -1078,7 +1085,7 @@ function NextSlideCard({slide}){
 function ScoreDisplay({scores,dispatch}){
   return (
     <div>
-      <div style={{fontFamily:"'Space Mono',monospace",fontSize:'var(--type-meta)',color:'var(--text-secondary)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:'var(--space-02)'}}>SCOREBOARD</div>
+      <div className="op-section-label">SCOREBOARD</div>
       <div className="score-panel">
         <div className="score-team">
           <div className="score-label">CYAN</div>
@@ -1151,7 +1158,7 @@ function QuickAccessButtons(){
   }
   return(
     <div style={{display:'flex',flexDirection:'column',gap:'var(--space-01)'}}>
-      <div style={{fontFamily:"'Space Mono',monospace",fontSize:'var(--type-meta)',color:'var(--text-secondary)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:2}}>QUICK ACCESS</div>
+      <div className="op-section-label">QUICK ACCESS</div>
       <div className="quick-btn-row">
         <button className="quick-btn" onClick={()=>openTab('answers')}>ANSWERS ↗</button>
         <button className="quick-btn" onClick={()=>copyLink('answers')}>{copied==='answers'?'COPIED!':'COPY LINK'}</button>
@@ -1217,7 +1224,7 @@ function RewardTierOverlay({tier}){
 function AutoToggles({autoTimer,autoAdvance,setAutoTimer,setAutoAdvance,muted,onToggleMute}){
   return(
     <div style={{display:'flex',flexDirection:'column',gap:'var(--space-01)'}}>
-      <div style={{fontFamily:"'Space Mono',monospace",fontSize:'var(--type-meta)',color:'var(--text-secondary)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:2}}>CONTROLS</div>
+      <div className="op-section-label">CONTROLS</div>
       <button className={'auto-toggle'+(!muted?' on':'')} onClick={onToggleMute}>
         <span className="auto-toggle-dot"></span>
         <span>{muted?'UNMUTE SFX':'SFX ON'}</span>
@@ -1668,7 +1675,7 @@ function OperatorView({state,dispatch,onTimerAction,autoTimer,autoAdvance,setAut
       </div>
       <div className="operator-right">
         <ConnectionSignal/>
-        <button className="setlist-btn" onClick={function(){dispatch({type:'TOGGLE_SETLIST_EDITOR'})}} style={{width:'100%',padding:'8px 12px',fontSize:11,marginBottom:'var(--space-02)'}}>{state.liveMode?'LIVE \uD83D\uDD34':'SETLIST [L]'}</button>
+        <button className="setlist-btn" onClick={function(){dispatch({type:'TOGGLE_SETLIST_EDITOR'})}} style={{width:'100%',padding:'8px 12px',fontSize:11}}>{state.liveMode?'LIVE \uD83D\uDD34':'SETLIST [L]'}</button>
         <QuickAccessButtons/>
         <RedFlagForm redFlags={state.redFlags} dispatch={dispatch}/>
         <AutoToggles autoTimer={autoTimer} autoAdvance={autoAdvance} setAutoTimer={setAutoTimer} setAutoAdvance={setAutoAdvance} muted={state.muted} onToggleMute={()=>dispatch({type:'TOGGLE_MUTE'})}/>
