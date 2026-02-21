@@ -535,15 +535,17 @@ function stopTimerSystem(){if(timerState.rafId){cancelAnimationFrame(timerState.
 // ═══════════════════════════════════════
 // DOA VOTING (from TEMPLATE.html)
 // ═══════════════════════════════════════
-let votes={dead:0,alive:0},fbVoteRef=null;
+let votes={dead:0,alive:0},fbVoteRef=null,voteListeners=[];
+function onVotesChange(fn){voteListeners.push(fn);return()=>{voteListeners=voteListeners.filter(f=>f!==fn)}}
+function notifyVotes(){voteListeners.forEach(fn=>fn({...votes}))}
 function pushTopic(name){
-  if(fbdb){fbdb.ref('currentTopic').set(name||null);const key=(name||'').replace(/[^a-zA-Z0-9]/g,'_');if(fbVoteRef){fbVoteRef.off();fbVoteRef=null}if(name){fbVoteRef=fbdb.ref('votes/'+key);fbVoteRef.on('value',snap=>{const v=snap.val()||{};votes.dead=v.dead||0;votes.alive=v.alive||0})}}
+  if(fbdb){fbdb.ref('currentTopic').set(name||null);const key=(name||'').replace(/[^a-zA-Z0-9]/g,'_');if(fbVoteRef){fbVoteRef.off();fbVoteRef=null}if(name){fbVoteRef=fbdb.ref('votes/'+key);fbVoteRef.on('value',snap=>{const v=snap.val()||{};votes.dead=v.dead||0;votes.alive=v.alive||0;notifyVotes()})}}
 }
 function castVote(v,topic){
-  if(fbdb&&topic){const key=topic.replace(/[^a-zA-Z0-9]/g,'_');fbdb.ref('votes/'+key+'/'+v).transaction(c=>(c||0)+1)}else{votes[v]++}
+  if(fbdb&&topic){const key=topic.replace(/[^a-zA-Z0-9]/g,'_');fbdb.ref('votes/'+key+'/'+v).transaction(c=>(c||0)+1)}else{votes[v]++;notifyVotes()}
 }
 function resetVotes(topic){
-  votes={dead:0,alive:0};
+  votes={dead:0,alive:0};notifyVotes();
   if(fbdb&&topic){const key=topic.replace(/[^a-zA-Z0-9]/g,'_');fbdb.ref('votes/'+key).set({dead:0,alive:0})}
 }
 
@@ -703,7 +705,9 @@ function IntermissionSlide({slide}){
   return <><div className="D hw" style={{fontSize:'clamp(40px,7vw,100px)',marginBottom:20}}>{slide.content.primary||''}</div><div className="M hs" style={{fontSize:'clamp(14px,2vw,24px)',marginBottom:30}}>{slide.content.secondary||''}</div><canvas ref={qrRef} width={400} height={400} style={{imageRendering:'pixelated',width:'clamp(200px,28vw,320px)',height:'clamp(200px,28vw,320px)',border:'5px solid rgba(255,255,255,.3)'}}></canvas><a href="https://lineconic.live/vote" target="_blank" rel="noopener" className="M" style={{color:'rgba(255,255,255,.5)',fontSize:'clamp(16px,2.5vw,28px)',marginTop:16,letterSpacing:'.1em',textDecoration:'none'}}>LINECONIC.LIVE/VOTE</a></>;
 }
 function DoaVoteSlide({slide}){
-  const total=votes.dead+votes.alive;const dp=total>0?Math.round(votes.dead/total*100):50;const ap=total>0?100-dp:50;
+  const[liveVotes,setLiveVotes]=useState({dead:votes.dead,alive:votes.alive});
+  useEffect(()=>{setLiveVotes({dead:votes.dead,alive:votes.alive});return onVotesChange(setLiveVotes)},[]);
+  const total=liveVotes.dead+liveVotes.alive;const dp=total>0?Math.round(liveVotes.dead/total*100):50;const ap=total>0?100-dp:50;
   return <><div className="nb nb-wh"></div><div className="D hw" style={{fontSize:aSz(slide.content.primary),...nwStyle(),marginBottom:30}}>{slide.content.primary||''}</div><div style={{width:'70%',maxWidth:600}}><div style={{display:'flex',justifyContent:'space-between',marginBottom:8}}><span className="M" style={{color:'var(--pk)',fontSize:'clamp(12px,1.5vw,18px)',letterSpacing:'.1em'}}>DEAD</span><span className="M" style={{color:'var(--cy)',fontSize:'clamp(12px,1.5vw,18px)',letterSpacing:'.1em'}}>ALIVE</span></div><div style={{width:'100%',height:'clamp(24px,4vh,40px)',background:'rgba(255,255,255,.05)',border:'1px solid rgba(255,255,255,.1)',position:'relative',overflow:'hidden'}}><div style={{position:'absolute',left:0,top:0,bottom:0,width:dp+'%',background:'linear-gradient(90deg,var(--pk),rgba(255,0,127,.3))',transition:'width .6s cubic-bezier(.4,0,.2,1)'}}></div><div style={{position:'absolute',right:0,top:0,bottom:0,width:ap+'%',background:'linear-gradient(270deg,var(--cy),rgba(0,255,255,.3))',transition:'width .6s cubic-bezier(.4,0,.2,1)'}}></div></div><div style={{display:'flex',justifyContent:'space-between',marginTop:8}}><span className="M" style={{color:'var(--pk)',fontSize:'clamp(18px,3vw,36px)'}}>{dp}%</span><span className="M" style={{color:'var(--cy)',fontSize:'clamp(18px,3vw,36px)'}}>{ap}%</span></div></div></>;
 }
 function WarningSlide({slide}){return <div className="D hw" style={{fontSize:'clamp(60px,12vw,180px)'}}>{slide.content.primary||''}</div>}
@@ -800,9 +804,8 @@ function AudienceView({state,dispatch,slideRef:externalSlideRef,rewardTier}){
     stopParticles();
     if(slide.type==='receipt_rain')startParticles('rain');
     if(slide.type==='last_line'||slide.type==='endcard')startParticles('flutter');
-    // DOA
-    if(slide.type==='doa_vote'){votes={dead:0,alive:0};pushTopic(slide.content.primary)}
-    else if(slide.type!=='doa_verdict_dead'&&slide.type!=='doa_verdict_alive'){if(fbdb&&fbVoteRef)pushTopic(null)}
+    // DOA — reset local vote counts on new vote slide (topic push handled by operator in App)
+    if(slide.type==='doa_vote'){votes={dead:0,alive:0};notifyVotes()}
     prevSlideRef.current=state.currentSlide;
   },[state.currentSlide,slide]);
 
@@ -1890,6 +1893,16 @@ useEffect(()=>{
   if(fbdb){fbdb.ref('live/'+state.show.id+'/state').set(sync).catch(()=>{})}
   if(bcRef.current){bcRef.current.postMessage({type:'sync',...sync})}
 },[state.currentSlide,state.scores,state.revealState,state.showScoreboard,state.muted,rewardTier,state.redFlags]);
+
+// DOA topic push — operator pushes currentTopic on slide change so /vote page works
+useEffect(()=>{
+  if(mode!=='operator'||!state.show)return;
+  const flat=flattenSlides(state.show,state.redFlags);
+  const slide=flat[state.currentSlide];
+  if(!slide)return;
+  if(slide.type==='doa_vote'){pushTopic(slide.content.primary)}
+  else if(slide.type!=='doa_verdict_dead'&&slide.type!=='doa_verdict_alive'){pushTopic(null)}
+},[state.currentSlide,state.show,state.redFlags]);
 
 useEffect(()=>{
   if(mode==='operator'||!state.show)return;
