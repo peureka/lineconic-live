@@ -219,7 +219,7 @@ html:has(body.answers-mode),body.answers-mode{overflow:auto!important;height:aut
 .shortcut-group{display:flex;flex-direction:column;gap:var(--space-02)}
 .shortcut-group-title{font-family:'Space Mono',monospace;font-size:var(--type-meta);color:var(--text-disabled);text-transform:uppercase;letter-spacing:.1em;margin-bottom:var(--space-01);padding-left:2px}
 .shortcut-row{display:flex;align-items:center;gap:var(--space-03)}
-.shortcut-key{font-family:'Space Mono',monospace;font-size:var(--type-meta);background:var(--surface-02);border:1px solid var(--border-subtle);padding:4px 10px;color:var(--text-primary);text-align:center;min-width:50px;flex-shrink:0}
+.shortcut-key{font-family:'Space Mono',monospace;font-size:var(--type-meta);background:var(--surface-02);border:1px solid var(--border-subtle);padding:4px 0;color:var(--text-primary);text-align:center;width:72px;flex-shrink:0;box-sizing:border-box}
 .shortcut-action{font-family:'Space Mono',monospace;font-size:var(--type-meta);color:var(--text-secondary);text-transform:uppercase;white-space:nowrap}
 
 /* Reward Tier Overlay */
@@ -238,7 +238,8 @@ html:has(body.answers-mode),body.answers-mode{overflow:auto!important;height:aut
 
 /* Bottom Bar */
 .operator-bottom{grid-column:2;grid-row:2;background:var(--surface-01);border-top:1px solid var(--border-subtle);padding:var(--space-02) var(--space-04);display:flex;align-items:center;justify-content:space-between}
-.guest-counter{font-family:'Space Mono',monospace;font-size:var(--type-meta);color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em}
+.guest-counter{display:flex;align-items:center;gap:var(--space-01)}
+.guest-count{font-family:'Space Mono',monospace;font-size:var(--type-meta);color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;padding:0 4px}
 .soundboard{display:flex;gap:var(--space-02);align-items:center}
 .snd-btn{font-family:'Space Mono',monospace;font-size:var(--type-meta);color:var(--text-secondary);background:transparent;border:1px solid var(--border-subtle);padding:4px 10px;cursor:pointer;text-transform:uppercase;letter-spacing:.05em}
 .snd-btn:hover{color:var(--text-primary);border-color:var(--text-secondary)}
@@ -738,6 +739,7 @@ function reducer(state,action){
     case'TOGGLE_MUTE':return{...state,muted:!state.muted};
     case'CLOSE_OVERLAYS':return{...state,showShortcuts:false,showHostPanel:false,showSetlistEditor:false};
     case'INCREMENT_GUESTS':return{...state,guests:state.guests+1};
+    case'DECREMENT_GUESTS':return{...state,guests:Math.max(0,state.guests-1)};
     case'SET_SCORES':return{...state,scores:action.payload};
     case'SET_REVEAL_STATE':return{...state,revealState:action.payload};
     case'SET_SCOREBOARD':return{...state,showScoreboard:action.payload};
@@ -959,6 +961,7 @@ function LauncherView(){
   const[popupWarning,setPopupWarning]=useState(false);
 
   function handleLaunch(){
+    try{const s=JSON.parse(localStorage.getItem('lineconic_state')||'{}');s.currentSlide=0;s.scores=[0,0];s.guests=0;s.revealState={};s.showScoreboard=false;localStorage.setItem('lineconic_state',JSON.stringify(s))}catch(e){}
     const w1=window.open('/audience','_blank');
     const w2=window.open('/answers','_blank');
     if(!w1||!w2){setPopupWarning(true);setTimeout(function(){setPopupWarning(false)},5000)}
@@ -1223,7 +1226,7 @@ function ShortcutOverlay({onClose}){
     ['NAVIGATE',[['SPACE / \u2192','ADVANCE'],['\u2190','PREVIOUS'],['1 \u2013 9','SECTION'],['R','REVEAL'],['ESC','CLOSE']]],
     ['SCORES',[['Q / W','CYAN +/-'],['P / O','PINK +/-'],['S','SCOREBOARD'],['G','REWARD TIER']]],
     ['TIMING',[['T','START TIMER'],['A','AUTO-TIMER'],['D','AUTO-ADVANCE']]],
-    ['SOUNDBOARD',[['Z','AIRHORN'],['X','RIMSHOT'],['B','CRICKETS'],['N','SCREAM']]],
+    ['SOUNDBOARD',[['Z','AIRHORN'],['X','RIMSHOT'],['B','CRICKETS'],['N','SCREAM'],[',','RAIN']]],
     ['TOOLS',[['C','ADD GUEST'],['L','SETLIST'],['M','MUTE / UNMUTE'],['F','FULLSCREEN'],['?','SHORTCUTS']]],
   ];
   return (
@@ -1724,12 +1727,13 @@ function OperatorView({state,dispatch,onTimerAction,autoTimer,autoAdvance,setAut
         </div>
       </div>
       <div className="operator-bottom">
-        <button className="guest-counter" onClick={()=>dispatch({type:'INCREMENT_GUESTS'})} style={{cursor:'pointer',background:'transparent',border:'1px solid var(--border-subtle)'}}>GUESTS: {state.guests} +</button>
+        <div className="guest-counter"><button className="snd-btn" onClick={()=>dispatch({type:'DECREMENT_GUESTS'})}>-</button><span className="guest-count">GUESTS: {state.guests}</span><button className="snd-btn" onClick={()=>dispatch({type:'INCREMENT_GUESTS'})}>+</button></div>
         <div className="soundboard">
           <button className="snd-btn" onClick={()=>playSample(SND_AIRHORN)}>AIRHORN</button>
           <button className="snd-btn" onClick={()=>playSample(SND_RIMSHOT)}>RIMSHOT</button>
           <button className="snd-btn" onClick={()=>playSample(SND_CRICKETS)}>CRICKETS</button>
           <button className="snd-btn" onClick={()=>playSample(SND_SCREAM)}>SCREAM</button>
+          <button className="snd-btn" onClick={()=>{startParticles('rain');sfx('receipt_rain',false)}}>RAIN</button>
         </div>
         <div data-testid="slide-counter" style={{fontFamily:"'Space Mono',monospace",fontSize:'var(--type-meta)',color:'var(--text-secondary)'}}>{state.currentSlide+1}/{flat.length}</div>
       </div>
@@ -2264,6 +2268,7 @@ useEffect(()=>{
         case'x':case'X':playSample(SND_RIMSHOT);break;
         case'b':case'B':playSample(SND_CRICKETS);break;
         case'n':case'N':playSample(SND_SCREAM);break;
+        case',':startParticles('rain');sfx('receipt_rain',false);break;
         case'g':case'G':setRewardTier(function(v){const cycle=[null,'cancel','grind','flop'];const i=cycle.indexOf(v);return cycle[(i+1)%cycle.length]});break;
         case'v':case'V':{const flat=flattenSlides(s.show,s.redFlags);const slide=flat[s.currentSlide];if(slide&&slide.type==='doa_vote'){pushTopic(slide.content.primary||null)}break}
         case'l':case'L':if(!s.liveMode)dispatch({type:'TOGGLE_SETLIST_EDITOR'});break;
