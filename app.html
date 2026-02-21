@@ -1733,7 +1733,7 @@ function OperatorView({state,dispatch,onTimerAction,autoTimer,autoAdvance,setAut
           <button className="snd-btn" onClick={()=>playSample(SND_RIMSHOT)}>RIMSHOT</button>
           <button className="snd-btn" onClick={()=>playSample(SND_CRICKETS)}>CRICKETS</button>
           <button className="snd-btn" onClick={()=>playSample(SND_SCREAM)}>SCREAM</button>
-          <button className="snd-btn" onClick={()=>{startParticles('rain');sfx('receipt_rain',false)}}>RAIN</button>
+          <button className="snd-btn" onClick={()=>{broadcastFx('rain');sfx('receipt_rain',false)}}>RAIN</button>
         </div>
         <div data-testid="slide-counter" style={{fontFamily:"'Space Mono',monospace",fontSize:'var(--type-meta)',color:'var(--text-secondary)'}}>{state.currentSlide+1}/{flat.length}</div>
       </div>
@@ -2162,6 +2162,12 @@ useEffect(()=>{
     };
     ref.on('value',handler);
     fbUnsub=()=>ref.off('value',handler);
+    // FX listener (rain, flutter)
+    const fxRef=fbdb.ref('live/'+showId+'/fx');
+    const fxHandler=snap=>{const d=snap.val();if(d)handleFxMsg(d)};
+    fxRef.on('value',fxHandler);
+    const origUnsub=fbUnsub;
+    fbUnsub=()=>{origUnsub();fxRef.off('value',fxHandler)};
   }
   const bcHandler=ev=>{
     const d=ev.data;if(d.type!=='sync')return;
@@ -2179,6 +2185,7 @@ useEffect(()=>{
     const d=ev.data;
     if(d.type==='sync')bcHandler(ev);
     if(d.type==='timer')handleTimerMsg(d);
+    if(d.type==='fx')handleFxMsg(d);
   };
   return()=>{if(fbUnsub)fbUnsub();if(bcRef.current)bcRef.current.onmessage=null};
 },[mode,state.show]);
@@ -2191,6 +2198,21 @@ function broadcastTimerAction(action,duration){
   const msg={type:'timer',action:action,duration:duration||0,timestamp:Date.now()};
   if(fbdb&&s.show)fbdb.ref('live/'+s.show.id+'/timer').set(msg).catch(()=>{});
   if(bcRef.current)bcRef.current.postMessage(msg);
+}
+
+// ═══ FX SYNC (rain, flutter etc) ═══
+function broadcastFx(fxType){
+  const s=stateRef.current;
+  const msg={type:'fx',fx:fxType,timestamp:Date.now()};
+  if(fbdb&&s.show)fbdb.ref('live/'+s.show.id+'/fx').set(msg).catch(()=>{});
+  if(bcRef.current)bcRef.current.postMessage(msg);
+}
+function handleFxMsg(d){
+  if(!d||d.type!=='fx')return;
+  // Ignore stale FX from previous sessions (>5s old)
+  if(d.timestamp&&Date.now()-d.timestamp>5000)return;
+  if(d.fx==='rain')startParticles('rain');
+  else if(d.fx==='flutter')startParticles('flutter');
 }
 
 function handleTimerMsg(d){
@@ -2268,7 +2290,7 @@ useEffect(()=>{
         case'x':case'X':playSample(SND_RIMSHOT);break;
         case'b':case'B':playSample(SND_CRICKETS);break;
         case'n':case'N':playSample(SND_SCREAM);break;
-        case',':startParticles('rain');sfx('receipt_rain',false);break;
+        case',':broadcastFx('rain');sfx('receipt_rain',false);break;
         case'g':case'G':setRewardTier(function(v){const cycle=[null,'cancel','grind','flop'];const i=cycle.indexOf(v);return cycle[(i+1)%cycle.length]});break;
         case'v':case'V':{const flat=flattenSlides(s.show,s.redFlags);const slide=flat[s.currentSlide];if(slide&&slide.type==='doa_vote'){pushTopic(slide.content.primary||null)}break}
         case'l':case'L':if(!s.liveMode)dispatch({type:'TOGGLE_SETLIST_EDITOR'});break;
