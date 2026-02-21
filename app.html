@@ -685,7 +685,19 @@ function drawQR(canvas){
 const initialState={show:null,currentSlide:0,scores:[0,0],revealState:{},showScoreboard:false,showShortcuts:false,showHostPanel:false,muted:true,guests:0,redFlags:[],liveMode:false,showSetlistEditor:false};
 function flattenSlides(show,redFlags){
   if(!show)return[];
-  var flat=show.sections.flatMap(function(s){return s.slides});
+  var qTypes=['source_q','acronym_q','fluency_line'];
+  var flat=show.sections.flatMap(function(s){
+    var slides=s.slides;
+    var answers=[];
+    slides.forEach(function(sl){
+      if(sl.type==='source_q'&&sl.content.answer)answers.push(sl.content.answer);
+      else if(sl.type==='acronym_q'&&sl.content.answer)answers.push(sl.content.answer);
+      else if(sl.type==='fluency_line'&&sl.content.primary)answers.push(sl.content.primary);
+    });
+    if(answers.length===0)return slides;
+    var sheet={id:'as-'+s.name,type:'answer_sheet',content:{primary:s.name+' ANSWERS',secondary:answers.join(' | ')}};
+    return slides.concat(sheet);
+  });
   if(!redFlags||!redFlags.length)return flat;
   var fi=flat.findIndex(function(s){return s.type==='fishbowl'});
   if(fi<0)return flat;
@@ -693,6 +705,10 @@ function flattenSlides(show,redFlags){
   var result=flat.slice();
   result.splice(fi+1,0,...rfSlides);
   return result;
+}
+function sectionHasAnswerSheet(sec){
+  var types=sec.slides.map(function(s){return s.type});
+  return types.includes('source_q')||types.includes('acronym_q')||types.includes('fluency_line');
 }
 function redFlagSectionOffset(show,redFlags){
   if(!show||!redFlags||!redFlags.length)return{sectionIdx:-1,offset:0};
@@ -710,6 +726,7 @@ function slideToSection(show,flatIndex,redFlags){
   var count=0;
   for(var i=0;i<show.sections.length;i++){
     count+=show.sections[i].slides.length;
+    if(sectionHasAnswerSheet(show.sections[i]))count++;
     if(i===rfo.sectionIdx)count+=rfo.offset;
     if(flatIndex<count)return i;
   }
@@ -720,6 +737,7 @@ function getSectionStartIndex(show,sectionIndex,redFlags){
   var count=0;
   for(var i=0;i<sectionIndex;i++){
     count+=show.sections[i].slides.length;
+    if(sectionHasAnswerSheet(show.sections[i]))count++;
     if(i===rfo.sectionIdx)count+=rfo.offset;
   }
   return count;
