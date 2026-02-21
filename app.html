@@ -869,7 +869,10 @@ function LastLineSlide({slide}){return <><div className="nb nb-wh"></div><div cl
 function EndcardSlide({slide}){return <><div className="D hp" style={{fontSize:'clamp(100px,30vw,300px)',marginBottom:12}}>{slide.content.primary||'L'}</div><div className="M hs" style={{fontSize:'clamp(12px,1.5vw,18px)'}}>{slide.content.secondary||''}</div></>}
 function AnswerSheetSlide({slide}){
   const items=(slide.content.secondary||'').split('|').map(a=>a.trim());
-  return <><div className="nb nb-wh"></div><div className="D hw" style={{fontSize:'clamp(20px,3vw,36px)',marginBottom:12,paddingTop:'3%'}}>{slide.content.primary||''}</div><div className="rule"></div><div className="ans-list">{items.map((a,i)=><div key={i} className={a.includes('[')?'bonus':''}>{a}</div>)}</div></>;
+  const n=items.length;
+  const sz=n<=6?'clamp(18px,3vh,32px)':n<=10?'clamp(14px,2.4vh,26px)':'clamp(12px,1.8vh,20px)';
+  const lh=n<=6?1.9:n<=10?1.7:1.5;
+  return <><div className="nb nb-wh"></div><div className="D hw" style={{fontSize:'clamp(18px,2.5vw,32px)',marginBottom:8,paddingTop:'2%'}}>{slide.content.primary||''}</div><div className="rule"></div><div className="ans-list" style={{lineHeight:lh,maxHeight:'none',overflow:'hidden'}}>{items.map((a,i)=><div key={i} className={a.includes('[')?'bonus':''} style={{fontSize:sz}}>{(i+1)+'. '+a}</div>)}</div></>;
 }
 
 // ═══════════════════════════════════════
