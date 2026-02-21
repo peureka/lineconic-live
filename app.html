@@ -264,6 +264,13 @@ html:has(body.answers-mode),body.answers-mode{overflow:auto!important;height:aut
 /* Host Access Toggle (mobile only) */
 .launcher-host-toggle{display:none;width:100%;padding:var(--space-03) var(--space-04);border:1px solid var(--border-subtle);background:transparent;color:var(--text-disabled);font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;text-align:center;transition:color .15s}
 .launcher-host-toggle:hover{color:var(--text-primary)}
+/* Hint Text */
+.launcher-hint{font-family:'Space Mono',monospace;font-size:9px;color:var(--text-disabled);letter-spacing:.06em;text-transform:uppercase;text-align:center}
+/* Focus Styles */
+.launcher-launch:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.launcher-join:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.launcher-link:focus-visible{color:var(--text-primary);outline:1px solid var(--text-primary);outline-offset:2px}
+.launcher-host-toggle:focus-visible{color:var(--text-primary);outline:1px solid var(--text-primary);outline-offset:2px}
 /* Footer */
 .launcher-footer{font-family:'Space Mono',monospace;font-size:9px;color:rgba(255,255,255,.1);letter-spacing:.1em;text-transform:uppercase;text-align:center;padding:var(--space-03)}
 
@@ -397,9 +404,10 @@ html:has(body.answers-mode),body.answers-mode{overflow:auto!important;height:aut
    ═══════════════════════════════════════ */
 @media(max-width:768px){
   .launcher-view{flex-direction:column;align-items:stretch}
-  .launcher-host{flex:none;border-right:none;border-top:1px solid var(--border-subtle);padding:var(--space-04);gap:var(--space-03);order:2}
+  .launcher-host{flex:none;border-right:none;border-top:1px solid var(--border-subtle);padding:var(--space-04);gap:var(--space-03);order:3}
   .launcher-audience{flex:none;padding:var(--space-05) var(--space-04);order:1}
   .launcher-host-toggle{display:block;order:2}
+  .launcher-footer{order:4}
   .launcher-host.collapsed{display:none}
   .launcher-title{font-size:clamp(40px,14vw,72px)}
   .launcher-status{max-width:100%}
@@ -810,81 +818,94 @@ function SlideRenderer({slide,revealed}){
 // ═══════════════════════════════════════
 // LAUNCHER STATUS CARD
 // ═══════════════════════════════════════
-function LauncherStatusCard(){
-  var[connected,setConnected]=useState(false);
-  var[showInfo,setShowInfo]=useState(null);
+function LauncherStatusCard({onHasShow}){
+  const[connected,setConnected]=useState(false);
+  const[showInfo,setShowInfo]=useState(null);
 
   useEffect(function(){
     if(!fbdb)return;
-    var connRef=fbdb.ref('.info/connected');
-    var connHandler=function(snap){setConnected(!!snap.val())};
+    const connRef=fbdb.ref('.info/connected');
+    const connHandler=function(snap){setConnected(!!snap.val())};
     connRef.on('value',connHandler);
-    fbdb.ref('active_show').on('value',function(snap){
-      var activeId=snap.val();
+    const activeRef=fbdb.ref('active_show');
+    const activeHandler=function(snap){
+      const activeId=snap.val();
       if(!activeId){setShowInfo(null);return}
       fbdb.ref('show_index/'+activeId).once('value',function(iSnap){
-        var info=iSnap.val();
+        const info=iSnap.val();
         if(info){setShowInfo(info)}else{setShowInfo(null)}
       });
-    });
-    return function(){connRef.off('value',connHandler);fbdb.ref('active_show').off()};
+    };
+    activeRef.on('value',activeHandler);
+    return function(){connRef.off('value',connHandler);activeRef.off('value',activeHandler)};
   },[]);
 
   useEffect(function(){
     if(showInfo||!fbdb)return;
     try{
-      var cached=JSON.parse(localStorage.getItem('lineconic_show'));
+      const cached=JSON.parse(localStorage.getItem('lineconic_show'));
       if(cached&&cached.name){setShowInfo({name:cached.name,duration:cached.duration||null,mediaFilter:cached.mediaFilter||[]})}
     }catch(e){}
   },[showInfo]);
 
-  var filterLabel=function(mf){
+  // Notify parent of show status
+  useEffect(function(){
+    if(onHasShow)onHasShow(!!showInfo);
+  },[showInfo,onHasShow]);
+
+  const filterLabel=function(mf){
     if(!mf||!mf.length)return'ALL CONTENT';
-    var sorted=mf.slice().sort().join(',');
-    var map={'internet':'INTERNET ONLY','movie':'MOVIES ONLY','movie,tv':'SCREEN','music':'MUSIC ONLY','tv':'TV ONLY'};
+    const sorted=mf.slice().sort().join(',');
+    const map={'internet':'INTERNET ONLY','movie':'MOVIES ONLY','movie,tv':'SCREEN','music':'MUSIC ONLY','tv':'TV ONLY'};
     return map[sorted]||mf.join(' + ').toUpperCase();
   };
 
   if(!showInfo){
-    return React.createElement('div',{className:'launcher-status'},
-      React.createElement('div',{className:'launcher-status-empty'},'NO SHOW LOADED'),
-      React.createElement('div',{className:'launcher-status-meta',style:{justifyContent:'center',marginTop:'var(--space-02)'}},
-        React.createElement('span',{className:'launcher-conn'},
-          React.createElement('span',{className:'launcher-conn-dot '+(connected?'on':'off')}),
-          connected?'CONNECTED':'OFFLINE'
-        )
-      )
+    return(
+      <div className="launcher-status">
+        <div className="launcher-status-empty">NO SHOW LOADED</div>
+        <div className="launcher-status-meta" style={{justifyContent:'center',marginTop:'var(--space-02)'}}>
+          <span className="launcher-conn">
+            <span className={'launcher-conn-dot '+(connected?'on':'off')}/>
+            {connected?'CONNECTED':'OFFLINE'}
+          </span>
+        </div>
+      </div>
     );
   }
 
-  var dur=showInfo.duration?(showInfo.duration+' MIN'):'';
-  var filt=filterLabel(showInfo.mediaFilter);
+  const dur=showInfo.duration?(showInfo.duration+' MIN'):'';
+  const filt=filterLabel(showInfo.mediaFilter);
 
-  return React.createElement('div',{className:'launcher-status'},
-    React.createElement('div',{className:'launcher-status-name'},showInfo.name),
-    React.createElement('div',{className:'launcher-status-meta'},
-      dur&&React.createElement('span',null,dur),
-      dur&&filt&&React.createElement('span',{style:{color:'var(--border-subtle)'}},'·'),
-      React.createElement('span',null,filt),
-      React.createElement('span',{style:{color:'var(--border-subtle)'}},'·'),
-      React.createElement('span',{className:'launcher-conn'},
-        React.createElement('span',{className:'launcher-conn-dot '+(connected?'on':'off')}),
-        connected?'CONNECTED':'OFFLINE'
-      )
-    )
+  return(
+    <div className="launcher-status">
+      <div className="launcher-status-name">{showInfo.name}</div>
+      <div className="launcher-status-meta">
+        {dur&&<span>{dur}</span>}
+        {dur&&filt&&<span style={{color:'var(--border-subtle)'}}>·</span>}
+        <span>{filt}</span>
+        <span style={{color:'var(--border-subtle)'}}>·</span>
+        <span className="launcher-conn">
+          <span className={'launcher-conn-dot '+(connected?'on':'off')}/>
+          {connected?'CONNECTED':'OFFLINE'}
+        </span>
+      </div>
+    </div>
   );
 }
 
 // ═══════════════════════════════════════
 // LAUNCHER VIEW (Homepage)
 // ═══════════════════════════════════════
-function LauncherView({showName}){
-  var[hostOpen,setHostOpen]=useState(false);
-  var hasShow=!!showName;
+function LauncherView(){
+  const[hostOpen,setHostOpen]=useState(false);
+  const[hasShow,setHasShow]=useState(false);
+  const[popupWarning,setPopupWarning]=useState(false);
 
   function handleLaunch(){
-    window.open('/audience','_blank');
-    window.open('/answers','_blank');
+    const w1=window.open('/audience','_blank');
+    const w2=window.open('/answers','_blank');
+    if(!w1||!w2){setPopupWarning(true);setTimeout(function(){setPopupWarning(false)},5000)}
     window.location.href='/operator';
   }
 
@@ -892,11 +913,14 @@ function LauncherView({showName}){
     <div className="launcher-view">
       {/* HOST PANEL — left on desktop, bottom on mobile */}
       <div className={'launcher-host'+(hostOpen?'':' collapsed')}>
-        <LauncherStatusCard/>
+        <LauncherStatusCard onHasShow={setHasShow}/>
         <button className="launcher-launch" onClick={handleLaunch}>
           {hasShow?'LAUNCH SHOW':'LAUNCH (DEFAULT SHOW)'}
         </button>
-        <div style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:'var(--text-disabled)',letterSpacing:'.06em',textTransform:'uppercase',textAlign:'center'}}>ALLOW POP-UPS FOR BEST EXPERIENCE</div>
+        {popupWarning
+          ?<div className="launcher-hint" style={{color:'var(--signal)'}}>POP-UPS BLOCKED — ALLOW POP-UPS AND TRY AGAIN</div>
+          :<div className="launcher-hint">ALLOW POP-UPS FOR BEST EXPERIENCE</div>
+        }
         <div className="launcher-links">
           <a className="launcher-link" href="/operator">OPERATOR</a>
           <a className="launcher-link" href="/audience" target="_blank" rel="noopener">AUDIENCE</a>
@@ -915,7 +939,7 @@ function LauncherView({showName}){
         <div>
           <a href="/" style={{textDecoration:'none'}}>
             <div className="launcher-title hp">LINECONIC</div>
-            <div className="launcher-title hs" style={{fontSize:'clamp(16px,4vw,32px)',letterSpacing:'.2em',marginTop:8}}>LIVE</div>
+            <div className="launcher-title hs" style={{fontSize:'clamp(16px,4vw,32px)',letterSpacing:'.2em',marginTop:'var(--space-02)'}}>LIVE</div>
           </a>
         </div>
         <div className="launcher-tagline">IS THIS CULTURALLY...</div>
@@ -2190,7 +2214,7 @@ useEffect(()=>{
   },[]);
 
   // Public routes — no auth needed
-  if(isLauncher)return <LauncherView showName={state.show?state.show.name||state.show.id:null}/>;
+  if(isLauncher)return <LauncherView/>;
   if(isVote)return <VoteView/>;
   if(isAudience){
     if(!state.show)return <div style={{background:'#000',color:'var(--signal)',width:'100vw',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Space Mono',monospace"}}>LOADING SHOW DATA...</div>;
