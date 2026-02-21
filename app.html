@@ -2054,9 +2054,9 @@ function App(){
     return function(){unsub()};
   },[]);
 
-  // Load saved state from localStorage
+  // Load saved state from localStorage (operator only restores slide position)
   const savedState=useMemo(()=>{
-    try{const s=JSON.parse(localStorage.getItem('lineconic_state'));if(s)return{...initialState,...s}}catch(e){}
+    try{const s=JSON.parse(localStorage.getItem('lineconic_state'));if(s){if(mode!=='operator'){s.currentSlide=0;s.scores=[0,0];s.guests=0;s.revealState={};s.showScoreboard=false}return{...initialState,...s}}}catch(e){}
     return initialState;
   },[]);
 
@@ -2076,7 +2076,7 @@ function App(){
   // Priority: localStorage (same session) → Firebase active_show (cross-device) → ros-v1.json (default)
   useEffect(()=>{
     if(state.show)return;
-    function restoreSlidePos(){try{const s=JSON.parse(localStorage.getItem('lineconic_state'));if(s&&s.currentSlide){dispatch({type:'GO_TO_SLIDE',payload:s.currentSlide})}}catch(e){}}
+    function restoreSlidePos(){if(mode!=='operator')return;try{const s=JSON.parse(localStorage.getItem('lineconic_state'));if(s&&s.currentSlide){dispatch({type:'GO_TO_SLIDE',payload:s.currentSlide})}}catch(e){}}
     function loadShow(show){localStorage.setItem('lineconic_show',JSON.stringify(show));dispatch({type:'SET_SHOW',payload:show});restoreSlidePos()}
     // 1. Try localStorage first (bust cache if version is stale)
     try{
