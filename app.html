@@ -440,6 +440,28 @@ html:has(body.answers-mode),body.answers-mode{overflow:auto!important;height:aut
 }
 
 /* ═══════════════════════════════════════
+   OPERATOR RIGHT PANEL — COMPACT (short viewports)
+   ═══════════════════════════════════════ */
+@media(max-height:800px){
+  /* Panel container */
+  .operator-right{gap:var(--space-02);padding:var(--space-02)}
+  /* Scoreboard */
+  .score-team{padding:var(--space-02)}
+  .score-label{margin-bottom:var(--space-01)}
+  .score-value{font-size:1.25rem;min-height:auto}
+  .score-btn{width:32px;height:32px;font-size:14px}
+  .score-buttons{margin-top:var(--space-01)}
+  /* Timer */
+  .timer-display{padding:var(--space-02)}
+  .timer-label{margin-bottom:var(--space-01)}
+  .timer-bar-track{margin-bottom:var(--space-01)}
+  .timer-buttons{margin-top:var(--space-01)}
+  .timer-btn{height:28px}
+  /* Quick access row gaps */
+  .quick-btn-row{gap:var(--space-01)}
+}
+
+/* ═══════════════════════════════════════
    VOTE VIEW — MOBILE
    ═══════════════════════════════════════ */
 @media(max-width:600px){
