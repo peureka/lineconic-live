@@ -235,14 +235,37 @@ html:has(body.answers-mode),body.answers-mode{overflow:auto!important;height:aut
 .operator-bottom{grid-column:2;grid-row:2;background:var(--surface-01);border-top:1px solid var(--border-subtle);padding:var(--space-02) var(--space-04);display:flex;align-items:center;justify-content:space-between}
 .receipt-counter{font-family:'Space Mono',monospace;font-size:var(--type-meta);color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em}
 
-/* Launcher View */
-.launcher-view{position:fixed;inset:0;background:var(--void);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-06)}
+/* Launcher View — Role-Based Split */
+.launcher-view{position:fixed;inset:0;background:var(--void);display:flex;flex-direction:row;align-items:stretch}
+.launcher-host{flex:0 0 55%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-05);padding:var(--space-06);border-right:1px solid var(--border-subtle)}
+.launcher-audience{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-05);padding:var(--space-06)}
 .launcher-title{font-family:'Anton','Impact',sans-serif;text-transform:uppercase;font-size:clamp(48px,12vw,120px);letter-spacing:.06em;line-height:1;text-align:center}
-.launcher-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-03);width:100%;max-width:400px;padding:0 var(--space-04)}
-.launcher-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:var(--space-04) var(--space-03);border:1px solid var(--border-subtle);background:transparent;color:var(--text-primary);font-family:'Space Mono',monospace;font-size:var(--type-label);letter-spacing:.08em;text-transform:uppercase;cursor:pointer;text-decoration:none;transition:border-color .15s,box-shadow .15s}
-.launcher-btn:hover{border-color:var(--signal);box-shadow:0 0 12px rgba(255,0,127,.4)}
-.launcher-btn-sub{font-size:10px;color:var(--text-disabled);letter-spacing:.05em}
-.launcher-meta{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-disabled);letter-spacing:.08em;text-transform:uppercase;text-align:center}
+/* Status Card */
+.launcher-status{border:1px solid var(--border-subtle);padding:var(--space-04);width:100%;max-width:360px}
+.launcher-status-name{font-family:'Anton',sans-serif;font-size:clamp(18px,2.5vw,28px);color:var(--text-primary);text-transform:uppercase;letter-spacing:.04em;line-height:1.2;margin-bottom:var(--space-02)}
+.launcher-status-meta{font-family:'Space Mono',monospace;font-size:11px;color:var(--text-secondary);letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;gap:var(--space-02);flex-wrap:wrap}
+.launcher-status-empty{font-family:'Space Mono',monospace;font-size:12px;color:var(--text-disabled);letter-spacing:.06em;text-transform:uppercase;text-align:center;padding:var(--space-03) 0}
+.launcher-conn{display:flex;align-items:center;gap:6px}
+.launcher-conn-dot{width:8px;height:8px;display:inline-block}
+.launcher-conn-dot.on{background:var(--cyan);box-shadow:0 0 6px rgba(0,255,255,.8)}
+.launcher-conn-dot.off{background:var(--signal);box-shadow:0 0 6px rgba(255,0,127,.8)}
+/* Launch Button */
+.launcher-launch{width:100%;max-width:360px;padding:var(--space-04) var(--space-03);border:2px solid var(--signal);background:transparent;color:var(--signal);font-family:'Anton',sans-serif;font-size:clamp(20px,3vw,32px);letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .15s}
+.launcher-launch:hover{background:var(--signal);color:var(--void);box-shadow:var(--glow-signal)}
+/* Secondary Links */
+.launcher-links{display:flex;gap:var(--space-04);flex-wrap:wrap;justify-content:center}
+.launcher-link{font-family:'Space Mono',monospace;font-size:11px;color:var(--text-disabled);letter-spacing:.08em;text-transform:uppercase;text-decoration:none;transition:color .15s}
+.launcher-link:hover{color:var(--text-primary)}
+/* Audience Panel */
+.launcher-join{display:block;width:100%;max-width:320px;padding:var(--space-05) var(--space-04);border:2px solid var(--cyan);background:transparent;color:var(--cyan);font-family:'Anton',sans-serif;font-size:clamp(24px,4vw,40px);letter-spacing:.06em;text-transform:uppercase;text-decoration:none;text-align:center;cursor:pointer;transition:all .15s}
+.launcher-join:hover{background:var(--cyan);color:var(--void);box-shadow:var(--glow-cyan)}
+.launcher-tagline{font-family:'Anton',sans-serif;font-size:clamp(16px,3vw,28px);color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.06em;text-align:center}
+.launcher-explain{font-family:'Space Mono',monospace;font-size:11px;color:var(--text-disabled);letter-spacing:.06em;text-transform:uppercase;text-align:center}
+/* Host Access Toggle (mobile only) */
+.launcher-host-toggle{display:none;width:100%;padding:var(--space-03) var(--space-04);border:1px solid var(--border-subtle);background:transparent;color:var(--text-disabled);font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;text-align:center;transition:color .15s}
+.launcher-host-toggle:hover{color:var(--text-primary)}
+/* Footer */
+.launcher-footer{font-family:'Space Mono',monospace;font-size:9px;color:rgba(255,255,255,.1);letter-spacing:.1em;text-transform:uppercase;text-align:center;padding:var(--space-03)}
 
 /* Login */
 .login-input::placeholder{color:var(--text-disabled);letter-spacing:.08em;text-transform:uppercase}
@@ -364,15 +387,24 @@ html:has(body.answers-mode),body.answers-mode{overflow:auto!important;height:aut
   #sbug .sc-cy,#sbug .sc-pk{font-size:14px;min-width:24px}
   #sbug .lbl{font-size:9px}
   #sbug .vs{font-size:8px}
-  /* Launcher refinements */
-  .launcher-view{gap:var(--space-05);padding:0 var(--space-03)}
-  .launcher-title{font-size:clamp(40px,14vw,100px)}
-  .launcher-grid{gap:var(--space-02);padding:0 var(--space-03)}
-  .launcher-btn{padding:var(--space-03) var(--space-02);font-size:clamp(11px,3vw,14px)}
-  .launcher-btn-sub{font-size:clamp(8px,2.2vw,10px)}
   /* Answers view */
   .answers-wrap{padding:20px 16px}
   .ans-h1{font-size:24px}
+}
+
+/* ═══════════════════════════════════════
+   LAUNCHER MOBILE — PORTRAIT (768px)
+   ═══════════════════════════════════════ */
+@media(max-width:768px){
+  .launcher-view{flex-direction:column;align-items:stretch}
+  .launcher-host{flex:none;border-right:none;border-top:1px solid var(--border-subtle);padding:var(--space-04);gap:var(--space-03);order:2}
+  .launcher-audience{flex:none;padding:var(--space-05) var(--space-04);order:1}
+  .launcher-host-toggle{display:block;order:2}
+  .launcher-host.collapsed{display:none}
+  .launcher-title{font-size:clamp(40px,14vw,72px)}
+  .launcher-status{max-width:100%}
+  .launcher-launch{max-width:100%}
+  .launcher-join{max-width:100%}
 }
 
 /* ═══════════════════════════════════════
@@ -390,12 +422,13 @@ html:has(body.answers-mode),body.answers-mode{overflow:auto!important;height:aut
   #sbug .lbl{font-size:8px}
   /* Answer reveal text */
   .answer{bottom:40px!important;font-size:clamp(10px,2vh,16px)!important}
-  /* Launcher in landscape */
-  .launcher-view{flex-direction:row;gap:var(--space-05);padding:var(--space-03)}
-  .launcher-title{font-size:clamp(28px,8vh,72px)}
-  .launcher-grid{max-width:320px;gap:var(--space-02)}
-  .launcher-btn{padding:var(--space-02) var(--space-02);font-size:clamp(10px,1.8vh,13px)}
-  .launcher-btn-sub{font-size:clamp(7px,1.4vh,10px)}
+  /* Launcher landscape — side-by-side but compact */
+  .launcher-view{flex-direction:row}
+  .launcher-host{padding:var(--space-03);gap:var(--space-02)}
+  .launcher-audience{padding:var(--space-03);gap:var(--space-03)}
+  .launcher-title{font-size:clamp(28px,8vh,60px)}
+  .launcher-host-toggle{display:none}
+  .launcher-host.collapsed{display:flex}
 }
 
 /* ═══════════════════════════════════════
@@ -775,22 +808,122 @@ function SlideRenderer({slide,revealed}){
 }
 
 // ═══════════════════════════════════════
+// LAUNCHER STATUS CARD
+// ═══════════════════════════════════════
+function LauncherStatusCard(){
+  var[connected,setConnected]=useState(false);
+  var[showInfo,setShowInfo]=useState(null);
+
+  useEffect(function(){
+    if(!fbdb)return;
+    var connRef=fbdb.ref('.info/connected');
+    var connHandler=function(snap){setConnected(!!snap.val())};
+    connRef.on('value',connHandler);
+    fbdb.ref('active_show').on('value',function(snap){
+      var activeId=snap.val();
+      if(!activeId){setShowInfo(null);return}
+      fbdb.ref('show_index/'+activeId).once('value',function(iSnap){
+        var info=iSnap.val();
+        if(info){setShowInfo(info)}else{setShowInfo(null)}
+      });
+    });
+    return function(){connRef.off('value',connHandler);fbdb.ref('active_show').off()};
+  },[]);
+
+  useEffect(function(){
+    if(showInfo||!fbdb)return;
+    try{
+      var cached=JSON.parse(localStorage.getItem('lineconic_show'));
+      if(cached&&cached.name){setShowInfo({name:cached.name,duration:cached.duration||null,mediaFilter:cached.mediaFilter||[]})}
+    }catch(e){}
+  },[showInfo]);
+
+  var filterLabel=function(mf){
+    if(!mf||!mf.length)return'ALL CONTENT';
+    var sorted=mf.slice().sort().join(',');
+    var map={'internet':'INTERNET ONLY','movie':'MOVIES ONLY','movie,tv':'SCREEN','music':'MUSIC ONLY','tv':'TV ONLY'};
+    return map[sorted]||mf.join(' + ').toUpperCase();
+  };
+
+  if(!showInfo){
+    return React.createElement('div',{className:'launcher-status'},
+      React.createElement('div',{className:'launcher-status-empty'},'NO SHOW LOADED'),
+      React.createElement('div',{className:'launcher-status-meta',style:{justifyContent:'center',marginTop:'var(--space-02)'}},
+        React.createElement('span',{className:'launcher-conn'},
+          React.createElement('span',{className:'launcher-conn-dot '+(connected?'on':'off')}),
+          connected?'CONNECTED':'OFFLINE'
+        )
+      )
+    );
+  }
+
+  var dur=showInfo.duration?(showInfo.duration+' MIN'):'';
+  var filt=filterLabel(showInfo.mediaFilter);
+
+  return React.createElement('div',{className:'launcher-status'},
+    React.createElement('div',{className:'launcher-status-name'},showInfo.name),
+    React.createElement('div',{className:'launcher-status-meta'},
+      dur&&React.createElement('span',null,dur),
+      dur&&filt&&React.createElement('span',{style:{color:'var(--border-subtle)'}},'·'),
+      React.createElement('span',null,filt),
+      React.createElement('span',{style:{color:'var(--border-subtle)'}},'·'),
+      React.createElement('span',{className:'launcher-conn'},
+        React.createElement('span',{className:'launcher-conn-dot '+(connected?'on':'off')}),
+        connected?'CONNECTED':'OFFLINE'
+      )
+    )
+  );
+}
+
+// ═══════════════════════════════════════
 // LAUNCHER VIEW (Homepage)
 // ═══════════════════════════════════════
 function LauncherView({showName}){
+  var[hostOpen,setHostOpen]=useState(false);
+  var hasShow=!!showName;
+
+  function handleLaunch(){
+    window.open('/audience','_blank');
+    window.open('/answers','_blank');
+    window.location.href='/operator';
+  }
+
   return(
     <div className="launcher-view">
-      <div>
-        <a href="/" style={{textDecoration:'none'}}><div className="launcher-title hp">LINECONIC</div>
-        <div className="launcher-title hs" style={{fontSize:'clamp(16px,4vw,32px)',letterSpacing:'.2em',marginTop:8}}>LIVE</div></a>
+      {/* HOST PANEL — left on desktop, bottom on mobile */}
+      <div className={'launcher-host'+(hostOpen?'':' collapsed')}>
+        <LauncherStatusCard/>
+        <button className="launcher-launch" onClick={handleLaunch}>
+          {hasShow?'LAUNCH SHOW':'LAUNCH (DEFAULT SHOW)'}
+        </button>
+        <div style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:'var(--text-disabled)',letterSpacing:'.06em',textTransform:'uppercase',textAlign:'center'}}>ALLOW POP-UPS FOR BEST EXPERIENCE</div>
+        <div className="launcher-links">
+          <a className="launcher-link" href="/operator">OPERATOR</a>
+          <a className="launcher-link" href="/audience" target="_blank" rel="noopener">AUDIENCE</a>
+          <a className="launcher-link" href="/answers" target="_blank" rel="noopener">ANSWERS</a>
+          <a className="launcher-link" href="/builder">BUILDER</a>
+        </div>
       </div>
-      <div className="launcher-grid">
-        <a className="launcher-btn" href="/operator"><span>OPERATOR</span><span className="launcher-btn-sub">HOST CONTROLS</span></a>
-        <a className="launcher-btn" href="/audience" target="_blank" rel="noopener"><span>AUDIENCE</span><span className="launcher-btn-sub">SCREEN OUTPUT</span></a>
-        <a className="launcher-btn" href="/answers" target="_blank" rel="noopener"><span>ANSWERS</span><span className="launcher-btn-sub">ANSWER SHEET</span></a>
-        <a className="launcher-btn" href="/vote" target="_blank" rel="noopener"><span>VOTE</span><span className="launcher-btn-sub">AUDIENCE PHONES</span></a>
-        <a className="launcher-btn" href="/builder" style={{gridColumn:'1 / -1'}}><span>BUILDER</span><span className="launcher-btn-sub">DECK GENERATOR</span></a>
+
+      {/* HOST ACCESS TOGGLE — mobile only */}
+      <button className="launcher-host-toggle" onClick={function(){setHostOpen(function(v){return!v})}}>
+        {hostOpen?'HIDE HOST CONTROLS':'HOST ACCESS'}
+      </button>
+
+      {/* AUDIENCE PANEL — right on desktop, top on mobile */}
+      <div className="launcher-audience">
+        <div>
+          <a href="/" style={{textDecoration:'none'}}>
+            <div className="launcher-title hp">LINECONIC</div>
+            <div className="launcher-title hs" style={{fontSize:'clamp(16px,4vw,32px)',letterSpacing:'.2em',marginTop:8}}>LIVE</div>
+          </a>
+        </div>
+        <div className="launcher-tagline">IS THIS CULTURALLY...</div>
+        <a className="launcher-join" href="/vote">JOIN THE VOTE</a>
+        <div className="launcher-explain">VOTE DEAD OR ALIVE ON YOUR PHONE</div>
       </div>
+
+      <div className="launcher-footer">LINECONIC.COM</div>
     </div>
   );
 }
