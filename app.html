@@ -870,9 +870,9 @@ function EndcardSlide({slide}){return <><div className="D hp" style={{fontSize:'
 function AnswerSheetSlide({slide}){
   const items=(slide.content.secondary||'').split('|').map(a=>a.trim());
   const n=items.length;
-  const sz=n<=6?'clamp(18px,3vh,32px)':n<=10?'clamp(14px,2.4vh,26px)':'clamp(12px,1.8vh,20px)';
-  const lh=n<=6?1.9:n<=10?1.7:1.5;
-  return <><div className="nb nb-wh"></div><div className="D hw" style={{fontSize:'clamp(18px,2.5vw,32px)',marginBottom:8,paddingTop:'2%'}}>{slide.content.primary||''}</div><div className="rule"></div><div className="ans-list" style={{lineHeight:lh,maxHeight:'none',overflow:'hidden'}}>{items.map((a,i)=><div key={i} className={a.includes('[')?'bonus':''} style={{fontSize:sz}}>{(i+1)+'. '+a}</div>)}</div></>;
+  const vh=Math.min(70/n/1.6,6);
+  const sz='clamp(16px,'+vh.toFixed(1)+'vh,48px)';
+  return <><div className="nb nb-wh"></div><div className="D hw" style={{fontSize:'clamp(18px,2.5vw,32px)',marginBottom:8,paddingTop:'2%'}}>{slide.content.primary||''}</div><div className="rule"></div><div className="ans-list" style={{lineHeight:1.6,maxHeight:'none',overflow:'hidden'}}>{items.map((a,i)=><div key={i} className={a.includes('[')?'bonus':''} style={{fontSize:sz}}>{(i+1)+'. '+a}</div>)}</div></>;
 }
 
 // ═══════════════════════════════════════
@@ -985,6 +985,8 @@ function LauncherView(){
 
   function handleLaunch(){
     try{const s=JSON.parse(localStorage.getItem('lineconic_state')||'{}');s.currentSlide=0;s.scores=[0,0];s.guests=0;s.revealState={};s.showScoreboard=false;localStorage.setItem('lineconic_state',JSON.stringify(s))}catch(e){}
+    // Clear Firebase live state so audience doesn't pick up stale session
+    if(fbdb){try{const c=JSON.parse(localStorage.getItem('lineconic_show'));if(c&&c.id)fbdb.ref('live/'+c.id+'/state').set(null)}catch(e){}}
     const w1=window.open('/audience','_blank');
     const w2=window.open('/answers','_blank');
     if(!w1||!w2){setPopupWarning(true);setTimeout(function(){setPopupWarning(false)},5000)}
