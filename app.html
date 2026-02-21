@@ -1677,7 +1677,7 @@ function SetlistEditor({show,dispatch,liveMode}){
   );
 }
 
-function OperatorView({state,dispatch,onTimerAction,autoTimer,autoAdvance,setAutoTimer,setAutoAdvance,autoAdvanceRef,autoTimerDuration}){
+function OperatorView({state,dispatch,onTimerAction,onFx,autoTimer,autoAdvance,setAutoTimer,setAutoAdvance,autoAdvanceRef,autoTimerDuration}){
   // Mobile detection
   const[isMobile,setIsMobile]=useState(function(){return window.matchMedia('(max-width:768px),(max-height:500px)').matches});
   useEffect(function(){
@@ -1733,7 +1733,7 @@ function OperatorView({state,dispatch,onTimerAction,autoTimer,autoAdvance,setAut
           <button className="snd-btn" onClick={()=>playSample(SND_RIMSHOT)}>RIMSHOT</button>
           <button className="snd-btn" onClick={()=>playSample(SND_CRICKETS)}>CRICKETS</button>
           <button className="snd-btn" onClick={()=>playSample(SND_SCREAM)}>SCREAM</button>
-          <button className="snd-btn" onClick={()=>{broadcastFx('rain');sfx('receipt_rain',false)}}>RAIN</button>
+          <button className="snd-btn" onClick={()=>{onFx('rain');sfx('receipt_rain',false)}}>RAIN</button>
         </div>
         <div data-testid="slide-counter" style={{fontFamily:"'Space Mono',monospace",fontSize:'var(--type-meta)',color:'var(--text-secondary)'}}>{state.currentSlide+1}/{flat.length}</div>
       </div>
@@ -2320,7 +2320,7 @@ useEffect(()=>{
   // Protected routes — user is authenticated
   if(!state.show)return <div style={{background:'#000',color:'var(--signal)',width:'100vw',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Space Mono',monospace"}}>LOADING SHOW DATA...</div>;
   if(isAnswers)return <AnswersView show={state.show}/>;
-  return <OperatorView state={state} dispatch={dispatch} onTimerAction={broadcastTimerAction} autoTimer={autoTimer} autoAdvance={autoAdvance} setAutoTimer={setAutoTimer} setAutoAdvance={setAutoAdvance} autoAdvanceRef={autoAdvanceRef} autoTimerDuration={autoTimerDuration}/>;
+  return <OperatorView state={state} dispatch={dispatch} onTimerAction={broadcastTimerAction} onFx={broadcastFx} autoTimer={autoTimer} autoAdvance={autoAdvance} setAutoTimer={setAutoTimer} setAutoAdvance={setAutoAdvance} autoAdvanceRef={autoAdvanceRef} autoTimerDuration={autoTimerDuration}/>;
 }
 
 // ═══════════════════════════════════════
