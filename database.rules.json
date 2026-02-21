@@ -1,0 +1,44 @@
+{
+  "rules": {
+    "shows": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "show_index": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "active_show": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "live": {
+      "$showId": {
+        "state": {
+          ".read": true,
+          ".write": "auth != null"
+        },
+        "timer": {
+          ".read": true,
+          ".write": "auth != null"
+        },
+        "fx": {
+          ".read": true,
+          ".write": "auth != null"
+        }
+      }
+    },
+    "currentTopic": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "votes": {
+      ".read": true,
+      ".write": true
+    },
+    "$other": {
+      ".read": false,
+      ".write": false
+    }
+  }
+}
