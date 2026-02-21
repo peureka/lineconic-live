@@ -789,13 +789,13 @@ function BonusMarkerSlide({slide}){
   return <><div className="nb nb-gd"></div><div className="D hg" style={{fontSize:'clamp(36px,8vw,120px)',padding:'0 8%'}}>{slide.content.primary||''}</div></>;
 }
 function SourceQSlide({slide,revealed}){
-  return <><div className="nb nb-pk"></div><div className="tb pk"></div><div className="D hw" style={{fontSize:aSz(slide.content.primary),...nwStyle()}}>{slide.content.primary||''}</div>{slide.content.answer?<div className={'answer'+(revealed?' revealed':'')} style={{position:'absolute',bottom:60,left:'50%',transform:'translateX(-50%)',fontFamily:"'Space Mono',monospace",fontSize:'clamp(14px,2vw,24px)',color:'var(--wh)',textTransform:'uppercase',letterSpacing:'.06em'}}>{slide.content.answer}</div>:null}</>;
+  return <><div className="nb nb-pk"></div><div className="tb pk"></div><div className="D hw" style={{fontSize:aSz(slide.content.primary),...nwStyle()}}>{slide.content.primary||''}</div>{slide.content.answer?<div className={'answer'+(revealed?' revealed':'')} style={{position:'absolute',bottom:80,left:'50%',transform:'translateX(-50%)',fontFamily:"'Space Mono',monospace",fontSize:'clamp(18px,2.8vw,36px)',color:'var(--wh)',textTransform:'uppercase',letterSpacing:'.06em'}}>{slide.content.answer}</div>:null}</>;
 }
 function SourceASlide({slide}){
   return <><div className="nb nb-wh"></div><div className="D hw" style={{fontSize:aSz(slide.content.primary),...nwStyle()}}>{slide.content.primary||''}</div></>;
 }
 function AcronymQSlide({slide,revealed}){
-  return <><div className="nb nb-cy"></div><div className="tb cy"></div><div className="D hw" style={{fontSize:qSz(slide.content.primary),letterSpacing:'.08em',...nwStyle()}}>{slide.content.primary||''}</div>{slide.content.source?<div className="srcbar">{slide.content.source}</div>:null}{slide.content.answer?<div className={'answer'+(revealed?' revealed':'')} style={{position:'absolute',bottom:80,left:'50%',transform:'translateX(-50%)',fontFamily:"'Space Mono',monospace",fontSize:'clamp(14px,2vw,24px)',color:'var(--wh)',textTransform:'uppercase',letterSpacing:'.06em',textAlign:'center',maxWidth:'80%'}}>{slide.content.answer}</div>:null}</>;
+  return <><div className="nb nb-cy"></div><div className="tb cy"></div><div className="D hw" style={{fontSize:qSz(slide.content.primary),letterSpacing:'.08em',...nwStyle()}}>{slide.content.primary||''}</div>{slide.content.source?<div className="srcbar">{slide.content.source}</div>:null}{slide.content.answer?<div className={'answer'+(revealed?' revealed':'')} style={{position:'absolute',bottom:120,left:'50%',transform:'translateX(-50%)',fontFamily:"'Space Mono',monospace",fontSize:'clamp(18px,2.8vw,36px)',color:'var(--wh)',textTransform:'uppercase',letterSpacing:'.06em',textAlign:'center',maxWidth:'80%'}}>{slide.content.answer}</div>:null}</>;
 }
 function AcronymASlide({slide}){
   return <><div className="nb nb-pk"></div><div className="D hw" style={{fontSize:aSz(slide.content.primary),...nwStyle()}}>{slide.content.primary||''}</div>{slide.content.secondary?<div className="srcbar">{slide.content.secondary}</div>:null}</>;
